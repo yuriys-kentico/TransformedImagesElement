@@ -34,7 +34,7 @@ export class AdvancedAssetElement extends React.Component<IElementProps, IElemen
             .toObservable()
             .subscribe(response => {
                 _this.setState({
-                    assetURLs: response.data.items.map(i => `https://assets-us-01.kc-usercontent.com:443/${this.props.context.projectId}/${i.fileReference}/${i.fileName}"`)
+                    assetURLs: response.data.items.map(i => `https://assets-us-01.kc-usercontent.com:443/${_this.props.context.projectId}/${i.fileReference.id}/${i.fileName}`)
                 })
             })
     }
