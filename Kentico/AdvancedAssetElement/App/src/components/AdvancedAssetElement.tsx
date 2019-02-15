@@ -18,7 +18,9 @@ export interface IElementState {
 declare const CustomElement: any;
 
 export class AdvancedAssetElement extends React.Component<IElementProps, IElementState> {
-    state: IElementState = null;
+    state: IElementState = {
+        assetURLs: null
+    };
 
     client = new ContentManagementClient({
         projectId: this.props.context.projectId,
