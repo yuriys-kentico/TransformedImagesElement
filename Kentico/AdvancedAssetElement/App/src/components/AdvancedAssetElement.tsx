@@ -3,25 +3,18 @@ import { IElement } from "./kentico/IElement";
 import { IContext } from "./kentico/IContext";
 
 export interface IElementProps {
+    element: IElement;
+    context: IContext;
 }
 
 export interface IElementState {
     contentManagementAPIKey: string;
 }
 
-declare var CustomElement: any;
-
 export class AdvancedAssetElement extends React.Component<IElementProps, IElementState> {
-    initElement = (element: IElement, _context: IContext) => {
-        // Set up the element with initial value
-        this.setState({
-            contentManagementAPIKey: element.config.contentManagementAPIKey
-        });
-    }
-
-    componentWillMount() {
-        CustomElement.init((element: IElement, _context: IContext) => this.initElement(element, _context));
-    }
+    state = {
+        contentManagementAPIKey: this.props.element.config.contentManagementAPIKey
+    };
 
     render() {
         return (
