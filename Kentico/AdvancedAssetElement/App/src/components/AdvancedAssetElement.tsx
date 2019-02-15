@@ -4,7 +4,6 @@ import { ContentManagementClient } from "kentico-cloud-content-management";
 
 import { IElement } from "./kentico/IElement";
 import { IContext } from "./kentico/IContext";
-import { string } from "prop-types";
 
 export interface IElementProps {
     element: IElement;
@@ -19,6 +18,8 @@ export interface IElementState {
 declare const CustomElement: any;
 
 export class AdvancedAssetElement extends React.Component<IElementProps, IElementState> {
+    state: IElementState = null;
+
     client = new ContentManagementClient({
         projectId: this.props.context.projectId,
         apiKey: this.props.element.config.contentManagementAPIKey
