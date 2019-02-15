@@ -15,12 +15,14 @@ export class AdvancedAssetElement extends React.Component<IElementProps, IElemen
     constructor(props: Readonly<IElementProps>) {
         super(props);
 
-        CustomElement.init((element: IElement, _context: IContext) => {
-            // Set up the element with initial value
-            this.state = {
-                contentManagementAPIKey: element.config.contentManagementAPIKey
-            };
-        });
+        CustomElement.init((element: IElement, _context: IContext) => this.initElement(element, _context));
+    }
+
+    initElement = (element: IElement, _context: IContext) => {
+        // Set up the element with initial value
+        this.state = {
+            contentManagementAPIKey: element.config.contentManagementAPIKey
+        };
     }
 
     render() {
