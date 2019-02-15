@@ -1,9 +1,12 @@
 ﻿import * as React from "react";
 
 import { ContentManagementClient } from "kentico-cloud-content-management";
+import { AssetModels } from "kentico-cloud-content-management/_bundles/models/assets/asset.models";
 
 import { IElement } from "./kentico/IElement";
 import { IContext } from "./kentico/IContext";
+
+import * as styles from "../styles/style.css";
 
 export interface IElementProps {
     element: IElement;
@@ -32,19 +35,32 @@ export class AdvancedAssetElement extends React.Component<IElementProps, IElemen
 
         _this.client.listAssets()
             .toObservable()
-            .subscribe(response => {
-                _this.setState({
-                    assetURLs: response.data.items.map(i => `https://assets-us-01.kc-usercontent.com:443/${_this.props.context.projectId}/${i.fileReference.id}/${i.fileName}`)
-                })
-            })
+            .subscribe(response =>
+                _this.filterAssetResponse(response.data.items)
+            );
+    }
+
+    filterAssetResponse = (items: AssetModels.Asset[]) => {
+        const filteredURLs = items
+            .filter(i => i.imageWidth !== null)
+            .map(i => `https://assets-us-01.kc-usercontent.com:443/${this.props.context.projectId}/${i.fileReference.id}/${i.fileName}`)
+
+        this.setState({
+            assetURLs: filteredURLs
+        });
     }
 
     render() {
         return (
             <div style={{ textAlign: 'center' }}>
                 <h1>Here are some assets</h1>
-                <div id="assetList">
-                    {this.state.assetURLs.map(u => <img src={u} />)}
+                <div id={styles.assetList}>
+                    {this.state.assetURLs.map(u => (
+                        <div className={styles.imgWrapper}>
+                            <img src={u} />
+                        </div>
+                    )
+                    )}
                 </div>
             </div>);
     }

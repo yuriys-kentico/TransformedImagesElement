@@ -43,6 +43,7 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="src\index.html" />
+    <Content Include="src\styles\style.css" />
     <Content Include="tsconfig.json" />
     <Content Include="package.json" />
     <Content Include="README.md" />
@@ -60,6 +61,7 @@
     <Folder Include="src\components\" />
     <Folder Include="src\" />
     <Folder Include="src\components\kentico\" />
+    <Folder Include="src\styles\" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="src\components\kentico\IItem.ts" />

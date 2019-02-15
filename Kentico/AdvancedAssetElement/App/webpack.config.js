@@ -3,12 +3,6 @@ const path = require('path');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const HtmlWebpackPluginConfig = new HtmlWebpackPlugin({
-    template: './src/index.html',
-    filename: 'element.html',
-    inject: 'body'
-});
-
 const usedevtool = process.env.NODE_ENV === 'production' ? false : 'cheap-module-eval-source-map';
 
 module.exports = {
@@ -24,13 +18,19 @@ module.exports = {
     },
     module: {
         rules: [
-            //{
-            //    test: /\.css$/,
-            //    use: [
-            //        { loader: "style-loader" },
-            //        { loader: "css-loader" }
-            //    ]
-            //},
+            {
+                test: /\.css$/,
+                use: [
+                    { loader: "style-loader" },
+                    {
+                        loader: "typings-for-css-modules-loader",
+                        options: {
+                            modules: true,
+                            namedExport: true
+                        }
+                    }
+                ]
+            },
             {
                 test: /\.tsx?$/,
                 loader: "awesome-typescript-loader"
@@ -57,6 +57,10 @@ module.exports = {
         ]
     },
     plugins: [
-        HtmlWebpackPluginConfig
+        new HtmlWebpackPlugin({
+            template: './src/index.html',
+            filename: 'element.html',
+            inject: 'body'
+        })
     ]
 };
