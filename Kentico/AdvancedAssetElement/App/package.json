@@ -30,6 +30,8 @@
   },
   "dependencies": {
     "react": "^16.8.2",
-    "react-dom": "16.8.2"
+    "react-dom": "16.8.2",
+    "kentico-cloud-content-management": "0.0.4",
+    "rxjs": "6.4.0"
   }
 }
