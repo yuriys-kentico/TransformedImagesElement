@@ -9,12 +9,18 @@ const HtmlWebpackPluginConfig = new HtmlWebpackPlugin({
     inject: 'body'
 });
 
+const usedevtool = process.env.NODE_ENV === 'production' ? false : 'cheap-module-eval-source-map';
+
 module.exports = {
     mode: process.env.NODE_ENV,
-    entry: './src/index.js',
+    devtool: usedevtool,
+    entry: './src/index.tsx',
     output: {
         path: path.resolve(__dirname, 'build'),
         filename: 'element.js'
+    },
+    resolve: {
+        extensions: [".ts", ".tsx", ".js", ".json"]
     },
     module: {
         rules: [
@@ -25,6 +31,15 @@ module.exports = {
             //        { loader: "css-loader" }
             //    ]
             //},
+            {
+                test: /\.tsx?$/,
+                loader: "awesome-typescript-loader"
+            },
+            {
+                enforce: "pre",
+                test: /\.js$/,
+                loader: "source-map-loader"
+            },
             {
                 test: /\.js$/,
                 exclude: /node_modules/,
@@ -43,5 +58,9 @@ module.exports = {
     },
     plugins: [
         HtmlWebpackPluginConfig
-    ]
+    ],
+    externals: {
+        "react": "React",
+        "react-dom": "ReactDOM"
+    }
 };

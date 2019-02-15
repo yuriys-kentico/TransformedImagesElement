@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "AdvancedAssetElement", "AdvancedAssetElement\AdvancedAssetElement.njsproj", "{40E59D3A-C417-4EA5-8F01-83C961543273}"
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "App", "App\App.njsproj", "{40E59D3A-C417-4EA5-8F01-83C961543273}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

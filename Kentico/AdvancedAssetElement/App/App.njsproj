@@ -3,16 +3,18 @@
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">14.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-    <Name>AdvancedAssetElement</Name>
+    <Name>App</Name>
     <RootNamespace>AdvancedAssetElement</RootNamespace>
     <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
+    <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>40e59d3a-c417-4ea5-8f01-83c961543273</ProjectGuid>
-    <ProjectHome>.</ProjectHome>
+    <ProjectHome>
+    </ProjectHome>
     <StartupFile>
     </StartupFile>
     <StartWebBrowser>True</StartWebBrowser>
@@ -27,7 +29,7 @@
     <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
     <TypeScriptToolsVersion>3.1</TypeScriptToolsVersion>
     <EnableTypeScript>true</EnableTypeScript>
-    <StartWebBrowser>true</StartWebBrowser>
+    <StartWebBrowser>True</StartWebBrowser>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -47,19 +49,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="build\element.js" />
-    <Compile Include="Build\TestScript.js">
+    <Compile Include="src\components\AdvancedAssetElement.tsx">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="src\components\AdvancedAssetElement.jsx">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="src\index.js" />
+    <Compile Include="src\index.tsx" />
     <Compile Include="webpack.config.js" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="build\" />
     <Folder Include="src\components\" />
     <Folder Include="src\" />
+    <Folder Include="src\components\kentico\" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="src\components\kentico\IItem.ts" />
+    <TypeScriptCompile Include="src\components\kentico\IVariant.ts" />
+    <TypeScriptCompile Include="src\components\kentico\IContext.ts" />
+    <TypeScriptCompile Include="src\components\kentico\IElement.ts" />
+    <TypeScriptCompile Include="src\components\IElementConfig.ts" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
