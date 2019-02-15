@@ -58,9 +58,5 @@ module.exports = {
     },
     plugins: [
         HtmlWebpackPluginConfig
-    ],
-    externals: {
-        "react": "React",
-        "react-dom": "ReactDOM"
-    }
+    ]
 };
