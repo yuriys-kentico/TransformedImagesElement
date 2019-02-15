@@ -19,7 +19,7 @@ declare const CustomElement: any;
 
 export class AdvancedAssetElement extends React.Component<IElementProps, IElementState> {
     state: IElementState = {
-        assetURLs: null
+        assetURLs: []
     };
 
     client = new ContentManagementClient({
