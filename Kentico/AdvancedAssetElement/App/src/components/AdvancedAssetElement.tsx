@@ -25,13 +25,14 @@ export class AdvancedAssetElement extends React.Component<IElementProps, IElemen
     });
 
     componentWillMount() {
-        this.client.listAssets()
+        const _this = this;
+
+        _this.client.listAssets()
             .toObservable()
             .subscribe(response => {
-                this.setState({
+                _this.setState({
                     assetURLs: response.data.items.map(i => `https://assets-us-01.kc-usercontent.com:443/${this.props.context.projectId}/${i.fileReference}/${i.fileName}"`)
                 })
-                response.data.items
             })
     }
 
