@@ -12,17 +12,15 @@ export interface IElementState {
 declare var CustomElement: any;
 
 export class AdvancedAssetElement extends React.Component<IElementProps, IElementState> {
-    constructor(props: Readonly<IElementProps>) {
-        super(props);
-
-        CustomElement.init((element: IElement, _context: IContext) => this.initElement(element, _context));
-    }
-
     initElement = (element: IElement, _context: IContext) => {
         // Set up the element with initial value
-        this.state = {
+        this.setState({
             contentManagementAPIKey: element.config.contentManagementAPIKey
-        };
+        });
+    }
+
+    componentWillMount() {
+        CustomElement.init((element: IElement, _context: IContext) => this.initElement(element, _context));
     }
 
     render() {
