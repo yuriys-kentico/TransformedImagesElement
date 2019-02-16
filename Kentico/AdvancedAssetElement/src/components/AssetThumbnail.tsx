@@ -53,12 +53,10 @@ export class AssetThumbnail extends React.Component<IAssetThumbnailProps, IAsset
                                     </div>
                                 </div>
                                 <span className={styles.assetThumbnailTechDetails}>
-                                    < span className={
-                                        styles.assetThumbnailTechDetail
-                                    }>
+                                    <span className={styles.assetThumbnailTechDetail}>
                                         <span className={styles.assetThumbnailFileSize}>{this.props.asset.size}</span>
                                     </span>
-                                    <span className={styles.assetThumbnailTechDetail}>{this.props.asset.lastModified}</span>
+                                    <span className={styles.assetThumbnailTechDetail}>{this.props.asset.lastModified.toDateString()}</span>
                                 </span>
                             </div>
                         </div>
