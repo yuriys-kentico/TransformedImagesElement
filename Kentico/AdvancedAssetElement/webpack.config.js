@@ -1,4 +1,4 @@
-/// <binding BeforeBuild='Run - Production' />
+/// <binding BeforeBuild='Run - Development' />
 const path = require('path');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -26,23 +26,13 @@ module.exports = {
                         loader: "style-loader"
                     },
                     {
-                        loader: 'css-loader',
-                        options: {
-                            modules: true, // this option must be enabled
-                            localIdentName: '[local]',
-                            exportOnlyLocals: true
-                        }
+                        loader: 'css-loader'
                     },
                     {
-                        loader: 'typed-css-modules-loader'
+                        loader: 'sass-loader'
                     }
                 ]
             },
-            //{
-            //    enforce: 'pre',
-            //    test: /\.scss$/,
-            //    exclude: /node_modules/,
-            //},
 
             {
                 test: /\.tsx?$/,

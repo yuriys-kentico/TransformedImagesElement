@@ -6,7 +6,6 @@ import { AssetModels } from "kentico-cloud-content-management/_bundles/models/as
 import { IElement } from "./kentico/IElement";
 import { IContext } from "./kentico/IContext";
 
-import * as styles from "../styles/style.scss";
 import { AssetThumbnail } from "./AssetThumbnail";
 
 export interface IElementProps {
@@ -51,12 +50,13 @@ export class AdvancedAssetElement extends React.Component<IElementProps, IElemen
     render() {
         return (
             <div>
-                <div id={styles.assetThumbnailList}>
+                <div className="assetThumbnailList">
                     {this.state.originalAssets.map((a, i) => (
                         <AssetThumbnail asset={a} key={i} context={this.props.context} />
                     )
                     )}
                 </div>
-            </div>);
+            </div>
+        );
     }
 }

@@ -4,8 +4,6 @@ import { AssetModels } from "kentico-cloud-content-management/_bundles/models/as
 
 import { IContext } from "./kentico/IContext";
 
-import * as styles from "../styles/style.scss";
-
 export interface IAssetThumbnailProps {
     asset: AssetModels.Asset;
     context: IContext;
@@ -29,34 +27,34 @@ export class AssetThumbnail extends React.Component<IAssetThumbnailProps, IAsset
 
     render() {
         return (
-            <div className={styles.assetThumbnailWrapper}>
-                <div className={styles.assetThumbnail}>
-                    <div className={styles.assetThumbnailActionsPane}>
-                        <a target="_blank" download={this.props.asset.fileName} href={this.getAssetUrl(this.props.asset)} className={styles.assetThumbnailAction + " " + styles.assetThumbnailActionDownload}>
+            <div className="assetThumbnailWrapper">
+                <div className="assetThumbnail">
+                    <div className="assetThumbnailActionsPane">
+                        <a target="_blank" download={this.props.asset.fileName} href={this.getAssetUrl(this.props.asset)} className="assetThumbnailAction assetThumbnailActionDownload">
                             <i aria-hidden="true" className="icon-download" />
                         </a>
-                        <div className={styles.assetThumbnailAction + " " + styles.assetThumbnailActionRemove}>
+                        <div className="assetThumbnailAction assetThumbnailActionRemove">
                             <i aria-hidden="true" className="icon-remove" />
                         </div>
                     </div>
                     <div>
-                        <div className={styles.assetThumbnailPreview}>
-                            <img className={styles.assetThumbnailImage} src={this.getAssetUrl(this.props.asset)} />
+                        <div className="assetThumbnailPreview">
+                            <img className="assetThumbnailImage" src={this.getAssetUrl(this.props.asset)} />
                         </div>
-                        <div className={styles.assetThumbnailBottom + " " + styles.assetThumbnailBottomWithPadding}>
-                            <div className={styles.assetThumbnailSummary}>
-                                <div className={styles.assetThumbnailTitle}>
-                                    <div className={styles.assetThumbnailName}>
-                                        <span className={styles.assetThumbnailFileNameWithoutExtension}>
+                        <div className="assetThumbnailBottom assetThumbnailBottomWithPadding">
+                            <div className="assetThumbnailSummary">
+                                <div className="assetThumbnailTitle">
+                                    <div className="assetThumbnailName">
+                                        <span className="assetThumbnailFileNameWithoutExtension">
                                             {this.props.asset.fileName}
                                         </span>
                                     </div>
                                 </div>
-                                <span className={styles.assetThumbnailTechDetails}>
-                                    <span className={styles.assetThumbnailTechDetail}>
-                                        <span className={styles.assetThumbnailFileSize}>{this.props.asset.size}</span>
+                                <span className="assetThumbnailTechDetails">
+                                    <span className="assetThumbnailTechDetail">
+                                        <span className="assetThumbnailFileSize">{this.props.asset.size}</span>
                                     </span>
-                                    <span className={styles.assetThumbnailTechDetail}>{this.props.asset.lastModified.toDateString()}</span>
+                                    <span className="assetThumbnailTechDetail">{this.props.asset.lastModified.toDateString()}</span>
                                 </span>
                             </div>
                         </div>
