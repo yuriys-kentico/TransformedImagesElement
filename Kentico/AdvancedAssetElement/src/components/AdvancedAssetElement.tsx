@@ -49,7 +49,7 @@ export class AdvancedAssetElement extends React.Component<IElementProps, IElemen
         });
     }
 
-    componentDidMount() {
+    componentDidUpdate() {
         const renderedHeight = this.thumbnailList.clientHeight;
 
         CustomElement.setHeight(renderedHeight);
