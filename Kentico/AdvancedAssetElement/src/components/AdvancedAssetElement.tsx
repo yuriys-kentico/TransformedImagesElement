@@ -51,7 +51,6 @@ export class AdvancedAssetElement extends React.Component<IElementProps, IElemen
     render() {
         return (
             <div>
-                <h1>Here are some assets</h1>
                 <div id={styles.assetThumbnailList}>
                     {this.state.originalAssets.map((a, i) => (
                         <AssetThumbnail asset={a} key={i} context={this.props.context} />
