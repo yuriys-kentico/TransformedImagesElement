@@ -2,8 +2,9 @@
   display: flex;
   flex-wrap: wrap; }
   .assetThumbnailList .assetThumbnailWrapper {
-    width: calc(100%/3);
-    flex: auto; }
+    width: calc(100%/3 - 1em);
+    flex: auto;
+    margin: 0.5em; }
   .assetThumbnailList .assetThumbnailActionsPane {
     position: absolute;
     top: 0;
@@ -26,7 +27,7 @@
     font-size: 1em;
     color: #424242;
     cursor: pointer; }
-  .assetThumbnailList .assetThumbnailAction.assetThumbnailActionAddComment i:hover {
+  .assetThumbnailList .assetThumbnailAction.assetThumbnailActionAddParams i:hover {
     background-color: #ffe082; }
   .assetThumbnailList .assetThumbnailAction.assetThumbnailActionDownload i:hover {
     color: #fff;
@@ -34,10 +35,13 @@
   .assetThumbnailList .assetThumbnailAction.assetThumbnailActionRemove i:hover {
     color: #fff;
     background-color: #ef5350; }
+  .assetThumbnailList .assetThumbnailAction .iconAddParams:before {
+    content: "\E73E"; }
   .assetThumbnailList .assetThumbnailPreview {
     display: flex;
     align-items: center;
-    justify-content: space-around; }
+    justify-content: space-around;
+    height: 200px; }
   .assetThumbnailList img.assetThumbnailImage {
     max-width: 100%;
     max-height: 100%; }

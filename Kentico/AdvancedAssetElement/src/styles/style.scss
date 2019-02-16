@@ -3,8 +3,9 @@
     flex-wrap: wrap;
 
     .assetThumbnailWrapper {
-        width: calc(100%/3);
+        width: calc(100%/3 - 1em);
         flex: auto;
+        margin: 0.5em;
     }
 
     .assetThumbnailActionsPane {
@@ -36,7 +37,7 @@
             cursor: pointer;
         }
 
-        &.assetThumbnailActionAddComment {
+        &.assetThumbnailActionAddParams {
             i:hover {
                 background-color: #ffe082;
             }
@@ -55,12 +56,17 @@
                 background-color: #ef5350;
             }
         }
+
+        .iconAddParams:before {
+            content: "\E73E";
+        }
     }
 
     .assetThumbnailPreview {
         display: flex;
         align-items: center;
         justify-content: space-around;
+        height: 200px;
     }
 
     img.assetThumbnailImage {

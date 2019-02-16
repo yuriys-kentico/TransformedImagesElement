@@ -21,6 +21,8 @@ export interface IElementState {
 declare const CustomElement: any;
 
 export class AdvancedAssetElement extends React.Component<IElementProps, IElementState> {
+    thumbnailList: HTMLDivElement;
+
     state: IElementState = {
         originalAssets: []
     };
@@ -47,15 +49,19 @@ export class AdvancedAssetElement extends React.Component<IElementProps, IElemen
         });
     }
 
+    componentDidMount() {
+        const renderedHeight = this.thumbnailList.clientHeight;
+
+        CustomElement.setHeight(renderedHeight);
+    }
+
     render() {
         return (
-            <div>
-                <div className="assetThumbnailList">
-                    {this.state.originalAssets.map((a, i) => (
-                        <AssetThumbnail asset={a} key={i} context={this.props.context} />
-                    )
-                    )}
-                </div>
+            <div className="assetThumbnailList" ref={e => this.thumbnailList = e}>
+                {this.state.originalAssets.map((a, i) => (
+                    <AssetThumbnail asset={a} key={i} context={this.props.context} />
+                )
+                )}
             </div>
         );
     }

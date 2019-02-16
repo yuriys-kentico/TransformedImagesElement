@@ -22,7 +22,7 @@ export class AssetThumbnail extends React.Component<IAssetThumbnailProps, IAsset
     };
 
     getAssetUrl = (item: AssetModels.Asset): string => {
-        return `${this.assetEndpoint}/${this.props.context.projectId}/${item.fileReference.id}/${item.fileName}?w=200&h=200`;
+        return `${this.assetEndpoint}/${this.props.context.projectId}/${item.fileReference.id}/${item.fileName}?w=400&h=400`;
     }
 
     render() {
@@ -30,7 +30,10 @@ export class AssetThumbnail extends React.Component<IAssetThumbnailProps, IAsset
             <div className="assetThumbnailWrapper">
                 <div className="assetThumbnail">
                     <div className="assetThumbnailActionsPane">
-                        <a target="_blank" download={this.props.asset.fileName} href={this.getAssetUrl(this.props.asset)} className="assetThumbnailAction assetThumbnailActionDownload">
+                        <div className="assetThumbnailAction assetThumbnailActionAddParams">
+                            <i aria-hidden="true" className="iconAddParams" />
+                        </div>
+                        <a target="_blank" href={this.getAssetUrl(this.props.asset)} className="assetThumbnailAction assetThumbnailActionDownload">
                             <i aria-hidden="true" className="icon-download" />
                         </a>
                         <div className="assetThumbnailAction assetThumbnailActionRemove">
