@@ -1,25 +1,14 @@
 {
   "name": "advanced-asset-element",
-  "version": "0.0.0",
-  "scripts": {
-    "build": "webpack"
-  },
+  "version": "1.0.0",
   "author": {
     "name": "Yuriy Sountsov"
   },
   "devDependencies": {
-    "@babel/core": "7.2.2",
-    "@babel/plugin-proposal-class-properties": "7.3.0",
-    "@babel/plugin-proposal-export-default-from": "7.2.0",
-    "@babel/preset-env": "7.3.1",
-    "@babel/preset-react": "7.0.0",
     "@types/node": "11.9.4",
     "@types/react": "16.8.3",
     "@types/react-dom": "16.8.1",
     "awesome-typescript-loader": "5.2.1",
-    "babel-loader": "8.0.5",
-    "babel-plugin-add-module-exports": "1.0.0",
-    "babel-plugin-wildcard": "5.0.0",
     "better-typings-for-css-modules-loader": "1.0.1",
     "css-loader": "2.0.2",
     "dts-css-modules-loader": "1.0.1",

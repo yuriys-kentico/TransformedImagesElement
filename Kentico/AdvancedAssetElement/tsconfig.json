@@ -4,13 +4,10 @@
     "noImplicitAny": true,
     "jsx": "react",
     "module": "commonjs",
-    "target": "es5",
-    "sourceMap": true
+    "target": "es6"
   },
   "exclude": [
-    "node_modules"
-  ],
-  "include": [
+    "node_modules",
     "./src/**/*"
   ]
 }

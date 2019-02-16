@@ -8,11 +8,11 @@ const gulp = require("gulp"),
 const CSS_EXTENSION = ".css",
     SCSS_EXTENSION = ".scss";
 
-const CSS_FOLDER_DEVELOPMENT = "src/styles/*" + SCSS_EXTENSION,
+const CSS_FOLDER_DEVELOPMENT = `src/styles/*${SCSS_EXTENSION}`,
     CSS_FOLDER_PRODUCTION = "build";
 
-const CSS_FILE_DEVELOPMENT = "style" + CSS_EXTENSION,
-    CSS_FILE_PRODUCTION = "style.min" + CSS_EXTENSION;
+const CSS_FILE_DEVELOPMENT = `style${CSS_EXTENSION}`,
+    CSS_FILE_PRODUCTION = `style.min${CSS_EXTENSION}`;
 
 gulp.task("css", function () {
     return gulp.src(CSS_FOLDER_DEVELOPMENT)
