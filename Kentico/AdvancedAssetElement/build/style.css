@@ -35,7 +35,7 @@
   .assetThumbnailList .assetThumbnailAction.assetThumbnailActionRemove i:hover {
     color: #fff;
     background-color: #ef5350; }
-  .assetThumbnailList .assetThumbnailAction .iconAddParams:before {
+  .assetThumbnailList .assetThumbnailAction .icon-add-params:before {
     content: "\E73E"; }
   .assetThumbnailList .assetThumbnailPreview {
     display: flex;

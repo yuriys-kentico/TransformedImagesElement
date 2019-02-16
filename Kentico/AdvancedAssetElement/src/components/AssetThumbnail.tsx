@@ -1,4 +1,5 @@
 ﻿import * as React from "react";
+import * as moment from "moment";
 
 import { AssetModels } from "kentico-cloud-content-management/_bundles/models/assets/asset.models";
 
@@ -25,13 +26,52 @@ export class AssetThumbnail extends React.Component<IAssetThumbnailProps, IAsset
         return `${this.assetEndpoint}/${this.props.context.projectId}/${item.fileReference.id}/${item.fileName}?w=400&h=400`;
     }
 
+    getAssetFileSize = (sizeInBytes: number): string => {
+        let finalSize = sizeInBytes;
+        let unit = "B";
+
+        // GigaBytes
+        if (sizeInBytes > (1024 * 1024 * 1024)) {
+            finalSize = sizeInBytes / 1024 / 1024 / 1024;
+            unit = "GB";
+        }
+        // MegaBytes
+        else if (sizeInBytes > (1024 * 1024)) {
+            finalSize = sizeInBytes / 1024 / 1024;
+            unit = "MB";
+        }
+        // KiloBytes
+        else if (sizeInBytes > (1024)) {
+            finalSize = sizeInBytes / 1024;
+            unit = "kB";
+        }
+
+        return `${Number(finalSize).toFixed(2)} ${unit}`;
+    }
+
+    getAssetLastModified(lastModified: Date): string {
+        return this._printDate(lastModified);
+    }
+
+    _printDate(date: Date): string {
+        return moment(date).format('MMM D, YYYY');
+    }
+
+    _printTime(date: Date, includeSeconds: boolean = false): string {
+        return moment(date).format('h:mm' + (includeSeconds ? ':ss' : '') + ' a');
+    }
+
+    _printDatetime(date: Date, includeSeconds: boolean = false): string {
+        return this._printDate(date) + ' \u00B7 ' + this._printTime(date, includeSeconds);
+    }
+
     render() {
         return (
             <div className="assetThumbnailWrapper">
                 <div className="assetThumbnail">
                     <div className="assetThumbnailActionsPane">
                         <div className="assetThumbnailAction assetThumbnailActionAddParams">
-                            <i aria-hidden="true" className="iconAddParams" />
+                            <i aria-hidden="true" className="icon-add-params" />
                         </div>
                         <a target="_blank" href={this.getAssetUrl(this.props.asset)} className="assetThumbnailAction assetThumbnailActionDownload">
                             <i aria-hidden="true" className="icon-download" />
@@ -55,9 +95,9 @@ export class AssetThumbnail extends React.Component<IAssetThumbnailProps, IAsset
                                 </div>
                                 <span className="assetThumbnailTechDetails">
                                     <span className="assetThumbnailTechDetail">
-                                        <span className="assetThumbnailFileSize">{this.props.asset.size}</span>
+                                        <span className="assetThumbnailFileSize">{this.getAssetFileSize(this.props.asset.size)}</span>
                                     </span>
-                                    <span className="assetThumbnailTechDetail">{this.props.asset.lastModified.toDateString()}</span>
+                                    <span className="assetThumbnailTechDetail">{this.getAssetLastModified(this.props.asset.lastModified)}</span>
                                 </span>
                             </div>
                         </div>
