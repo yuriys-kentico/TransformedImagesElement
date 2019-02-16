@@ -37,20 +37,20 @@
         }
 
         &.assetThumbnailActionAddComment {
-            i: hover {
+            i:hover {
                 background-color: #ffe082;
             }
         }
 
         &.assetThumbnailActionDownload {
-            i: hover {
+            i:hover {
                 color: #fff;
                 background-color: #2196f3;
             }
         }
 
         &.assetThumbnailActionRemove {
-            i: hover {
+            i:hover {
                 color: #fff;
                 background-color: #ef5350;
             }
@@ -115,6 +115,12 @@
     .assetThumbnailName {
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+
+    .assetThumbnailFileSize {
+    }
+
+    .assetThumbnailSummary {
     }
 
     .assetThumbnailFileExtension, .assetThumbnailFileNameWithoutExtension {

@@ -23,6 +23,9 @@ module.exports = {
                 test: /\.scss$/,
                 use: [
                     {
+                        loader: "style-loader"
+                    },
+                    {
                         loader: 'css-loader',
                         options: {
                             modules: true, // this option must be enabled
@@ -31,16 +34,15 @@ module.exports = {
                         }
                     },
                     {
-                        loader: "sass-loader"
+                        loader: 'typed-css-modules-loader'
                     }
                 ]
             },
-            {
-                enforce: 'pre',
-                test: /\.scss$/,
-                exclude: /node_modules/,
-                loader: 'typed-css-modules-loader'
-            },
+            //{
+            //    enforce: 'pre',
+            //    test: /\.scss$/,
+            //    exclude: /node_modules/,
+            //},
 
             {
                 test: /\.tsx?$/,

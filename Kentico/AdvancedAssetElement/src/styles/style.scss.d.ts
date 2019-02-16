@@ -14,5 +14,7 @@ export const assetThumbnailTitle: string;
 export const assetThumbnailTechDetails: string;
 export const assetThumbnailTechDetail: string;
 export const assetThumbnailName: string;
+export const assetThumbnailFileSize: string;
+export const assetThumbnailSummary: string;
 export const assetThumbnailFileExtension: string;
 export const assetThumbnailFileNameWithoutExtension: string;
