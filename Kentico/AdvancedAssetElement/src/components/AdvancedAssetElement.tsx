@@ -6,7 +6,8 @@ import { AssetModels } from "kentico-cloud-content-management/_bundles/models/as
 import { IElement } from "./kentico/IElement";
 import { IContext } from "./kentico/IContext";
 
-import { AssetThumbnail } from "./AssetThumbnail";
+import { AssetThumbnailTile } from "./AssetThumbnailTile";
+import { AddAssetTile } from "./AddAssetTile";
 
 export interface IElementProps {
     element: IElement;
@@ -14,7 +15,8 @@ export interface IElementProps {
 }
 
 export interface IElementState {
-    originalAssets: AssetModels.Asset[];
+    rawAssets: AssetModels.Asset[];
+    selectedAssets: AssetModels.Asset[];
 }
 
 // Expose access to Kentico custom element API
@@ -24,7 +26,8 @@ export class AdvancedAssetElement extends React.Component<IElementProps, IElemen
     thumbnailList: HTMLDivElement;
 
     state: IElementState = {
-        originalAssets: []
+        rawAssets: [],
+        selectedAssets: []
     };
 
     client = new ContentManagementClient({
@@ -44,7 +47,7 @@ export class AdvancedAssetElement extends React.Component<IElementProps, IElemen
 
     filterAssetResponse = (items: AssetModels.Asset[]) => {
         this.setState({
-            originalAssets: items
+            rawAssets: items
                 .filter(i => i.imageWidth !== null)
         });
     }
@@ -58,8 +61,9 @@ export class AdvancedAssetElement extends React.Component<IElementProps, IElemen
     render() {
         return (
             <div className="assetThumbnailList" ref={e => this.thumbnailList = e}>
-                {this.state.originalAssets.map((a, i) => (
-                    <AssetThumbnail asset={a} key={i} context={this.props.context} />
+                <AddAssetTile />
+                {this.state.selectedAssets.map((a, i) => (
+                    <AssetThumbnailTile asset={a} key={i} context={this.props.context} />
                 )
                 )}
             </div>

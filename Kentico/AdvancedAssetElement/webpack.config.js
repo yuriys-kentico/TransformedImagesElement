@@ -7,6 +7,8 @@ const isProduction = process.env.NODE_ENV === 'production';
 const makeSourceMaps = isProduction ? false : 'cheap-module-eval-source-map';
 const getDevSuffix = isProduction ? '' : 'Dev';
 
+const htmlTemplatePath = `./src/templates/index${getDevSuffix}.html`;
+
 module.exports = {
     mode: process.env.NODE_ENV,
     devtool: makeSourceMaps,
@@ -44,7 +46,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: `./src/index${getDevSuffix}.html`,
+            template: htmlTemplatePath,
             filename: `element${getDevSuffix}.html`,
             inject: 'body'
         })
