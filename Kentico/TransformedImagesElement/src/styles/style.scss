@@ -2,6 +2,23 @@ body {
     overflow: hidden;
 }
 
+.configuration {
+    padding: .5em;
+
+    .details {
+        margin: 0 0 2em;
+    }
+
+    .notice {
+    }
+
+    .json {
+        max-width: initial;
+        min-width: initial;
+        margin: .5em 0 0;
+    }
+}
+
 .imageSelection, .imageListing, .imageEditor {
     .selectionBar {
         display: flex;
@@ -168,19 +185,48 @@ body {
     .editor {
         display: flex;
         flex-wrap: wrap;
-    }
+        background: #eee;
 
-    .imageEditorPreview {
-        margin: 0.5em;
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
-        width: 100%;
-        height: 400px;
+        .imageEditorPreview {
+            margin: 0.5em;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            width: 100%;
+            height: 400px;
+            flex: 10;
 
-        .imageEditorImage {
-            max-width: 100%;
-            max-height: 100%;
+            .imageWrapper {
+                position: relative;
+
+                .cropBox {
+                    position: absolute;
+                    outline: 1px dashed red;
+                }
+
+                .imageMask {
+                    min-width: 100%;
+                    min-height: 100%;
+                    position: absolute;
+                }
+
+                .imageEditorImage {
+                    max-width: 100%;
+                    max-height: 100%;
+                    outline: .2em solid #2196f3;
+                    box-shadow: 0 1px 8px 2px rgba(0,0,0,.2);
+                    pointer-events: none;
+                }
+            }
+        }
+
+        .editorControls {
+            right: 0;
+            min-height: 100%;
+            flex: 3;
+            background: #f5f5f5;
+            border-left: 1px solid #e0e0e0;
+            padding: 1em;
         }
     }
 }

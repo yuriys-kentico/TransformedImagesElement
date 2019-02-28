@@ -1,8 +1,8 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { IElement } from "./components/kentico/IElement";
-import { IContext } from "./components/kentico/IContext";
+import { IElement } from "./types/kentico/IElement";
+import { IContext } from "./types/kentico/IContext";
 
 import { TransformedImagesElement } from "./components/TransformedImagesElement";
 

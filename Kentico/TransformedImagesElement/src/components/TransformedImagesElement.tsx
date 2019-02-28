@@ -3,15 +3,17 @@
 import { ContentManagementClient } from "kentico-cloud-content-management";
 import { AssetModels } from "kentico-cloud-content-management/_commonjs/models/assets/asset.models";
 
-import { IElement } from "./kentico/IElement";
-import { IContext } from "./kentico/IContext";
+import { IElement } from "../types/kentico/IElement";
+import { IContext } from "../types/kentico/IContext";
+import { ICustomElement } from "../types/kentico/ICustomElement";
+import { IElementConfig } from "../types/IElementConfig";
+import { TransformedImagesElementMode } from "../types/TransformedImagesElementMode";
+import { TransformedImage } from "../types/TransformedImage";
 
-import { ImageListingTile } from "./ImageListingTile";
-import { OpenSelectionBar } from "./OpenSelectionBar";
-import { TransformedImagesElementMode } from "./TransformedImagesElementMode";
-import { CloseSelectionBar } from "./CloseSelectionBar";
-import { fail } from "assert";
-import { ImageEditor } from "./ImageEditor";
+import { ImageListingTile } from "./listing/ImageListingTile";
+import { ListingButtons } from "./listing/ListingButtons";
+import { SelectionButtons } from "./selection/SelectionButtons";
+import { ImageEditor } from "./editor/ImageEditor";
 
 export interface IElementProps {
     element: IElement;
@@ -19,49 +21,82 @@ export interface IElementProps {
 }
 
 export interface IElementState {
-    rawAssets: AssetModels.Asset[];
-    selectedImages: AssetModels.Asset[];
-    previousSelectedImages: AssetModels.Asset[];
-    editedImage: AssetModels.Asset;
+    rawImages: TransformedImage[];
+    selectedImages: TransformedImage[];
+    previousSelectedImages: TransformedImage[];
+    editedImage: TransformedImage;
     mode: TransformedImagesElementMode;
+    configurationError: Error
 }
 
 // Expose access to Kentico custom element API
-declare const CustomElement: any;
+declare const CustomElement: ICustomElement;
 
 export class TransformedImagesElement extends React.Component<IElementProps, IElementState> {
+    configuration: HTMLDivElement;
     selectionList: HTMLDivElement;
     listingList: HTMLDivElement;
     editor: HTMLDivElement;
 
     state: IElementState = {
-        rawAssets: [],
+        rawImages: [],
         selectedImages: [],
         previousSelectedImages: [],
         editedImage: null,
-        mode: TransformedImagesElementMode.listing
+        mode: TransformedImagesElementMode.unset,
+        configurationError: null
     };
-
-    client = new ContentManagementClient({
-        projectId: this.props.context.projectId,
-        apiKey: this.props.element.config.contentManagementAPIKey
-    });
 
     componentWillMount() {
         const _this = this;
 
-        _this.client.listAssets()
-            .toObservable()
-            .subscribe(response =>
-                _this.filterAssetResponse(response.data.items)
-            );
+        try {
+            const client = new ContentManagementClient({
+                projectId: this.props.context.projectId,
+                apiKey: this.props.element.config.contentManagementAPIKey
+            });
+
+            client.listAssets()
+                .toObservable()
+                .subscribe(
+                    response => _this.filterAssetResponse(response.data.items),
+                    error => _this.showError(error)
+                );
+        } catch (error) {
+            this.showError(error);
+        }
+    }
+
+    showError(error: any): void {
+        this.setState({
+            configurationError: error,
+            mode: TransformedImagesElementMode.configuration
+        })
     }
 
     filterAssetResponse = (items: AssetModels.Asset[]) => {
+        const rawImages = items
+            .filter(i => i.imageWidth !== null)
+            .map(a => new TransformedImage(this.props.context.projectId, a));
+
+        const selectedIds = this.loadSelectedIds(this.props.element.value);
+
         this.setState({
-            rawAssets: items
-                .filter(i => i.imageWidth !== null)
+            rawImages: rawImages,
+            mode: TransformedImagesElementMode.listing,
+            selectedImages:
+                rawImages
+                    .filter(i => selectedIds.includes(i.asset.id))
+                    .sort((a, b) => selectedIds.indexOf(a.asset.id) - selectedIds.indexOf(b.asset.id))
         });
+    }
+
+    loadSelectedIds(value: string): string[] {
+        if (value !== null) {
+            return TransformedImage.parseDeliveryModels(JSON.parse(value));
+        }
+
+        return [];
     }
 
     setMode = (mode: TransformedImagesElementMode) => {
@@ -70,11 +105,11 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         })
     }
 
-    selectImage(image: AssetModels.Asset): any {
+    selectImage(image: TransformedImage): any {
         // Deselect image
         if (this.state.selectedImages.includes(image)) {
             this.setState({
-                selectedImages: this.state.selectedImages.filter(a => a != image)
+                selectedImages: this.state.selectedImages.filter(a => a !== image)
             })
         }
         // Select image
@@ -97,7 +132,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         })
     }
 
-    openEditor(image: AssetModels.Asset): void {
+    openEditor(image: TransformedImage) {
         this.setState({
             editedImage: image
         })
@@ -105,12 +140,21 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         this.setMode(TransformedImagesElementMode.editor);
     }
 
+    updateValue(selectedImages: TransformedImage[]) {
+        CustomElement.setValue(
+            JSON.stringify(
+                selectedImages
+                    .map(i => i.getDeliveryModel())
+            )
+        );
+    }
+
     updateHeight = () => {
         let renderedHeight: number;
 
         switch (this.state.mode) {
-            case TransformedImagesElementMode.editor:
-                renderedHeight = this.editor.scrollHeight;
+            case TransformedImagesElementMode.configuration:
+                renderedHeight = this.configuration.scrollHeight;
                 break;
             case TransformedImagesElementMode.listing:
                 renderedHeight = this.listingList.scrollHeight;
@@ -118,9 +162,16 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
             case TransformedImagesElementMode.selection:
                 renderedHeight = this.selectionList.scrollHeight;
                 break;
+            case TransformedImagesElementMode.editor:
+                renderedHeight = this.editor.scrollHeight;
+                break;
         }
 
-        CustomElement.setHeight(renderedHeight);
+        if (renderedHeight > 0) {
+            CustomElement.setHeight(renderedHeight);
+        }
+
+        this.updateValue(this.state.selectedImages);
     }
 
     componentDidMount = this.updateHeight;
@@ -128,69 +179,110 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
     componentDidUpdate = this.updateHeight;
 
     render() {
+        let currentModeElement: JSX.Element;
+
+        switch (this.state.mode) {
+            case TransformedImagesElementMode.configuration:
+                const sampleParameters: IElementConfig = {
+                    contentManagementAPIKey: "<Key value from Project settings > API Keys > Content Management API>"
+                }
+
+                currentModeElement = (
+                    <div
+                        className="configuration"
+                        ref={e => this.configuration = e}
+                    >
+                        <div className="details">
+                            <strong>Error: </strong>
+                            {this.state.configurationError.message}
+                        </div>
+                        <div>
+                            <span className="notice">In other words, please make sure the parameters look like this:</span>
+                            <pre className="json text-field__input">
+                                {JSON.stringify(sampleParameters, null, 4)}
+                            </pre>
+                        </div>
+                    </div>
+                );
+                break;
+
+            case TransformedImagesElementMode.listing:
+                currentModeElement = (
+                    <div
+                        className="imageListing"
+                        ref={e => this.listingList = e}
+                    >
+                        <ListingButtons
+                            onClickPick={() => { this.storeCurrentSelectedImages(); this.setMode(TransformedImagesElementMode.selection) }}
+                        />
+                        <div className="list">
+                            {this.state.selectedImages.map((a, i) => (
+                                <ImageListingTile
+                                    image={a}
+                                    key={i}
+                                    context={this.props.context}
+                                    showActions={true}
+                                    isSelected={false}
+                                    onRemove={image => this.selectImage(image)}
+                                    onSelect={image => this.openEditor(image)}
+                                    onAddParams={image => this.openEditor(image)}
+                                />
+                            )
+                            )}
+                        </div>
+                    </div>
+                );
+                break;
+
+            case TransformedImagesElementMode.selection:
+                currentModeElement = (
+                    <div
+                        className="imageSelection"
+                        ref={e => this.selectionList = e}
+                    >
+                        <div className="list">
+                            {this.state.rawImages.map((a, i) => (
+                                <ImageListingTile
+                                    image={a}
+                                    key={i}
+                                    context={this.props.context}
+                                    showActions={false}
+                                    isSelected={this.state.selectedImages.includes(a)}
+                                    onSelect={image => this.selectImage(image)}
+                                />
+                            )
+                            )}
+                        </div>
+                        <SelectionButtons
+                            onClickCancel={() => { this.revertSelectedImages(); this.setMode(TransformedImagesElementMode.listing) }}
+                            onClickUpdate={() => { this.setMode(TransformedImagesElementMode.listing) }}
+                        />
+                    </div>
+                );
+                break;
+
+            case TransformedImagesElementMode.editor:
+                currentModeElement = (
+                    <div
+                        className="imageEditor"
+                        ref={e => this.editor = e}
+                    >
+                        <ImageEditor
+                            image={this.state.editedImage}
+                            context={this.props.context}
+                        />
+                        <SelectionButtons
+                            onClickCancel={() => { this.setMode(TransformedImagesElementMode.listing) }}
+                            onClickUpdate={() => { this.setMode(TransformedImagesElementMode.listing) }}
+                        />
+                    </div>
+                );
+                break;
+        }
+
         return (
             <div>
-                <div
-                    className="imageSelection"
-                    hidden={this.state.mode == TransformedImagesElementMode.selection ? false : true}
-                    ref={e => this.selectionList = e}
-                >
-                    <div className="list">
-                        {this.state.rawAssets.map((a, i) => (
-                            <ImageListingTile
-                                image={a}
-                                key={i}
-                                context={this.props.context}
-                                showActions={false}
-                                isSelected={this.state.selectedImages.includes(a)}
-                                onSelect={image => this.selectImage(image)}
-                            />
-                        )
-                        )}
-                    </div>
-                    <CloseSelectionBar
-                        onClickCancel={() => { this.revertSelectedImages(); this.setMode(TransformedImagesElementMode.listing) }}
-                        onClickUpdate={() => { this.setMode(TransformedImagesElementMode.listing) }}
-                    />
-                </div>
-                <div
-                    className="imageListing"
-                    hidden={this.state.mode == TransformedImagesElementMode.listing ? false : true}
-                    ref={e => this.listingList = e}
-                >
-                    <OpenSelectionBar
-                        onClickPick={() => { this.storeCurrentSelectedImages(); this.setMode(TransformedImagesElementMode.selection) }}
-                    />
-                    <div className="list">
-                        {this.state.selectedImages.map((a, i) => (
-                            <ImageListingTile
-                                image={a}
-                                key={i}
-                                context={this.props.context}
-                                showActions={true}
-                                isSelected={false}
-                                onRemove={image => this.selectImage(image)}
-                                onSelect={image => this.openEditor(image)}
-                                onAddParams={image => this.openEditor(image)}
-                            />
-                        )
-                        )}
-                    </div>
-                </div>
-                <div
-                    className="imageEditor"
-                    hidden={this.state.mode == TransformedImagesElementMode.editor ? false : true}
-                    ref={e => this.editor = e}
-                >
-                    <ImageEditor
-                        image={this.state.editedImage}
-                        context={this.props.context}
-                    />
-                    <CloseSelectionBar
-                        onClickCancel={() => { this.setMode(TransformedImagesElementMode.listing) }}
-                        onClickUpdate={() => { this.setMode(TransformedImagesElementMode.listing) }}
-                    />
-                </div>
+                {currentModeElement}
             </div>
         );
     }
