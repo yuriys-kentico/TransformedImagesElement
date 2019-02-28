@@ -31,14 +31,14 @@ export class ImageEditor extends React.Component<IImageEditorProps, IImageEditor
         endPoint: new DOMPoint(0, 0)
     };
 
-    getMousePointFromEvent(e: React.MouseEvent<HTMLImageElement, MouseEvent>): DOMPoint {
-        const target = e.target as HTMLImageElement;
+    getMousePointFromEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>): DOMPoint {
+        const target = e.target as HTMLDivElement;
         const targetRect = target.getBoundingClientRect() as DOMRect;
 
         return new DOMPoint(e.clientX - targetRect.x, e.clientY - targetRect.y);
     }
 
-    onMouseDown(e: React.MouseEvent<HTMLImageElement, MouseEvent>) {
+    onMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         this.setState({
             mode: ImageEditorMode.selecting,
             startPoint: this.getMousePointFromEvent(e),
@@ -46,7 +46,7 @@ export class ImageEditor extends React.Component<IImageEditorProps, IImageEditor
         });
     }
 
-    onMouseMove(e: React.MouseEvent<HTMLImageElement, MouseEvent>) {
+    onMouseMove(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         switch (this.state.mode) {
             case ImageEditorMode.selecting:
                 this.setState({
@@ -55,7 +55,7 @@ export class ImageEditor extends React.Component<IImageEditorProps, IImageEditor
         }
     }
 
-    onMouseUp(e: React.MouseEvent<HTMLImageElement, MouseEvent>) {
+    onMouseUp(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         this.setState({
             mode: ImageEditorMode.unset,
             endPoint: this.getMousePointFromEvent(e)
