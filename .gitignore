@@ -17,6 +17,10 @@ pids
 # Simulation
 _simulation
 
+# Certificates
+*.cert
+*.key
+
 # Compiled folders
 [Dd]ebug/
 [Dd]ebugPublic/
