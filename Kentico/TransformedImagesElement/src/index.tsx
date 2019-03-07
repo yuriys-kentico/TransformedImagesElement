@@ -62,7 +62,7 @@ const setComponentProps = (items: AssetModels.Asset[], selectedImageModels: Tran
             && allowedImageTypes.indexOf(i.type) > -1
         );
 
-    const selectedIds = selectedImageModels.map(i => i.id);
+    let selectedIds = selectedImageModels ? selectedImageModels.map(i => i.id) : [];
 
     Object.assign(elementProps,
         {
