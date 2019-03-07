@@ -1,23 +1,31 @@
 ﻿import * as React from "react";
 
-import { IContext } from "../../types/kentico/IContext";
-import { TransformedImage } from "../../types/TransformedImage";
-import { ImageEditorMode } from "../../types/ImageEditorMode";
+import { IContext } from "../../types/customElement/IContext";
+import { BaseControls } from "../../types/editor/BaseControls";
+import { TransformedImage } from "../../types/transformedImage/TransformedImage";
+
+import { ResizeControls } from "./controls/ResizeControls";
+import { BackgroundControls } from "./controls/BackgroundControls";
 
 export interface IImageEditorProps {
     image: TransformedImage;
     context: IContext;
+    usePreview: boolean;
 }
 
 export interface IImageEditorState {
-    mode: ImageEditorMode;
-    startPoint: DOMPoint;
-    endPoint: DOMPoint;
+    currentEditor: BaseControls;
 }
 
 export class ImageEditor extends React.Component<IImageEditorProps, IImageEditorState> {
-    getImageUrl(item: TransformedImage): string {
-        if (item) {
+    state: IImageEditorState = {
+        currentEditor: null
+    }
+
+    getPreviewImageUrl(item: TransformedImage): string {
+        if (this.props.usePreview) {
+            return item.getImageUrl();
+        } else {
             return item.buildUrl()
                 .withWidth(1000)
                 .withHeight(1000)
@@ -25,75 +33,77 @@ export class ImageEditor extends React.Component<IImageEditorProps, IImageEditor
         }
     }
 
-    state: IImageEditorState = {
-        mode: ImageEditorMode.unset,
-        startPoint: new DOMPoint(0, 0),
-        endPoint: new DOMPoint(0, 0)
-    };
-
-    getMousePointFromEvent(e: React.MouseEvent<HTMLDivElement, MouseEvent>): DOMPoint {
-        const target = e.target as HTMLDivElement;
-        const targetRect = target.getBoundingClientRect() as DOMRect;
-
-        return new DOMPoint(e.clientX - targetRect.x, e.clientY - targetRect.y);
-    }
-
-    onMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-        this.setState({
-            mode: ImageEditorMode.selecting,
-            startPoint: this.getMousePointFromEvent(e),
-            endPoint: new DOMPoint(0, 0)
-        });
-    }
-
-    onMouseMove(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-        switch (this.state.mode) {
-            case ImageEditorMode.selecting:
-                this.setState({
-                    endPoint: this.getMousePointFromEvent(e)
-                });
-        }
-    }
-
-    onMouseUp(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-        this.setState({
-            mode: ImageEditorMode.unset,
-            endPoint: this.getMousePointFromEvent(e)
-        });
-    }
-
     render() {
+        let currentEditor = this.state.currentEditor;
+
         return (
             <div className="editor">
-                <div
-                    className="imageEditorPreview"
-                >
+                <div className="imageEditorPreview" >
                     <span className="imageWrapper">
                         <div
-                            className="cropBox"
-                            style={{
-                                left: this.state.startPoint.x,
-                                top: this.state.startPoint.y,
-                                width: this.state.endPoint.x - this.state.startPoint.x,
-                                height: this.state.endPoint.y - this.state.startPoint.y
-                            }}
-                        />
-                        <div
                             className="imageMask"
-                            onMouseDown={e => this.onMouseDown(e)}
-                            onMouseMove={e => this.onMouseMove(e)}
-                            onMouseUp={e => this.onMouseUp(e)}
-                        />
+                            onMouseDown={e => {
+                                if (this.state.currentEditor.onMouseDown(e))
+                                    this.forceUpdate()
+                            }}
+                            onMouseMove={e => {
+                                if (this.state.currentEditor.onMouseMove(e))
+                                    this.forceUpdate()
+                            }}
+                            onMouseUp={e => {
+                                if (this.state.currentEditor.onMouseUp(e))
+                                    this.forceUpdate()
+                            }}
+                        >
+                            {this.state.currentEditor ? this.state.currentEditor.getImageOverlay() : null}
+                        </div>
                         <img
                             className="imageEditorImage"
-                            src={this.getImageUrl(this.props.image)}
+                            src={this.getPreviewImageUrl(this.props.image)}
                         />
                     </span>
                 </div>
-                <div className="editorControls">
-                    Controls coming soon!
+                <div className="editorControls" >
+                    <ResizeControls
+                        getCurrentEditor={() => currentEditor}
+                        setCurrentEditor={editor => {
+                            currentEditor = editor;
+                            this.setState({ currentEditor: editor })
+                        }}
+                        imageWidth={this.props.image.imageWidth}
+                        imageHeight={this.props.image.imageHeight}
+                        setResizeType={type => {
+                            this.props.image.transformations.resize.type = type;
+                            this.forceUpdate(() => this.forceUpdate());
+                        }}
+                        setResizeHeight={height => {
+                            this.props.image.transformations.resize.height = height;
+                            this.forceUpdate(() => this.forceUpdate());
+                        }}
+                        setResizeWidth={width => {
+                            this.props.image.transformations.resize.width = width;
+                            this.forceUpdate(() => this.forceUpdate());
+                        }}
+                        setResizeDpr={dpr => {
+                            this.props.image.transformations.resize.devicePixelRatio = dpr;
+                            this.forceUpdate(() => this.forceUpdate());
+                        }}
+                        {...this.props.image.transformations.resize}
+                    />
+                    <BackgroundControls
+                        getCurrentEditor={() => currentEditor}
+                        setCurrentEditor={editor => {
+                            currentEditor = editor;
+                            this.setState({ currentEditor: editor })
+                        }}
+                        setBackgroundColor={color => {
+                            this.props.image.transformations.background.color = color;
+                            this.forceUpdate(() => this.forceUpdate());
+                        }}
+                        {...this.props.image.transformations.background}
+                    />
                 </div>
-            </div>
+            </div >
         );
     }
 }

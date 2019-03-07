@@ -1,13 +1,18 @@
 /// <binding BeforeBuild='Run - Development' AfterBuild='Run - Production' />
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
 const makeSourceMaps = isProduction ? false : 'cheap-module-eval-source-map';
 const getDevSuffix = isProduction ? '' : 'Dev';
 
-const htmlTemplatePath = `./src/templates/index${getDevSuffix}.html`;
+const htmlTemplatePath = "./src/templates/index.html";
+const jsFileName = `element${getDevSuffix}.js`;
+const cssFileName = `style${getDevSuffix}.css`;
+const htmlFileName = `element${getDevSuffix}.html`;
 
 module.exports = {
     mode: process.env.NODE_ENV,
@@ -15,7 +20,7 @@ module.exports = {
     entry: './src/index.tsx',
     output: {
         path: path.resolve(__dirname, 'build'),
-        filename: `element${isProduction ? '.min' : ''}.js`
+        filename: jsFileName
     },
     resolve: {
         extensions: [".ts", ".tsx", ".js", ".json"]
@@ -25,17 +30,10 @@ module.exports = {
 
             {
                 test: /\.scss$/,
-                use: [
-                    {
-                        loader: "style-loader"
-                    },
-                    {
-                        loader: 'css-loader'
-                    },
-                    {
-                        loader: 'sass-loader'
-                    }
-                ]
+                use: ExtractTextPlugin.extract({
+                    fallback: 'style-loader',
+                    use: ['css-loader', 'sass-loader'],
+                })
             },
 
             {
@@ -45,9 +43,13 @@ module.exports = {
         ]
     },
     plugins: [
+        new ExtractTextPlugin(cssFileName),
+        new OptimizeCssAssetsPlugin({
+            assetNameRegExp: /^((?!Dev).)*\.css/
+        }),
         new HtmlWebpackPlugin({
             template: htmlTemplatePath,
-            filename: `element${getDevSuffix}.html`,
+            filename: htmlFileName,
             inject: 'body'
         })
     ]

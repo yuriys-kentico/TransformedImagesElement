@@ -1,10 +1,7 @@
 ﻿import * as React from "react";
 
-import { AssetModels } from "kentico-cloud-content-management/_commonjs/models/assets/asset.models";
-import { ImageUrlBuilder } from "kentico-cloud-delivery/_commonjs/images/image-url-builder";
-
-import { IContext } from "../../types/kentico/IContext";
-import { TransformedImage } from "../../types/TransformedImage";
+import { IContext } from "../../types/customElement/IContext";
+import { TransformedImage } from "../../types/transformedImage/TransformedImage";
 
 import { AssetDetails } from "./AssetDetails";
 
@@ -45,6 +42,8 @@ export class ImageListingTile extends React.Component<IimageListingProps, {}> {
                     className="imageListingAction imageListingActionAddParams"
                     onClick={() => this.props.onAddParams(this.props.image)}
                     key="addParams"
+                    data-balloon="Edit transformations"
+                    data-balloon-pos="down"
                 >
                     <i aria-hidden="true" className="icon-add-params" />
                 </div>,
@@ -54,6 +53,8 @@ export class ImageListingTile extends React.Component<IimageListingProps, {}> {
                     href={this.getImageUrl(this.props.image)}
                     hidden={true}
                     key="download"
+                    data-balloon="Download"
+                    data-balloon-pos="down"
                 >
                     <i aria-hidden="true" className="icon-download" />
                 </a>,
@@ -61,6 +62,8 @@ export class ImageListingTile extends React.Component<IimageListingProps, {}> {
                     className="imageListingAction imageListingActionRemove"
                     onClick={() => this.props.onRemove(this.props.image)}
                     key="remove"
+                    data-balloon="Remove"
+                    data-balloon-pos="down"
                 >
                     <i aria-hidden="true" className="icon-remove" />
                 </div>

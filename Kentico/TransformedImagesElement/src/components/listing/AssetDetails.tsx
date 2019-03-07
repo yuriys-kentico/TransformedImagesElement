@@ -1,9 +1,7 @@
 ﻿import * as React from "react";
 import * as moment from "moment";
 
-import { AssetModels } from "kentico-cloud-content-management/_commonjs/models/assets/asset.models";
-
-import { TransformedImage } from "../../types/TransformedImage";
+import { TransformedImage } from "../../types/transformedImage/TransformedImage";
 
 export interface IAssetDetailsProps {
     image: TransformedImage;
@@ -55,16 +53,16 @@ export class AssetDetails extends React.Component<IAssetDetailsProps, {}> {
                 <div className="assetDetailsTitle">
                     <div className="assetDetailsName">
                         <span className="assetDetailsFileName">
-                            {this.props.image.asset.fileName}
+                            {this.props.image.fileName}
                         </span>
                     </div>
                 </div>
                 <span className="assetDetailsTechDetails">
                     <span className="assetDetailsTechDetail">
-                        {this.getAssetFileSize(this.props.image.asset.size)}
+                        {this.getAssetFileSize(this.props.image.size)}
                     </span>
                     <span className="assetDetailsTechDetail">
-                        {this.getAssetLastModified(this.props.image.asset.lastModified)}
+                        {this.getAssetLastModified(this.props.image.lastModified)}
                     </span>
                 </span>
             </div>
