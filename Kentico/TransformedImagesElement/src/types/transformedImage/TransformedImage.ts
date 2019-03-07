@@ -12,7 +12,7 @@ export class TransformedImage extends AssetModels.Asset {
 
     transformations: IImageTransformations = {
         resize: {
-            type: ResizeType.crop
+            type: ResizeType.fit
         },
         crop: {
             type: CropType.full

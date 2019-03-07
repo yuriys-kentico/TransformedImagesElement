@@ -44,21 +44,21 @@ export class ResizeControls extends BaseControls<IResizeControlsProps> {
             >
                 <div className="modes">
                     <button
-                        className={`btn mode ${this.getButtonClassForTransformationType(hasWidthOrHeight && !(this.props.type === ResizeType.crop || this.props.type === ResizeType.scale))}`}
+                        className={`btn mode ${this.getButtonClassForTransformationType(this.props.type === ResizeType.fit)}`}
                         disabled={!hasWidthOrHeight}
                         onClick={() => this.props.setResizeType(ResizeType.fit)}
                     >
                         {ResizeType.fit}
                     </button>
                     <button
-                        className={`btn mode ${this.getButtonClassForTransformationType(this.props.width > 0 && this.props.height > 0 && this.props.type === ResizeType.crop)}`}
+                        className={`btn mode ${this.getButtonClassForTransformationType(this.props.type === ResizeType.crop)}`}
                         disabled={!(this.props.width > 0 && this.props.height > 0)}
                         onClick={() => this.props.setResizeType(ResizeType.crop)}
                     >
                         {ResizeType.crop}
                     </button>
                     <button
-                        className={`btn mode ${this.getButtonClassForTransformationType(hasWidthOrHeight && this.props.type === ResizeType.scale)}`}
+                        className={`btn mode ${this.getButtonClassForTransformationType(this.props.type === ResizeType.scale)}`}
                         disabled={!hasWidthOrHeight}
                         onClick={() => this.props.setResizeType(ResizeType.scale)}
                     >
