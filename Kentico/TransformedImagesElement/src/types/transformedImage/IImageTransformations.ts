@@ -1,5 +1,6 @@
 import { Color } from "csstype";
 import { ImageFormatEnum, ImageCompressionEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
+import { ColorResult } from "react-color";
 
 /*
 Crop:
@@ -40,7 +41,7 @@ export enum CropType {
 }
 
 export interface IResizeTransformation {
-    type: ResizeType,
+    type?: ResizeType,
     width?: number;
     height?: number;
     devicePixelRatio?: number;
@@ -53,7 +54,7 @@ export enum ResizeType {
 }
 
 export interface IBackgroundTransformation {
-    color?: Color;
+    color?: ColorResult;
 }
 
 export interface IFormatTransformation {

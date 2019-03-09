@@ -1,16 +1,23 @@
 ﻿import * as React from "react";
-import { Color } from "csstype";
+import { ColorResult } from "react-color";
 
-import { BaseControls, IBaseControlsProps } from "../../../types/editor/BaseControls";
+import { BaseControls, IBaseControlsProps } from "./BaseControls";
 import { IBackgroundTransformation } from "../../../types/transformedImage/IImageTransformations";
 
-import { ColorInput } from "../inputs/ColorInput";
+import ColorPicker from "../inputs/ColorPicker";
+import HexInput from "../inputs/HexInput";
+import AlphaInput from "../inputs/AlphaInput";
 
-export interface IBackgroundControlsControlsProps extends IBackgroundTransformation, IBaseControlsProps {
-    setBackgroundColor(color: Color): void;
+export interface IBackgroundControlsProps extends IBaseControlsProps<IBackgroundTransformation> {
 }
 
-export class BackgroundControls extends BaseControls<IBackgroundControlsControlsProps> {
+export class BackgroundControls extends BaseControls<IBackgroundControlsProps, IBackgroundTransformation> {
+    private emptyColor: ColorResult = {
+        hex: "#000000",
+        hsl: { a: 0, h: 0, s: 0, l: 0 },
+        rgb: { a: 0, r: 0, g: 0, b: 0 }
+    }
+
     onMouseDown(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean {
         return false;
     }
@@ -30,17 +37,32 @@ export class BackgroundControls extends BaseControls<IBackgroundControlsControls
         );
     }
 
-    render() {
+    renderControls() {
+        const background = this.props.getTransformation;
+
         return (
-            <div
-                className={`control ${this.getCurrentClass()}`}
-                onClick={() => this.props.setCurrentEditor(this)}
-            >
+            <div>
                 <div className="fields">
-                    <ColorInput
-                        value={this.props.color || "#000000"}
-                        tooltip="Background color"
-                        onChange={value => this.props.setBackgroundColor(value)}
+                    <HexInput
+                        value={background.color || this.emptyColor}
+                        tooltip="Hex color"
+                        setValue={(value: ColorResult) => {
+                            this.setTransformation({ color: value })
+                        }}
+                    />
+                    <AlphaInput
+                        value={background.color || this.emptyColor}
+                        tooltip="Transparency"
+                        setValue={(value: ColorResult) => {
+                            this.setTransformation({ color: value })
+                        }}
+                    />
+                    <ColorPicker
+                        value={background.color || this.emptyColor}
+                        tooltip="Pick a color"
+                        setValue={(value: ColorResult) => {
+                            this.setTransformation({ color: value })
+                        }}
                     />
                 </div>
             </div>

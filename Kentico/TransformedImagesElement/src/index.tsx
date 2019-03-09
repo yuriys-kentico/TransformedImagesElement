@@ -1,35 +1,25 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { ContentManagementClient, AssetModels } from "kentico-cloud-content-management";
+import { ContentManagementClient, AssetModels, ListAssetsQuery } from "kentico-cloud-content-management";
 
 import { ICustomElement } from "./types/customElement/ICustomElement";
 import { IContext } from "./types/customElement/IContext";
-import { TransformedImagesElementMode } from "./types/TransformedImagesElementMode";
 import { TransformedImageModel } from "./types/transformedImage/TransformedImageModel";
 import { TransformedImage } from "./types/transformedImage/TransformedImage";
 
-import { TransformedImagesElement, IElementProps } from "./components/TransformedImagesElement";
+import { TransformedImagesElement, IElementProps, TransformedImagesElementMode } from "./components/TransformedImagesElement";
 
 require('./styles/style.scss');
 
 // Expose access to Kentico custom element API
 declare const CustomElement: ICustomElement;
 
-const allowedImageTypes = [
-    "image/jpeg",
-    "image/png",
-    "image/gif",
-    "image/webp"
-];
-
-const getAssetsFromDelivery = (element: ICustomElement, context: IContext) => {
+const initElementFromDelivery = (element: ICustomElement, context: IContext) => {
     let elementProps: IElementProps = {
         context: context,
-        rawImages: [],
-        initialSelectedImages: [],
         initialMode: TransformedImagesElementMode.unset,
-        configurationError: null
+        editorDefaultToPreview: Boolean(element.config.editorDefaultToPreview)
     };
 
     try {
@@ -41,11 +31,15 @@ const getAssetsFromDelivery = (element: ICustomElement, context: IContext) => {
         client.listAssets()
             .toObservable()
             .subscribe(
-                response => setComponentProps(
-                    response.data.items,
+                response => loadAssetsFromDelivery(
+                    context.projectId,
+                    elementProps,
                     JSON.parse(element.value) as TransformedImageModel[],
-                    elementProps
-                ),
+                    response.data.items,
+                    response.data.pagination.continuationToken !== null
+                        ? client.listAssets()
+                            .withCustomParameter("continuationToken", response.data.pagination.continuationToken)
+                        : null),
                 error => setError(elementProps, error)
             );
     }
@@ -55,35 +49,40 @@ const getAssetsFromDelivery = (element: ICustomElement, context: IContext) => {
     }
 };
 
-const setComponentProps = (items: AssetModels.Asset[], selectedImageModels: TransformedImageModel[], elementProps: IElementProps) => {
+const loadAssetsFromDelivery = (
+    projectId: string,
+    elementProps: IElementProps,
+    selectedImageModels: TransformedImageModel[],
+    items: AssetModels.Asset[],
+    moreAssetsQuery: ListAssetsQuery) => {
     const rawAssets = items
         .filter(i =>
-            i.imageWidth !== null
-            && allowedImageTypes.indexOf(i.type) > -1
+            TransformedImage.assetIsImage(i)
         );
 
-    const selectedIds = selectedImageModels.map(i => i.id);
+    const selectedIds = selectedImageModels ? selectedImageModels.map(i => i.id) : [];
 
-    Object.assign(elementProps,
+    Object.assign<IElementProps, IElementProps>(elementProps,
         {
-            rawImages: rawAssets
-                .map(a => new TransformedImage(elementProps.context.projectId, a)),
+            initialRawImages: rawAssets
+                .map(a => new TransformedImage(projectId, a)),
             initialSelectedImages: rawAssets
                 .filter(rawImage => selectedIds.indexOf(rawImage.id) > -1)
                 .map(rawImage => new TransformedImage(
-                    elementProps.context.projectId,
+                    projectId,
                     rawImage,
                     selectedImageModels.find(foundImage => foundImage.id === rawImage.id)
                 ))
                 .sort((a, b) => selectedIds.indexOf(a.id) - selectedIds.indexOf(b.id)),
             initialMode: TransformedImagesElementMode.listing,
+            moreAssetsQuery: moreAssetsQuery
         });
 
     renderElementComponent(elementProps);
 }
 
 const setError = (elementProps: IElementProps, error: any) => {
-    Object.assign(elementProps,
+    Object.assign<IElementProps, IElementProps>(elementProps,
         {
             initialMode: TransformedImagesElementMode.configuration,
             configurationError: error
@@ -94,4 +93,4 @@ const renderElementComponent = (elementProps: IElementProps) => {
     ReactDOM.render(<TransformedImagesElement {...elementProps} />, document.getElementById('root'));
 }
 
-CustomElement.init(getAssetsFromDelivery);
+CustomElement.init(initElementFromDelivery);

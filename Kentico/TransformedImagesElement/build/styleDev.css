@@ -31,7 +31,10 @@ body {
 
 .imageSelection .list, .imageListing .list {
   display: flex;
-  flex-wrap: wrap; }
+  flex-wrap: wrap;
+  max-height: calc(600px + 3em);
+  overflow-y: scroll;
+  overflow-x: hidden; }
   .imageSelection .list .imageListingWrapper, .imageListing .list .imageListingWrapper {
     width: calc(100%/3 - 1em);
     margin: 0.5em; }
@@ -119,28 +122,47 @@ body {
   flex-wrap: wrap;
   background: #eee; }
   .imageEditor .editor .imageEditorPreview {
-    margin: 0.5em;
     display: flex;
     align-items: center;
     justify-content: space-around;
     width: 100%;
     height: 400px;
-    flex: 10; }
+    flex: 10;
+    overflow: hidden;
+    position: relative; }
     .imageEditor .editor .imageEditorPreview .imageWrapper {
-      position: relative;
       display: flex;
       align-items: center;
       justify-content: space-around;
-      height: 100%; }
+      height: 100%;
+      position: relative;
+      padding: .5em; }
       .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask {
-        min-width: 100%;
-        min-height: 100%;
+        min-width: calc(100% - 1em);
+        min-height: calc(100% - 1em);
         position: absolute; }
       .imageEditor .editor .imageEditorPreview .imageWrapper .imageEditorImage {
-        max-width: 100%;
-        max-height: 100%;
         box-shadow: 0 1px 8px 2px rgba(0, 0, 0, 0.2);
-        pointer-events: none; }
+        pointer-events: none;
+        max-width: 100%;
+        max-height: 100%; }
+    .imageEditor .editor .imageEditorPreview.preview .imageWrapper {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%); }
+      .imageEditor .editor .imageEditorPreview.preview .imageWrapper .imageEditorImage {
+        max-width: initial;
+        max-height: initial; }
+    .imageEditor .editor .imageEditorPreview.preview::after {
+      content: "(Hover to edit)";
+      position: absolute;
+      color: #757575;
+      width: 100%;
+      background-color: rgba(245, 245, 245, 0.8);
+      text-align: center;
+      padding: .5em;
+      bottom: 0; }
   .imageEditor .editor .editorControls {
     right: 0;
     min-height: 100%;
@@ -164,9 +186,23 @@ body {
         .imageEditor .editor .editorControls .control .fields .input {
           width: 100%;
           display: flex; }
+          .imageEditor .editor .editorControls .control .fields .input > div:not(.colorBox) {
+            padding-right: .2em; }
+          .imageEditor .editor .editorControls .control .fields .input .colorBox {
+            width: 100%; }
+          .imageEditor .editor .editorControls .control .fields .input .picker {
+            position: absolute;
+            right: calc(100% + .5em); }
+            .imageEditor .editor .editorControls .control .fields .input .picker .sketch-picker > div:nth-of-type(3) {
+              display: none !important; }
           .imageEditor .editor .editorControls .control .fields .input input {
             width: 100%;
             text-align: right; }
+            .imageEditor .editor .editorControls .control .fields .input input[type="number"] {
+              -moz-appearance: textfield; }
+              .imageEditor .editor .editorControls .control .fields .input input[type="number"]::-webkit-outer-spin-button, .imageEditor .editor .editorControls .control .fields .input input[type="number"]::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0; }
             .imageEditor .editor .editorControls .control .fields .input input + span {
               padding: 0.2em;
               text-align: start;

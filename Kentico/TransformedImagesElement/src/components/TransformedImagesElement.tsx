@@ -1,27 +1,38 @@
 ﻿import * as React from "react";
+import { ListAssetsQuery } from "kentico-cloud-content-management";
 
 import { IContext } from "../types/customElement/IContext";
 import { ICustomElement } from "../types/customElement/ICustomElement";
 import { IElementConfig } from "../types/customElement/IElementConfig";
-import { TransformedImagesElementMode } from "../types/TransformedImagesElementMode";
 import { TransformedImage } from "../types/transformedImage/TransformedImage";
+import { IImageTransformations } from "../types/transformedImage/IImageTransformations";
 
 import { ImageListingTile } from "./listing/ImageListingTile";
 import { ListingButtons } from "./listing/ListingButtons";
 import { SelectionButtons } from "./selection/SelectionButtons";
-import { ImageEditor } from "./editor/ImageEditor";
-import { IImageTransformations } from "../types/transformedImage/IImageTransformations";
+import { TransformationsEditor } from "./editor/TransformationsEditor";
 import { EditorButtons } from "./editor/EditorButtons";
 
+export enum TransformedImagesElementMode {
+    unset,
+    configuration,
+    listing,
+    selection,
+    editor
+}
+
 export interface IElementProps {
-    context: IContext;
-    rawImages: TransformedImage[];
-    initialSelectedImages: TransformedImage[];
+    context?: IContext;
+    initialRawImages?: TransformedImage[];
+    initialSelectedImages?: TransformedImage[];
     initialMode: TransformedImagesElementMode;
-    configurationError: Error;
+    editorDefaultToPreview?: boolean;
+    moreAssetsQuery?: ListAssetsQuery;
+    configurationError?: Error;
 }
 
 export interface IElementState {
+    rawImages: TransformedImage[];
     selectedImages: TransformedImage[];
     previousSelectedImages?: TransformedImage[];
     editedImage?: TransformedImage;
@@ -34,15 +45,16 @@ export interface IElementState {
 declare const CustomElement: ICustomElement;
 
 export class TransformedImagesElement extends React.Component<IElementProps, IElementState> {
-    configuration: HTMLDivElement;
-    selectionList: HTMLDivElement;
-    listingList: HTMLDivElement;
-    editorWrapper: HTMLDivElement;
+    private configuration: HTMLDivElement;
+    private selectionList: HTMLDivElement;
+    private listingList: HTMLDivElement;
+    private editorWrapper: HTMLDivElement;
 
     state: IElementState = {
+        rawImages: this.props.initialRawImages,
         selectedImages: this.props.initialSelectedImages,
         mode: this.props.initialMode,
-        editorUsePreview: false
+        editorUsePreview: this.props.editorDefaultToPreview
     };
 
     setMode = (mode: TransformedImagesElementMode) => {
@@ -51,14 +63,33 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         })
     }
 
+    loadMoreAssets(): void {
+        this.props.moreAssetsQuery
+            .toObservable()
+            .subscribe(response =>
+                this.setState(state => ({
+                    rawImages: [
+                        ...state.rawImages,
+                        ...response.data.items
+                            .filter(i =>
+                                TransformedImage.assetIsImage(i)
+                            )
+                            .map(a =>
+                                new TransformedImage(this.props.context.projectId, a)
+                            )
+                    ]
+                }))
+            )
+    }
+
     storeCurrentSelectedImages() {
-        this.setState((state) => ({
+        this.setState(state => ({
             previousSelectedImages: [...state.selectedImages]
         }))
     }
 
     revertSelectedImages() {
-        this.setState((state) => ({
+        this.setState(state => ({
             selectedImages: [...state.previousSelectedImages]
         }))
     }
@@ -144,7 +175,8 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         switch (this.state.mode) {
             case TransformedImagesElementMode.configuration:
                 const sampleParameters: IElementConfig = {
-                    contentManagementAPIKey: "<Key value from Project settings > API Keys > Content Management API>"
+                    contentManagementAPIKey: "<Key value from Project settings > API Keys > Content Management API>",
+                    editorDefaultToPreview: "<Optional: 'true' or 'false' (without quotes) to preview transformations in the editor by default>"
                 }
 
                 return (
@@ -179,12 +211,17 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                                 <ImageListingTile
                                     image={a}
                                     key={i}
-                                    context={this.props.context}
                                     showActions={true}
                                     isSelected={false}
                                     onRemove={image => this.selectImage(image)}
-                                    onSelect={image => { this.storeEditedImage(image); this.setMode(TransformedImagesElementMode.editor) }}
-                                    onAddParams={image => { this.storeEditedImage(image); this.setMode(TransformedImagesElementMode.editor) }}
+                                    onSelect={image => {
+                                        this.storeEditedImage(image);
+                                        this.setMode(TransformedImagesElementMode.editor)
+                                    }}
+                                    onAddParams={image => {
+                                        this.storeEditedImage(image);
+                                        this.setMode(TransformedImagesElementMode.editor)
+                                    }}
                                 />
                             )
                             )}
@@ -199,21 +236,26 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                         ref={e => this.selectionList = e}
                     >
                         <div className="list">
-                            {this.props.rawImages.map((a, i) => (
-                                <ImageListingTile
-                                    image={a}
-                                    key={i}
-                                    context={this.props.context}
-                                    showActions={false}
-                                    isSelected={this.state.selectedImages.includes(a)}
-                                    onSelect={image => this.selectImage(image)}
-                                />
-                            )
-                            )}
+                            {this.state.rawImages
+                                .map((a, i) => (
+                                    <ImageListingTile
+                                        image={a}
+                                        key={i}
+                                        showActions={false}
+                                        isSelected={this.state.selectedImages.includes(a)}
+                                        onSelect={image => this.selectImage(image)}
+                                    />
+                                )
+                                )}
                         </div>
                         <SelectionButtons
-                            onClickCancel={() => { this.revertSelectedImages(); this.setMode(TransformedImagesElementMode.listing) }}
+                            onClickCancel={() => {
+                                this.revertSelectedImages();
+                                this.setMode(TransformedImagesElementMode.listing)
+                            }}
                             onClickUpdate={() => { this.setMode(TransformedImagesElementMode.listing) }}
+                            onClickLoadMore={() => { this.loadMoreAssets() }}
+                            showLoadMore={this.props.moreAssetsQuery !== null}
                         />
                     </div>
                 );
@@ -224,18 +266,22 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                         className="imageEditor"
                         ref={e => this.editorWrapper = e}
                     >
-                        <ImageEditor
-                            image={this.state.editedImage}
-                            context={this.props.context}
-                            usePreview={this.state.editorUsePreview}
+                        <TransformationsEditor
+                            editedImage={this.state.editedImage}
+                            isPreview={() => this.state.editorUsePreview}
                         />
                         <EditorButtons
-                            onClickCancel={() => { this.revertEditedImage(); this.setMode(TransformedImagesElementMode.listing) }}
-                            onClickUpdate={() => { this.setMode(TransformedImagesElementMode.listing) }}
+                            onClickCancel={() => {
+                                this.revertEditedImage();
+                                this.setMode(TransformedImagesElementMode.listing)
+                            }}
+                            onClickUpdate={() => {
+                                this.setMode(TransformedImagesElementMode.listing)
+                            }}
                             onClickPreview={() => {
                                 this.state.editorUsePreview
-                                    ? this.setState({ editorUsePreview: false }, () => this.forceUpdate())
-                                    : this.setState({ editorUsePreview: true }, () => this.forceUpdate())
+                                    ? this.setState({ editorUsePreview: false })
+                                    : this.setState({ editorUsePreview: true })
                             }}
                             usePreview={this.state.editorUsePreview}
                         />

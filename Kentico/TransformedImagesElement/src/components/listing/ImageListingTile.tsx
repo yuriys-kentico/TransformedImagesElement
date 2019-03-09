@@ -1,13 +1,12 @@
 ﻿import * as React from "react";
 
-import { IContext } from "../../types/customElement/IContext";
 import { TransformedImage } from "../../types/transformedImage/TransformedImage";
 
 import { AssetDetails } from "./AssetDetails";
+import { Checkerboard } from "../../types/editor/Checkerboard";
 
 export interface IimageListingProps {
     image: TransformedImage;
-    context: IContext;
     showActions: boolean;
     isSelected: boolean;
     onSelect(image: TransformedImage): void;
@@ -17,7 +16,7 @@ export interface IimageListingProps {
 
 export class ImageListingTile extends React.Component<IimageListingProps, {}> {
     getImageUrl(item: TransformedImage): string {
-        return item.buildUrl()
+        return item.buildEditedUrl()
             .withWidth(400)
             .withHeight(400)
             .getUrl();
@@ -78,6 +77,9 @@ export class ImageListingTile extends React.Component<IimageListingProps, {}> {
                     </div>
                     <div
                         className="imageListingPreview"
+                        style={{
+                            background: `url(${Checkerboard.getCheckerBoard("transparent", "rgba(0,0,0,.02)", 16)}) center left`
+                        }}
                         onClick={() => this.onSelect()}
                     >
                         <img
