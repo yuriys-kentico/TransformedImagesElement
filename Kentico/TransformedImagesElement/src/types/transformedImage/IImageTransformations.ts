@@ -1,4 +1,3 @@
-import { Color } from "csstype";
 import { ImageFormatEnum, ImageCompressionEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
 import { ColorResult } from "react-color";
 
@@ -26,11 +25,11 @@ export interface IImageTransformations {
 }
 
 export interface ICropTransformation {
-    type: CropType;
-    x?: number;
-    y?: number;
-    width?: number;
-    height?: number;
+    type?: CropType;
+    xPercent?: number;
+    yPercent?: number;
+    widthPercent?: number;
+    heightPercent?: number;
     zoom?: number;
 }
 
@@ -42,8 +41,8 @@ export enum CropType {
 
 export interface IResizeTransformation {
     type?: ResizeType,
-    width?: number;
-    height?: number;
+    widthPercent?: number;
+    heightPercent?: number;
     devicePixelRatio?: number;
 }
 

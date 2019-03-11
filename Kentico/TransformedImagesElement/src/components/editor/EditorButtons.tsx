@@ -7,7 +7,7 @@ export interface IEditorButtonsProps {
     usePreview: boolean;
 }
 
-export class EditorButtons extends React.Component<IEditorButtonsProps, {}> {
+export class EditorButtons extends React.Component<IEditorButtonsProps> {
     render() {
         return (
             <div className="selectionBar">

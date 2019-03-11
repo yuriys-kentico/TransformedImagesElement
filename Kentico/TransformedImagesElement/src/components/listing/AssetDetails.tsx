@@ -7,7 +7,7 @@ export interface IAssetDetailsProps {
     image: TransformedImage;
 }
 
-export class AssetDetails extends React.Component<IAssetDetailsProps, {}> {
+export class AssetDetails extends React.Component<IAssetDetailsProps> {
     getAssetFileSize = (sizeInBytes: number): string => {
         let finalSize = sizeInBytes;
         let unit = "B";

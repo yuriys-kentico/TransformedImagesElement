@@ -9,17 +9,14 @@ export interface IColorInputProps {
     setValue: ColorChangeHandler;
 }
 
-export interface IColorPickerState {
-    pickerOpen: boolean;
+export interface IColorPickerProps extends IColorInputProps {
+    isPickerOpen: boolean;
+    togglePicker(): void;
 }
 
-class ColorPicker extends React.Component<IColorInputProps, IColorPickerState> {
-    state: IColorPickerState = {
-        pickerOpen: false
-    }
-
+class ColorPicker extends React.Component<IColorPickerProps> {
     render() {
-        const sketchPicker = this.state.pickerOpen
+        const sketchPicker = this.props.isPickerOpen
             ? (
                 <div className="picker">
                     <SketchPicker
@@ -34,12 +31,21 @@ class ColorPicker extends React.Component<IColorInputProps, IColorPickerState> {
             : null;
 
         return (
-            <span className="input" data-balloon={this.props.tooltip} data-balloon-pos="down">
+            <span
+                className="input"
+                data-balloon={this.props.tooltip}
+                data-balloon-pos="down"
+                onClick={e => e.stopPropagation()}
+            >
                 {sketchPicker}
                 <button
                     className="btn colorBox"
-                    onClick={() => this.setState(state => { return { pickerOpen: !state.pickerOpen } })}
-                    style={{ background: `rgba(${this.props.value.rgb.r},${this.props.value.rgb.g},${this.props.value.rgb.b},${this.props.value.rgb.a}) url(${Checkerboard.getCheckerBoard("transparent", "rgba(0,0,0,.08)", 8)}) center left` }}
+                    onClick={this.props.togglePicker}
+                    style={{ background: `rgba(${this.props.value.rgb.r},${this.props.value.rgb.g},${this.props.value.rgb.b},${this.props.value.rgb.a})` }}
+                />
+                <div
+                    className="colorBoxBackground"
+                    style={{ background: `url(${Checkerboard.generate("transparent", "rgba(0,0,0,.08)", 8)}) center left` }}
                 />
             </span>
         );

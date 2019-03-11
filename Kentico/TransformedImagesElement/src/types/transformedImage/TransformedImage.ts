@@ -6,6 +6,7 @@ import { TransformedImageModel } from "./TransformedImageModel";
 import { IImageTransformations, ResizeType, CropType } from "./IImageTransformations";
 import { ImageFitModeEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
 import { ColorResult } from "react-color";
+import { create } from "domain";
 
 export class TransformedImage extends AssetModels.Asset {
     private imageEndpoint: string = "https://assets-us-01.kc-usercontent.com";
@@ -61,11 +62,28 @@ export class TransformedImage extends AssetModels.Asset {
 
     buildEditedUrl(): ImageUrlBuilder {
         const builder = this.buildUrl();
-        const { resize, background } = this.transformations;
+        const { crop, resize, background } = this.transformations;
 
-        if ((resize.height > 0
-            || resize.width > 0)
-            && resize.type) {
+        switch (crop.type) {
+            case CropType.box:
+                if (crop.widthPercent > 0
+                    && crop.heightPercent > 0
+                    && crop.xPercent > 0
+                    && crop.yPercent > 0) {
+                    builder.withRectangleCrop(crop.xPercent, crop.yPercent, crop.widthPercent, crop.heightPercent);
+                }
+                break;
+            case CropType.focal:
+                if (crop.xPercent > 0
+                    && crop.yPercent > 0
+                    && crop.zoom > 0) {
+                    builder.withFocalPointCrop(crop.xPercent, crop.yPercent, crop.zoom);
+                }
+                break;
+        }
+
+        if (resize.heightPercent > 0
+            || resize.widthPercent > 0) {
             switch (resize.type) {
                 case ResizeType.crop:
                     builder.withFitMode(ImageFitModeEnum.Crop);
@@ -80,12 +98,12 @@ export class TransformedImage extends AssetModels.Asset {
             }
         }
 
-        if (resize.height > 0) {
-            builder.withHeight(resize.height);
+        if (resize.heightPercent > 0) {
+            builder.withHeight(resize.heightPercent);
         }
 
-        if (resize.width > 0) {
-            builder.withWidth(resize.width);
+        if (resize.widthPercent > 0) {
+            builder.withWidth(resize.widthPercent);
         }
 
         if (resize.devicePixelRatio) {

@@ -47,13 +47,16 @@
     <Content Include="README.md" />
     <TypeScriptCompile Include="src\components\editor\controls\BackgroundControls.tsx" />
     <TypeScriptCompile Include="src\components\editor\controls\BaseControls.tsx" />
+    <TypeScriptCompile Include="src\components\editor\controls\CropControls.tsx" />
     <TypeScriptCompile Include="src\components\editor\inputs\AlphaInput.tsx" />
     <TypeScriptCompile Include="src\components\editor\inputs\HexInput.tsx" />
     <TypeScriptCompile Include="src\components\editor\inputs\ColorPicker.tsx" />
     <TypeScriptCompile Include="src\components\editor\inputs\NumberInput.tsx" />
     <TypeScriptCompile Include="src\components\editor\EditorButtons.tsx" />
     <TypeScriptCompile Include="src\components\editor\controls\ResizeControls.tsx" />
+    <TypeScriptCompile Include="src\components\InvalidUsage.tsx" />
     <TypeScriptCompile Include="src\types\editor\Checkerboard.ts" />
+    <TypeScriptCompile Include="src\components\Initialize.tsx" />
     <TypeScriptCompile Include="src\types\transformedImage\IImageTransformations.ts" />
     <TypeScriptCompile Include="src\types\transformedImage\TransformedImageModel.ts" />
     <TypeScriptCompile Include="src\types\transformedImage\TransformedImage.ts" />
@@ -68,7 +71,7 @@
     <TypeScriptCompile Include="src\types\customElement\IContext.ts" />
     <TypeScriptCompile Include="src\types\customElement\IItem.ts" />
     <TypeScriptCompile Include="src\types\customElement\IVariant.ts" />
-    <TypeScriptCompile Include="src\index.tsx" />
+    <TypeScriptCompile Include="src\index.ts" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="build\" />

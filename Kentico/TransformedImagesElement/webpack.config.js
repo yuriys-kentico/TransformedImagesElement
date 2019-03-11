@@ -17,7 +17,7 @@ const htmlFileName = `element${getDevSuffix}.html`;
 module.exports = {
     mode: process.env.NODE_ENV,
     devtool: makeSourceMaps,
-    entry: './src/index.tsx',
+    entry: './src/index',
     output: {
         path: path.resolve(__dirname, 'build'),
         filename: jsFileName

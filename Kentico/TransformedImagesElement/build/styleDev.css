@@ -186,10 +186,16 @@ body {
         .imageEditor .editor .editorControls .control .fields .input {
           width: 100%;
           display: flex; }
-          .imageEditor .editor .editorControls .control .fields .input > div:not(.colorBox) {
-            padding-right: .2em; }
+          .imageEditor .editor .editorControls .control .fields .input + .input {
+            padding: 0 0 0 0.2em; }
           .imageEditor .editor .editorControls .control .fields .input .colorBox {
-            width: 100%; }
+            z-index: 1;
+            position: absolute;
+            height: 100%; }
+          .imageEditor .editor .editorControls .control .fields .input .colorBoxBackground {
+            position: absolute;
+            height: 100%;
+            width: calc(100% - .2em); }
           .imageEditor .editor .editorControls .control .fields .input .picker {
             position: absolute;
             right: calc(100% + .5em); }
@@ -204,9 +210,13 @@ body {
                 -webkit-appearance: none;
                 margin: 0; }
             .imageEditor .editor .editorControls .control .fields .input input + span {
-              padding: 0.2em;
-              text-align: start;
+              padding: 0.2em 0 .2em .2em;
               margin: 0em; }
+              .imageEditor .editor .editorControls .control .fields .input input + span.toggle {
+                color: #2196f3;
+                cursor: pointer; }
+          .imageEditor .editor .editorControls .control .fields .input:last-of-type input + span {
+            /*padding: 0.2em 0;*/ }
 
 [data-balloon] {
   position: relative; }
@@ -276,3 +286,6 @@ body {
 [data-balloon-pos=down].balloon-displayed:after, [data-balloon-pos=down].balloon-displayed:before, [data-balloon-pos=down]:hover:after, [data-balloon-pos=down]:hover:before {
   -webkit-transform: translate(-50%);
   transform: translate(-50%); }
+
+.invalidUsage {
+  margin: 1em; }

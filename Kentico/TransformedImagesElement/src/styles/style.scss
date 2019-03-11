@@ -288,12 +288,20 @@ body {
                         width: 100%;
                         display: flex;
 
-                        > div:not(.colorBox) {
-                            padding-right: .2em;
+                        + .input {
+                            padding: 0 0 0 0.2em;
                         }
 
                         .colorBox {
-                            width: 100%;
+                            z-index: 1;
+                            position: absolute;
+                            height: 100%;
+                        }
+
+                        .colorBoxBackground {
+                            position: absolute;
+                            height: 100%;
+                            width: calc(100% - .2em);
                         }
 
                         .picker {
@@ -322,9 +330,21 @@ body {
                             }
 
                             + span {
-                                padding: 0.2em;
-                                text-align: start;
+                                padding: 0.2em 0 .2em .2em;
                                 margin: 0em;
+
+                                &.toggle {
+                                    color: #2196f3;
+                                    cursor: pointer;
+                                }
+                            }
+                        }
+
+                        &:last-of-type {
+                            input {
+                                + span {
+                                    /*padding: 0.2em 0;*/
+                                }
                             }
                         }
                     }
@@ -421,4 +441,8 @@ body {
         -webkit-transform: translate(-50%);
         transform: translate(-50%)
     }
+}
+
+.invalidUsage {
+    margin: 1em;
 }

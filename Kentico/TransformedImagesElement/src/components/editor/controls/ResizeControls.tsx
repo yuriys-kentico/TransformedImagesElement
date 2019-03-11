@@ -8,9 +8,13 @@ import { NumberInput, NumberInputType } from "../inputs/NumberInput";
 export interface IResizeControlsProps extends IBaseControlsProps<IResizeTransformation> {
     imageWidth: number;
     imageHeight: number;
+    justCrop: boolean;
 }
 
 export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTransformation> {
+    onClickSidebar(): void {
+    }
+
     onMouseDown(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean {
         return false;
     }
@@ -32,14 +36,14 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
 
     renderControls() {
         const resize = this.props.getTransformation;
-        const hasWidthOrHeight = resize.width > 0 || resize.height > 0;
+        const hasWidthOrHeight = resize.widthPercent > 0 || resize.heightPercent > 0;
 
         return (
             <div>
                 <div className="modes">
                     <button
                         className={`btn mode ${this.buttonIsSelectedClass(resize.type === ResizeType.fit)}`}
-                        disabled={!hasWidthOrHeight}
+                        disabled={!hasWidthOrHeight || this.props.justCrop}
                         onClick={() => {
                             this.setTransformation({ type: ResizeType.fit })
                         }}
@@ -48,7 +52,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                     </button>
                     <button
                         className={`btn mode ${this.buttonIsSelectedClass(resize.type === ResizeType.crop)}`}
-                        disabled={!(resize.width > 0 && resize.height > 0)}
+                        disabled={!(resize.widthPercent > 0 && resize.heightPercent > 0)}
                         onClick={() => {
                             this.setTransformation({ type: ResizeType.crop })
                         }}
@@ -57,7 +61,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                     </button>
                     <button
                         className={`btn mode ${this.buttonIsSelectedClass(resize.type === ResizeType.scale)}`}
-                        disabled={!hasWidthOrHeight}
+                        disabled={!hasWidthOrHeight || this.props.justCrop}
                         onClick={() => {
                             this.setTransformation({ type: ResizeType.scale })
                         }}
@@ -68,29 +72,29 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                 <div className="fields">
                     <NumberInput
                         type={NumberInputType.pixel}
-                        value={resize.width || null}
+                        value={resize.widthPercent || null}
                         max={this.props.imageWidth}
                         tooltip="Width"
-                        onChange={value => {
-                            this.setTransformation({ width: value })
+                        setValue={value => {
+                            this.setTransformation({ widthPercent: value })
                         }}
                     />
                     <NumberInput
                         type={NumberInputType.pixel}
-                        value={resize.height || null}
+                        value={resize.heightPercent || null}
                         max={this.props.imageHeight}
                         tooltip="Height"
-                        onChange={value => {
-                            this.setTransformation({ height: value })
+                        setValue={value => {
+                            this.setTransformation({ heightPercent: value })
                         }}
                     />
                     <NumberInput
                         type={NumberInputType.float}
                         value={resize.devicePixelRatio || null}
-                        visible={resize.height > 0 || resize.width > 0}
+                        visible={resize.heightPercent > 0 || resize.widthPercent > 0}
                         max={5}
                         tooltip="DPR"
-                        onChange={value => {
+                        setValue={value => {
                             this.setTransformation({ devicePixelRatio: value })
                         }}
                     />

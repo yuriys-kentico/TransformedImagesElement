@@ -4,7 +4,7 @@ export interface IListingButtonsProps {
     onClickPick(): void;
 }
 
-export class ListingButtons extends React.Component<IListingButtonsProps, {}> {
+export class ListingButtons extends React.Component<IListingButtonsProps> {
     render() {
         return (
             <div className="selectionBar">

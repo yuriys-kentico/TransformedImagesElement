@@ -14,7 +14,7 @@ export interface IimageListingProps {
     onAddParams?(image: TransformedImage): void;
 }
 
-export class ImageListingTile extends React.Component<IimageListingProps, {}> {
+export class ImageListingTile extends React.Component<IimageListingProps> {
     getImageUrl(item: TransformedImage): string {
         return item.buildEditedUrl()
             .withWidth(400)
@@ -78,7 +78,7 @@ export class ImageListingTile extends React.Component<IimageListingProps, {}> {
                     <div
                         className="imageListingPreview"
                         style={{
-                            background: `url(${Checkerboard.getCheckerBoard("transparent", "rgba(0,0,0,.02)", 16)}) center left`
+                            background: `url(${Checkerboard.generate("transparent", "rgba(0,0,0,.02)", 16)}) center left`
                         }}
                         onClick={() => this.onSelect()}
                     >
