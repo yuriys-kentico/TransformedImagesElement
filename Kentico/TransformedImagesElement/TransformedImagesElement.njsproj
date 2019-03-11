@@ -48,7 +48,6 @@
     <TypeScriptCompile Include="src\components\editor\controls\BackgroundControls.tsx" />
     <TypeScriptCompile Include="src\components\editor\controls\BaseControls.tsx" />
     <TypeScriptCompile Include="src\components\editor\controls\CropControls.tsx" />
-    <TypeScriptCompile Include="src\components\editor\inputs\AlphaInput.tsx" />
     <TypeScriptCompile Include="src\components\editor\inputs\HexInput.tsx" />
     <TypeScriptCompile Include="src\components\editor\inputs\ColorPicker.tsx" />
     <TypeScriptCompile Include="src\components\editor\inputs\NumberInput.tsx" />

@@ -7,7 +7,7 @@ import { BackgroundControls, IBackgroundControlsProps } from "./controls/Backgro
 import { TransformedImage } from "../../types/transformedImage/TransformedImage";
 import { Checkerboard } from "../../types/editor/Checkerboard";
 import { CropControls, ICropControlsProps } from "./controls/CropControls";
-import { CropType, ResizeType } from "../../types/transformedImage/IImageTransformations";
+import { CropType } from "../../types/transformedImage/IImageTransformations";
 
 export enum EditorMode {
     preview,

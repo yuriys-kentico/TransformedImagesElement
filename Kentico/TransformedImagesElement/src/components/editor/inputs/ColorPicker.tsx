@@ -34,7 +34,7 @@ class ColorPicker extends React.Component<IColorPickerProps> {
                 className="input"
                 data-balloon={this.props.tooltip}
                 data-balloon-pos="down"
-                onClick={e => e.stopPropagation()}
+                onClick={e => this.props.isPickerOpen ? e.stopPropagation() : null}
             >
                 {sketchPicker}
                 <button
