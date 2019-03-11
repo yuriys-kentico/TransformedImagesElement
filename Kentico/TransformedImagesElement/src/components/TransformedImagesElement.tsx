@@ -1,9 +1,10 @@
 ﻿import * as React from "react";
-import { ListAssetsQuery } from "kentico-cloud-content-management";
+import { AssetResponses } from "kentico-cloud-content-management";
+import { Observable } from "rxjs";
 
 import { IContext } from "../types/customElement/IContext";
 import { ICustomElement } from "../types/customElement/ICustomElement";
-import { IElementConfig } from "../types/customElement/IElementConfig";
+import { IElementConfig, IRequiredConfig } from "../types/customElement/IElementConfig";
 import { TransformedImage } from "../types/transformedImage/TransformedImage";
 import { IImageTransformations } from "../types/transformedImage/IImageTransformations";
 
@@ -12,9 +13,9 @@ import { ListingButtons } from "./listing/ListingButtons";
 import { SelectionButtons } from "./selection/SelectionButtons";
 import { TransformationsEditor } from "./editor/TransformationsEditor";
 import { EditorButtons } from "./editor/EditorButtons";
+import { OPTIONAL_CONFIG } from "./Initialize";
 
 export enum TransformedImagesElementMode {
-    unset,
     configuration,
     listing,
     selection,
@@ -25,9 +26,8 @@ export interface IElementProps {
     context?: IContext;
     initialRawImages?: TransformedImage[];
     initialSelectedImages?: TransformedImage[];
+    moreAssetsObservable?: Observable<AssetResponses.AssetsListResponse>;
     initialMode: TransformedImagesElementMode;
-    editorDefaultToPreview?: boolean;
-    moreAssetsQuery?: ListAssetsQuery;
     configurationError?: Error;
 }
 
@@ -54,7 +54,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         rawImages: this.props.initialRawImages,
         selectedImages: this.props.initialSelectedImages,
         mode: this.props.initialMode,
-        editorUsePreview: this.props.editorDefaultToPreview
+        editorUsePreview: OPTIONAL_CONFIG.editorDefaultToPreview
     };
 
     setMode = (mode: TransformedImagesElementMode) => {
@@ -64,8 +64,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
     }
 
     loadMoreAssets(): void {
-        this.props.moreAssetsQuery
-            .toObservable()
+        this.props.moreAssetsObservable
             .subscribe(response =>
                 this.setState(state => ({
                     rawImages: [
@@ -174,9 +173,10 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
     render() {
         switch (this.state.mode) {
             case TransformedImagesElementMode.configuration:
-                const sampleParameters: IElementConfig = {
+                const sampleParameters: IRequiredConfig = {
                     contentManagementAPIKey: "<Key value from Project settings > API Keys > Content Management API>",
-                    editorDefaultToPreview: "<Optional: 'true' or 'false' (without quotes) to preview transformations in the editor by default>"
+                    [nameof<IElementConfig>(i => i.editorDefaultToPreview)]: "<Optional: 'true' or 'false' (without quotes) to preview transformations in the editor by default>",
+                    [nameof<IElementConfig>(i => i.colorPickerDefaultColors)]: "<Optional: array of default colors like ['#2196f3', '#4caf50', ...]>"
                 }
 
                 return (
@@ -255,7 +255,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                             }}
                             onClickUpdate={() => { this.setMode(TransformedImagesElementMode.listing) }}
                             onClickLoadMore={() => { this.loadMoreAssets() }}
-                            showLoadMore={this.props.moreAssetsQuery !== null}
+                            showLoadMore={this.props.moreAssetsObservable !== null}
                         />
                     </div>
                 );

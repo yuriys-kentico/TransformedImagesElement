@@ -42,7 +42,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
             <div>
                 <div className="modes">
                     <button
-                        className={`btn mode ${this.buttonIsSelectedClass(resize.type === ResizeType.fit)}`}
+                        className={`btn mode ${this.buttonIsSelectedClass(!this.props.justCrop && resize.type === ResizeType.fit)}`}
                         disabled={!hasWidthOrHeight || this.props.justCrop}
                         onClick={() => {
                             this.setTransformation({ type: ResizeType.fit })
@@ -51,8 +51,8 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                         {ResizeType.fit}
                     </button>
                     <button
-                        className={`btn mode ${this.buttonIsSelectedClass(resize.type === ResizeType.crop)}`}
-                        disabled={!(resize.widthPercent > 0 && resize.heightPercent > 0)}
+                        className={`btn mode ${this.buttonIsSelectedClass(this.props.justCrop || resize.type === ResizeType.crop)}`}
+                        disabled={!(resize.widthPercent > 0 && resize.heightPercent > 0) || this.props.justCrop}
                         onClick={() => {
                             this.setTransformation({ type: ResizeType.crop })
                         }}
@@ -60,7 +60,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                         {ResizeType.crop}
                     </button>
                     <button
-                        className={`btn mode ${this.buttonIsSelectedClass(resize.type === ResizeType.scale)}`}
+                        className={`btn mode ${this.buttonIsSelectedClass(!this.props.justCrop && resize.type === ResizeType.scale)}`}
                         disabled={!hasWidthOrHeight || this.props.justCrop}
                         onClick={() => {
                             this.setTransformation({ type: ResizeType.scale })

@@ -3,6 +3,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const tsNameof = require("ts-nameof");
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -38,7 +39,12 @@ module.exports = {
 
             {
                 test: /\.tsx?$/,
-                loader: "awesome-typescript-loader"
+                use: [{
+                    loader: "awesome-typescript-loader",
+                    options: {
+                        getCustomTransformers: () => ({ before: [tsNameof] })
+                    }
+                }]
             }
         ]
     },

@@ -2,6 +2,7 @@
 import { CustomPicker, SketchPicker, ColorResult, ColorChangeHandler } from "react-color";
 
 import { Checkerboard } from "../../../types/editor/Checkerboard";
+import { OPTIONAL_CONFIG } from "../../Initialize";
 
 export interface IColorInputProps {
     tooltip: string;
@@ -22,9 +23,7 @@ class ColorPicker extends React.Component<IColorPickerProps> {
                     <SketchPicker
                         color={this.props.value.rgb}
                         onChange={this.props.setValue}
-                        presetColors={["#D0021B", "#F5A623", "#F8E71C", "#7ED321", "#417505",
-                            "#BD10E0", "#9013FE", "#4A90E2", "#50E3C2", "#B8E986", "#000000",
-                            "#4A4A4A", "#9B9B9B", "#FFFFFF"]}
+                        presetColors={OPTIONAL_CONFIG.colorPickerDefaultColors}
                     />
                 </div>
             )

@@ -123,12 +123,7 @@ export class TransformationsEditor extends React.Component<IImageEditorProps, II
                             this.setState({ currentEditor: editor })
                         }}
                         getTransformation={transformations.crop}
-                        onSetTransformation={t => {
-                            if (t.type !== CropType.full) {
-                                transformations.resize.type = ResizeType.crop;
-                            }
-                            this.forceUpdate();
-                        }}
+                        onSetTransformation={() => this.forceUpdate()}
                         imageWidth={this.props.editedImage.imageWidth}
                         imageHeight={this.props.editedImage.imageHeight}
                     />

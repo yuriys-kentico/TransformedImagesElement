@@ -17,13 +17,13 @@ export interface INumberInputProps {
 }
 
 export interface INumberInputState {
-    type: NumberInputType;
+    type?: NumberInputType;
     temporaryValue: string;
 }
 
 export class NumberInput extends React.Component<INumberInputProps, INumberInputState> {
     state: INumberInputState = {
-        type: this.props.type,
+        type: null,
         temporaryValue: null
     }
 
@@ -148,8 +148,8 @@ export class NumberInput extends React.Component<INumberInputProps, INumberInput
                     data-balloon={this.props.tooltip}
                     data-balloon-pos="down"
                 >
-                    {this.renderInput(this.state.type, this.props.value, this.props.max, this.props.min)}
-                    {this.renderLabel(this.state.type)}
+                    {this.renderInput(this.state.type || this.props.type, this.props.value, this.props.max, this.props.min)}
+                    {this.renderLabel(this.state.type || this.props.type)}
                 </span>
             );
         } else {

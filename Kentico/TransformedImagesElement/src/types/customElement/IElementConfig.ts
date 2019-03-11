@@ -1,4 +1,10 @@
-export interface IElementConfig {
+export interface IOptionalConfig {
+    editorDefaultToPreview: boolean;
+    colorPickerDefaultColors: string[]
+}
+export interface IRequiredConfig {
     contentManagementAPIKey: string;
-    editorDefaultToPreview?: string;
+}
+
+export interface IElementConfig extends IOptionalConfig, IRequiredConfig {
 }

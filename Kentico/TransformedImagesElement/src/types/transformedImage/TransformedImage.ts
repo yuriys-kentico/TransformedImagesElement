@@ -82,8 +82,9 @@ export class TransformedImage extends AssetModels.Asset {
                 break;
         }
 
-        if (resize.heightPercent > 0
-            || resize.widthPercent > 0) {
+        if ((resize.heightPercent > 0
+            || resize.widthPercent > 0)
+            && crop.type === CropType.full) {
             switch (resize.type) {
                 case ResizeType.crop:
                     builder.withFitMode(ImageFitModeEnum.Crop);
