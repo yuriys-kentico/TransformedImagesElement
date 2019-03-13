@@ -34,9 +34,9 @@ export interface ICropTransformation {
 }
 
 export enum CropType {
-    full = "Full",
+    border = "Border",
     box = "Box",
-    focal = "Focal"
+    zoom = "Zoom"
 }
 
 export interface IResizeTransformation {

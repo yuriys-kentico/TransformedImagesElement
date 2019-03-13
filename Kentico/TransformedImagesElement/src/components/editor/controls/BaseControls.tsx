@@ -5,6 +5,7 @@ export interface IBaseControlsProps<TTransformation> {
     setCurrentEditor(editor: BaseControls<this, TTransformation>): void;
     getTransformation: TTransformation;
     onSetTransformation: (transformation: TTransformation) => void;
+    visible?: boolean;
 }
 
 export abstract class BaseControls<IProps extends IBaseControlsProps<TTransformation> = IBaseControlsProps<any>, TTransformation = {}, IState = {}> extends React.Component<IProps, IState> {
@@ -38,7 +39,7 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransforma
     protected abstract renderControls(): React.ReactNode;
 
     render() {
-        return (
+        return this.props.visible === undefined || this.props.visible ? (
             <div
                 className={`control ${this.props.getCurrentEditor === this
                     ? "selected"
@@ -48,6 +49,6 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransforma
             >
                 {this.renderControls()}
             </div>
-        );
+        ) : null;
     }
 }

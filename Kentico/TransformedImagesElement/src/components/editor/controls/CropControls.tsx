@@ -35,6 +35,29 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
 
     renderInputs(crop: ICropTransformation): React.ReactNode {
         switch (crop.type) {
+            case CropType.border:
+                return (
+                    <div className="fields">
+                        <NumberInput
+                            type={NumberInputType.pixel}
+                            value={crop.widthPercent || null}
+                            max={this.props.imageWidth}
+                            tooltip="Width"
+                            setValue={value => {
+                                this.setTransformation({ widthPercent: value })
+                            }}
+                        />
+                        <NumberInput
+                            type={NumberInputType.pixel}
+                            value={crop.heightPercent || null}
+                            max={this.props.imageHeight}
+                            tooltip="Height"
+                            setValue={value => {
+                                this.setTransformation({ heightPercent: value })
+                            }}
+                        />
+                    </div>
+                );
             case CropType.box:
                 return (
                     <div className="fields">
@@ -76,7 +99,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                         />
                     </div>
                 );
-            case CropType.focal:
+            case CropType.zoom:
                 return (
                     <div className="fields">
                         <NumberInput
@@ -119,12 +142,12 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
             <div>
                 <div className="modes">
                     <button
-                        className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.full)}`}
+                        className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.border)}`}
                         onClick={() => {
-                            this.setTransformation({ type: CropType.full })
+                            this.setTransformation({ type: CropType.border })
                         }}
                     >
-                        {CropType.full}
+                        {CropType.border}
                     </button>
                     <button
                         className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.box)}`}
@@ -135,12 +158,12 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                         {CropType.box}
                     </button>
                     <button
-                        className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.focal)}`}
+                        className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.zoom)}`}
                         onClick={() => {
-                            this.setTransformation({ type: CropType.focal })
+                            this.setTransformation({ type: CropType.zoom })
                         }}
                     >
-                        {CropType.focal}
+                        {CropType.zoom}
                     </button>
                 </div>
                 {this.renderInputs(crop)}

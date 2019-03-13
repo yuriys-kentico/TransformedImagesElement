@@ -7,7 +7,7 @@ import { BackgroundControls, IBackgroundControlsProps } from "./controls/Backgro
 import { TransformedImage } from "../../types/transformedImage/TransformedImage";
 import { Checkerboard } from "../../types/editor/Checkerboard";
 import { CropControls, ICropControlsProps } from "./controls/CropControls";
-import { CropType } from "../../types/transformedImage/IImageTransformations";
+import { CropType, ResizeType } from "../../types/transformedImage/IImageTransformations";
 
 export enum EditorMode {
     preview,
@@ -116,27 +116,28 @@ export class TransformationsEditor extends React.Component<IImageEditorProps, II
                         e.nativeEvent.stopImmediatePropagation();
                     }}
                 >
-                    <CropControls
-                        getCurrentEditor={currentEditor as BaseControls<ICropControlsProps>}
-                        setCurrentEditor={editor => {
-                            currentEditor = editor;
-                            this.setState({ currentEditor: editor })
-                        }}
-                        getTransformation={transformations.crop}
-                        onSetTransformation={() => this.forceUpdate()}
-                        imageWidth={this.props.editedImage.imageWidth}
-                        imageHeight={this.props.editedImage.imageHeight}
-                    />
+
                     <ResizeControls
                         getCurrentEditor={currentEditor as BaseControls<IResizeControlsProps>}
                         setCurrentEditor={editor => {
+                            currentEditor = editor;
                             this.setState({ currentEditor: editor })
                         }}
                         getTransformation={transformations.resize}
                         onSetTransformation={() => this.forceUpdate()}
                         imageWidth={this.props.editedImage.imageWidth}
                         imageHeight={this.props.editedImage.imageHeight}
-                        justCrop={transformations.crop.type !== CropType.full}
+                    />
+                    <CropControls
+                        getCurrentEditor={currentEditor as BaseControls<ICropControlsProps>}
+                        setCurrentEditor={editor => {
+                            this.setState({ currentEditor: editor })
+                        }}
+                        getTransformation={transformations.crop}
+                        onSetTransformation={() => this.forceUpdate()}
+                        visible={transformations.resize.type === ResizeType.crop}
+                        imageWidth={this.props.editedImage.imageWidth}
+                        imageHeight={this.props.editedImage.imageHeight}
                     />
                     <BackgroundControls
                         getCurrentEditor={currentEditor as BaseControls<IBackgroundControlsProps>}

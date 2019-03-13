@@ -17,7 +17,7 @@ export class TransformedImage extends AssetModels.Asset {
             type: ResizeType.fit
         },
         crop: {
-            type: CropType.full
+            type: CropType.border
         },
         background: {},
         format: {}
@@ -73,7 +73,7 @@ export class TransformedImage extends AssetModels.Asset {
                     builder.withRectangleCrop(crop.xPercent, crop.yPercent, crop.widthPercent, crop.heightPercent);
                 }
                 break;
-            case CropType.focal:
+            case CropType.zoom:
                 if (crop.xPercent > 0
                     && crop.yPercent > 0
                     && crop.zoom > 0) {
@@ -84,7 +84,7 @@ export class TransformedImage extends AssetModels.Asset {
 
         if ((resize.heightPercent > 0
             || resize.widthPercent > 0)
-            && crop.type === CropType.full) {
+            && crop.type === CropType.border) {
             switch (resize.type) {
                 case ResizeType.crop:
                     builder.withFitMode(ImageFitModeEnum.Crop);
