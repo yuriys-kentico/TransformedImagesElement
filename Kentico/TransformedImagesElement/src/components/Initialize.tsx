@@ -58,9 +58,6 @@ export function initElementFromDelivery(element: ICustomElement, context: IConte
         });
     }
 
-    OPTIONAL_CONFIG.editorDefaultToPreview = Boolean(element.config.editorDefaultToPreview);
-    OPTIONAL_CONFIG.colorPickerDefaultColors = element.config.colorPickerDefaultColors;
-
     const renderElementComponent = (elementProps: IElementProps) => {
         ReactDOM.render(<TransformedImagesElement {...elementProps} />, document.getElementById('root'));
     }
@@ -85,6 +82,9 @@ export function initElementFromDelivery(element: ICustomElement, context: IConte
                         : null),
                 error => showError(error)
             );
+
+        OPTIONAL_CONFIG.editorDefaultToPreview = Boolean(element.config.editorDefaultToPreview);
+        OPTIONAL_CONFIG.colorPickerDefaultColors = element.config.colorPickerDefaultColors;
     }
     catch (error) {
         showError(error);
