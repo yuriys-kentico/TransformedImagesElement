@@ -1,16 +1,16 @@
 ﻿import * as React from "react";
 
 import { BaseControls, IBaseControlsProps } from "./BaseControls";
-import { ResizeType, IResizeTransformation } from "../../../types/transformedImage/IImageTransformations";
+import { ResizeType, IResizeTransform } from "../../../types/transformedImage/IImageTransforms";
 
 import { NumberInput, NumberInputType } from "../inputs/NumberInput";
 
-export interface IResizeControlsProps extends IBaseControlsProps<IResizeTransformation> {
+export interface IResizeControlsProps extends IBaseControlsProps<IResizeTransform> {
     imageWidth: number;
     imageHeight: number;
 }
 
-export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTransformation> {
+export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTransform> {
     onClickSidebar(): void {
     }
 
@@ -33,7 +33,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
         );
     }
 
-    renderInputs(resize: IResizeTransformation): React.ReactNode {
+    renderInputs(resize: IResizeTransform): React.ReactNode {
         switch (resize.type) {
             case ResizeType.fit:
             case ResizeType.scale:
@@ -42,32 +42,24 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                         <NumberInput
                             type={NumberInputType.pixel}
                             value={resize.widthPercent || null}
+                            setValue={value => this.setTransform({ widthPercent: value })}
                             max={this.props.imageWidth}
                             tooltip="Width"
-                            setValue={value => {
-                                this.setTransformation({ widthPercent: value })
-                            }}
                         />
                         <NumberInput
                             type={NumberInputType.pixel}
                             value={resize.heightPercent || null}
+                            setValue={value => this.setTransform({ heightPercent: value })}
                             max={this.props.imageHeight}
                             tooltip="Height"
-                            setValue={value => {
-                                this.setTransformation({ heightPercent: value })
-                            }}
                         />
                         <NumberInput
-                            type={resize.heightPercent > 0 || resize.widthPercent > 0
-                                ? NumberInputType.float
-                                : NumberInputType.hidden
-                            }
+                            type={NumberInputType.float}
                             value={resize.devicePixelRatio || null}
+                            setValue={value => this.setTransform({ devicePixelRatio: value })}
                             max={5}
                             tooltip="DPR"
-                            setValue={value => {
-                                this.setTransformation({ devicePixelRatio: value })
-                            }}
+                            disabled={!(resize.heightPercent > 0 || resize.widthPercent > 0)}
                         />
                     </div>
                 );
@@ -75,16 +67,14 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
     }
 
     renderControls() {
-        const resize = this.props.getTransformation;
-        const hasWidthOrHeight = resize.widthPercent > 0 || resize.heightPercent > 0;
-
+        const resize = this.props.getTransform;
         return (
             <div>
                 <div className="modes">
                     <button
                         className={`btn mode ${this.buttonIsSelectedClass(resize.type === ResizeType.fit)}`}
                         onClick={() => {
-                            this.setTransformation({ type: ResizeType.fit })
+                            this.setTransform({ type: ResizeType.fit })
                         }}
                     >
                         {ResizeType.fit}
@@ -92,7 +82,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                     <button
                         className={`btn mode ${this.buttonIsSelectedClass(resize.type === ResizeType.scale)}`}
                         onClick={() => {
-                            this.setTransformation({ type: ResizeType.scale })
+                            this.setTransform({ type: ResizeType.scale })
                         }}
                     >
                         {ResizeType.scale}
@@ -100,7 +90,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                     <button
                         className={`btn mode ${this.buttonIsSelectedClass(resize.type === ResizeType.crop)}`}
                         onClick={() => {
-                            this.setTransformation({ type: ResizeType.crop })
+                            this.setTransform({ type: ResizeType.crop })
                         }}
                     >
                         {ResizeType.crop}

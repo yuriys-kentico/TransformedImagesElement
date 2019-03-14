@@ -296,6 +296,7 @@ body {
                             z-index: 1;
                             position: absolute;
                             height: 100%;
+                            width: calc(100% - .2em);
                         }
 
                         .colorBoxBackground {
@@ -316,20 +317,10 @@ body {
                         }
 
                         input {
-                            width: 100%;
+                            width: 3.5em;
                             text-align: right;
-                            max-width: initial;
                             min-width: initial;
-
-                            &[type="number"] {
-                                -moz-appearance: textfield;
-
-                                &::-webkit-outer-spin-button,
-                                &::-webkit-inner-spin-button {
-                                    -webkit-appearance: none;
-                                    margin: 0;
-                                }
-                            }
+                            flex: 1;
 
                             + span {
                                 padding: .375em .25em 0 .25em;
@@ -339,6 +330,18 @@ body {
                                     color: #2196f3;
                                     cursor: pointer;
                                 }
+                            }
+                        }
+
+                        span {
+                            padding: .375em .25em 0 .25em;
+                            margin: 0em;
+
+                            + input {
+                                width: 3.5em;
+                                text-align: right;
+                                min-width: initial;
+                                flex: 1;
                             }
                         }
 

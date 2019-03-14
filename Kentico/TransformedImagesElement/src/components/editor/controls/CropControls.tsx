@@ -1,16 +1,16 @@
 ﻿import * as React from "react";
 
 import { BaseControls, IBaseControlsProps } from "./BaseControls";
-import { ResizeType, ICropTransformation, CropType } from "../../../types/transformedImage/IImageTransformations";
+import { ResizeType, ICropTransform, CropType } from "../../../types/transformedImage/IImageTransforms";
 
 import { NumberInput, NumberInputType } from "../inputs/NumberInput";
 
-export interface ICropControlsProps extends IBaseControlsProps<ICropTransformation> {
+export interface ICropControlsProps extends IBaseControlsProps<ICropTransform> {
     imageWidth: number;
     imageHeight: number;
 }
 
-export class CropControls extends BaseControls<ICropControlsProps, ICropTransformation> {
+export class CropControls extends BaseControls<ICropControlsProps, ICropTransform> {
     onClickSidebar(): void {
     }
 
@@ -33,7 +33,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
         );
     }
 
-    renderInputs(crop: ICropTransformation): React.ReactNode {
+    renderInputs(crop: ICropTransform): React.ReactNode {
         switch (crop.type) {
             case CropType.border:
                 return (
@@ -44,7 +44,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             max={this.props.imageWidth}
                             tooltip="Width"
                             setValue={value => {
-                                this.setTransformation({ widthPercent: value })
+                                this.setTransform({ widthPercent: value })
                             }}
                         />
                         <NumberInput
@@ -53,7 +53,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             max={this.props.imageHeight}
                             tooltip="Height"
                             setValue={value => {
-                                this.setTransformation({ heightPercent: value })
+                                this.setTransform({ heightPercent: value })
                             }}
                         />
                     </div>
@@ -67,7 +67,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             max={this.props.imageWidth}
                             tooltip="X"
                             setValue={value => {
-                                this.setTransformation({ xPercent: value })
+                                this.setTransform({ xPercent: value })
                             }}
                         />
                         <NumberInput
@@ -76,7 +76,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             max={this.props.imageHeight}
                             tooltip="Y"
                             setValue={value => {
-                                this.setTransformation({ yPercent: value })
+                                this.setTransform({ yPercent: value })
                             }}
                         />
                         <NumberInput
@@ -85,7 +85,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             max={this.props.imageWidth}
                             tooltip="Width"
                             setValue={value => {
-                                this.setTransformation({ widthPercent: value })
+                                this.setTransform({ widthPercent: value })
                             }}
                         />
                         <NumberInput
@@ -94,7 +94,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             max={this.props.imageHeight}
                             tooltip="Height"
                             setValue={value => {
-                                this.setTransformation({ heightPercent: value })
+                                this.setTransform({ heightPercent: value })
                             }}
                         />
                     </div>
@@ -108,7 +108,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             max={this.props.imageWidth}
                             tooltip="X coordinate"
                             setValue={value => {
-                                this.setTransformation({ xPercent: value })
+                                this.setTransform({ xPercent: value })
                             }}
                         />
                         <NumberInput
@@ -117,7 +117,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             max={this.props.imageHeight}
                             tooltip="Y coordinate"
                             setValue={value => {
-                                this.setTransformation({ yPercent: value })
+                                this.setTransform({ yPercent: value })
                             }}
                         />
                         <NumberInput
@@ -127,7 +127,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             min={1}
                             tooltip="Zoom"
                             setValue={value => {
-                                this.setTransformation({ zoom: value })
+                                this.setTransform({ zoom: value })
                             }}
                         />
                     </div>
@@ -136,7 +136,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
     }
 
     renderControls() {
-        const crop = this.props.getTransformation;
+        const crop = this.props.getTransform;
 
         return (
             <div>
@@ -144,7 +144,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     <button
                         className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.border)}`}
                         onClick={() => {
-                            this.setTransformation({ type: CropType.border })
+                            this.setTransform({ type: CropType.border })
                         }}
                     >
                         {CropType.border}
@@ -152,7 +152,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     <button
                         className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.box)}`}
                         onClick={() => {
-                            this.setTransformation({ type: CropType.box })
+                            this.setTransform({ type: CropType.box })
                         }}
                     >
                         {CropType.box}
@@ -160,7 +160,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     <button
                         className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.zoom)}`}
                         onClick={() => {
-                            this.setTransformation({ type: CropType.zoom })
+                            this.setTransform({ type: CropType.zoom })
                         }}
                     >
                         {CropType.zoom}

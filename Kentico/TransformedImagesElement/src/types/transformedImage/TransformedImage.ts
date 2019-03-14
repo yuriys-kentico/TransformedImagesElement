@@ -1,18 +1,18 @@
 import { AssetModels } from "kentico-cloud-content-management";
 import { ImageUrlBuilder } from "kentico-cloud-delivery/_commonjs/images/image-url-builder";
 import { FieldModels } from "kentico-cloud-delivery/_commonjs/fields/field-models";
+import { ImageFitModeEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
 
 import { TransformedImageModel } from "./TransformedImageModel";
-import { IImageTransformations, ResizeType, CropType } from "./IImageTransformations";
-import { ImageFitModeEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
-import { ColorResult } from "react-color";
-import { create } from "domain";
+import { IImageTransforms, ResizeType, CropType } from "./IImageTransforms";
+
+import { Color } from '../../components/editor/controls/BackgroundControls';
 
 export class TransformedImage extends AssetModels.Asset {
     private imageEndpoint: string = "https://assets-us-01.kc-usercontent.com";
     private baseImageUrl: string;
 
-    transformations: IImageTransformations = {
+    transforms: IImageTransforms = {
         resize: {
             type: ResizeType.fit
         },
@@ -32,8 +32,8 @@ export class TransformedImage extends AssetModels.Asset {
 
         this.baseImageUrl = `${this.imageEndpoint}/${projectId}/${image.fileReference.id}/${image.fileName}`;
 
-        if (model && model.transformations) {
-            this.transformations = model.transformations;
+        if (model && model.transforms) {
+            this.transforms = model.transforms;
         }
     }
 
@@ -49,11 +49,28 @@ export class TransformedImage extends AssetModels.Asset {
             && allowedImageTypes.indexOf(asset.type) > -1;
     }
 
-    private getBackgroundColor(color: ColorResult): string {
-        if (color.rgb.a != 1) {
-            return Number(Math.round(color.rgb.a * 255)).toString(16) + color.hex.substr(1);
+    private static isRepeatedCharacter = (value: string, count: number) => new RegExp(`(.)\\1{${count - 1}}$`).test(value);
+
+    static getBackgroundColor(color: Color): string {
+        const { a, r, g, b } = color.argb;
+
+        const rHex = r.toString(16);
+        const gHex = g.toString(16);
+        const bHex = b.toString(16);
+
+        const aHex = a !== 0 ? Math.round((a * 255)).toString(16) : "";
+        const a0 = this.isRepeatedCharacter(aHex, 2) ? aHex[0] : "";
+
+        if (this.isRepeatedCharacter(rHex, 2)
+            && this.isRepeatedCharacter(gHex, 2)
+            && this.isRepeatedCharacter(bHex, 2)
+        ) {
+            return `${a0}${rHex[0]}${gHex[0]}${bHex[0]}`;
+        } else if (this.isRepeatedCharacter(aHex, 2)) {
+            return `${a0}${rHex}${gHex}${bHex}`;
+        } else {
+            return `${aHex}${rHex}${gHex}${bHex}`;
         }
-        return color.hex.substr(1);
     }
 
     buildUrl(): ImageUrlBuilder {
@@ -62,7 +79,7 @@ export class TransformedImage extends AssetModels.Asset {
 
     buildEditedUrl(): ImageUrlBuilder {
         const builder = this.buildUrl();
-        const { crop, resize, background } = this.transformations;
+        const { crop, resize, background } = this.transforms;
 
         switch (crop.type) {
             case CropType.box:
@@ -111,8 +128,8 @@ export class TransformedImage extends AssetModels.Asset {
             builder.withDpr(resize.devicePixelRatio);
         }
 
-        if (background.color && background.color.hex) {
-            builder.withCustomParam("bg", this.getBackgroundColor(background.color));
+        if (background.color) {
+            builder.withCustomParam("bg", TransformedImage.getBackgroundColor(background.color));
         }
 
         return builder;
@@ -134,7 +151,7 @@ export class TransformedImage extends AssetModels.Asset {
             this.descriptions[0].description,
             this.buildEditedUrl().getUrl(),
             this.id,
-            this.transformations
+            this.transforms
         );
     }
 };

@@ -6,12 +6,12 @@ import { IContext } from "../types/customElement/IContext";
 import { ICustomElement } from "../types/customElement/ICustomElement";
 import { IElementConfig, IRequiredConfig } from "../types/customElement/IElementConfig";
 import { TransformedImage } from "../types/transformedImage/TransformedImage";
-import { IImageTransformations } from "../types/transformedImage/IImageTransformations";
+import { IImageTransforms } from "../types/transformedImage/IImageTransforms";
 
 import { ImageListingTile } from "./listing/ImageListingTile";
 import { ListingButtons } from "./listing/ListingButtons";
 import { SelectionButtons } from "./selection/SelectionButtons";
-import { TransformationsEditor } from "./editor/TransformationsEditor";
+import { TransformsEditor } from "./editor/TransformsEditor";
 import { EditorButtons } from "./editor/EditorButtons";
 import { OPTIONAL_CONFIG } from "./Initialize";
 
@@ -36,7 +36,7 @@ export interface IElementState {
     selectedImages: TransformedImage[];
     previousSelectedImages?: TransformedImage[];
     editedImage?: TransformedImage;
-    previousEditedTransformations?: IImageTransformations;
+    previousEditedTransforms?: IImageTransforms;
     mode: TransformedImagesElementMode;
     editorUsePreview: boolean;
 }
@@ -94,23 +94,23 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
     }
 
     storeEditedImage(image: TransformedImage) {
-        const transformationsClone = {
-            resize: { ...image.transformations.resize },
-            crop: { ...image.transformations.crop },
-            background: { ...image.transformations.background },
-            format: { ...image.transformations.format }
+        const transformsClone = {
+            resize: { ...image.transforms.resize },
+            crop: { ...image.transforms.crop },
+            background: { ...image.transforms.background },
+            format: { ...image.transforms.format }
         };
 
         this.setState({
             editedImage: image,
-            previousEditedTransformations: transformationsClone
+            previousEditedTransforms: transformsClone
         },
             this.updateValue
         )
     }
 
     revertEditedImage() {
-        this.state.editedImage.transformations = this.state.previousEditedTransformations;
+        this.state.editedImage.transforms = this.state.previousEditedTransforms;
 
         this.updateValue();
     }
@@ -266,7 +266,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                         className="imageEditor"
                         ref={e => this.editorWrapper = e}
                     >
-                        <TransformationsEditor
+                        <TransformsEditor
                             editedImage={this.state.editedImage}
                             isPreview={() => this.state.editorUsePreview}
                         />

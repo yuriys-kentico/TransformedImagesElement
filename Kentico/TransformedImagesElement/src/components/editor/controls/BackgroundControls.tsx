@@ -1,25 +1,25 @@
 ﻿import * as React from "react";
-import { ColorResult } from "react-color";
 
 import { BaseControls, IBaseControlsProps } from "./BaseControls";
-import { IBackgroundTransformation } from "../../../types/transformedImage/IImageTransformations";
+import { IBackgroundTransform } from "../../../types/transformedImage/IImageTransforms";
 
 import ColorPicker from "../inputs/ColorPicker";
-import HexInput from "../inputs/HexInput";
-import { NumberInput, NumberInputType } from "../inputs/NumberInput";
+import { ColorInput, ColorInputType } from "../inputs/ColorInput";
 
-export interface IBackgroundControlsProps extends IBaseControlsProps<IBackgroundTransformation> {
+export interface IBackgroundControlsProps extends IBaseControlsProps<IBackgroundTransform> {
 }
 
 export interface IBackgroundControlsState {
     pickerOpen: boolean;
 }
 
-export class BackgroundControls extends BaseControls<IBackgroundControlsProps, IBackgroundTransformation, IBackgroundControlsState> {
-    private emptyColor: ColorResult = {
-        hex: "#000000",
-        hsl: { a: 0, h: 0, s: 0, l: 0 },
-        rgb: { a: 0, r: 0, g: 0, b: 0 }
+export interface Color {
+    argb: { a?: number, r: number, g: number, b: number }
+}
+
+export class BackgroundControls extends BaseControls<IBackgroundControlsProps, IBackgroundTransform, IBackgroundControlsState> {
+    private emptyColor: Color = {
+        argb: { a: 1, r: 0, g: 0, b: 0 }
     }
 
     state: IBackgroundControlsState = {
@@ -52,31 +52,17 @@ export class BackgroundControls extends BaseControls<IBackgroundControlsProps, I
     }
 
     renderControls() {
-        const background = this.props.getTransformation;
+        const background = this.props.getTransform;
 
         return (
             <div>
                 <div className="fields">
-                    <HexInput
+                    <ColorInput
+                        type={ColorInputType.hex}
                         value={background.color || this.emptyColor}
                         tooltip="Hex color"
                         setValue={value => {
-                            this.setTransformation({ color: value })
-                        }}
-                    />
-                    <NumberInput
-                        type={NumberInputType.float}
-                        value={background.color
-                            ? background.color.rgb.a
-                            : this.emptyColor.rgb.a}
-                        max={1}
-                        tooltip="Transparency"
-                        setValue={value => {
-                            const backgroundColor = this.props.getTransformation.color
-                                ? this.props.getTransformation.color
-                                : this.emptyColor;
-                            backgroundColor.rgb.a = value;
-                            this.setTransformation({ color: backgroundColor })
+                            this.setTransform({ color: value })
                         }}
                     />
                     <ColorPicker
@@ -89,7 +75,9 @@ export class BackgroundControls extends BaseControls<IBackgroundControlsProps, I
                         value={background.color || this.emptyColor}
                         tooltip="Pick a color"
                         setValue={value => {
-                            this.setTransformation({ color: value })
+                            this.setTransform({
+                                color: { argb: Object.assign({}, value.rgb) }
+                            })
                         }}
                     />
                 </div>

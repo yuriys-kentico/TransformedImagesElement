@@ -1,12 +1,14 @@
 ﻿import * as React from "react";
-import { CustomPicker, SketchPicker, ColorResult, ColorChangeHandler } from "react-color";
+import { CustomPicker, SketchPicker, ColorChangeHandler } from "react-color";
 
 import { Checkerboard } from "../../../types/editor/Checkerboard";
 import { OPTIONAL_CONFIG } from "../../Initialize";
 
+import { Color } from '../controls/BackgroundControls';
+
 export interface IColorInputProps {
     tooltip: string;
-    value: ColorResult;
+    value: Color;
     setValue: ColorChangeHandler;
 }
 
@@ -21,7 +23,7 @@ class ColorPicker extends React.Component<IColorPickerProps> {
             ? (
                 <div className="picker">
                     <SketchPicker
-                        color={this.props.value.rgb}
+                        color={this.props.value.argb}
                         onChange={this.props.setValue}
                         presetColors={OPTIONAL_CONFIG.colorPickerDefaultColors}
                     />
@@ -40,7 +42,7 @@ class ColorPicker extends React.Component<IColorPickerProps> {
                 <button
                     className="btn colorBox"
                     onClick={this.props.togglePicker}
-                    style={{ background: `rgba(${this.props.value.rgb.r},${this.props.value.rgb.g},${this.props.value.rgb.b},${this.props.value.rgb.a})` }}
+                    style={{ background: `rgba(${this.props.value.argb.r},${this.props.value.argb.g},${this.props.value.argb.b},${this.props.value.argb.a})` }}
                 />
                 <div
                     className="colorBoxBackground"

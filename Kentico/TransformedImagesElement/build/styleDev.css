@@ -191,7 +191,8 @@ body {
           .imageEditor .editor .editorControls .control .fields .input .colorBox {
             z-index: 1;
             position: absolute;
-            height: 100%; }
+            height: 100%;
+            width: calc(100% - .2em); }
           .imageEditor .editor .editorControls .control .fields .input .colorBoxBackground {
             position: absolute;
             height: 100%;
@@ -202,21 +203,24 @@ body {
             .imageEditor .editor .editorControls .control .fields .input .picker .sketch-picker > div:nth-of-type(3) {
               display: none !important; }
           .imageEditor .editor .editorControls .control .fields .input input {
-            width: 100%;
+            width: 3.5em;
             text-align: right;
-            max-width: initial;
-            min-width: initial; }
-            .imageEditor .editor .editorControls .control .fields .input input[type="number"] {
-              -moz-appearance: textfield; }
-              .imageEditor .editor .editorControls .control .fields .input input[type="number"]::-webkit-outer-spin-button, .imageEditor .editor .editorControls .control .fields .input input[type="number"]::-webkit-inner-spin-button {
-                -webkit-appearance: none;
-                margin: 0; }
+            min-width: initial;
+            flex: 1; }
             .imageEditor .editor .editorControls .control .fields .input input + span {
               padding: .375em .25em 0 .25em;
               margin: 0em; }
               .imageEditor .editor .editorControls .control .fields .input input + span[title] {
                 color: #2196f3;
                 cursor: pointer; }
+          .imageEditor .editor .editorControls .control .fields .input span {
+            padding: .375em .25em 0 .25em;
+            margin: 0em; }
+            .imageEditor .editor .editorControls .control .fields .input span + input {
+              width: 3.5em;
+              text-align: right;
+              min-width: initial;
+              flex: 1; }
           .imageEditor .editor .editorControls .control .fields .input:last-of-type input + span {
             /*padding: 0.2em 0;*/ }
 

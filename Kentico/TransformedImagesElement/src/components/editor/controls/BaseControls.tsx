@@ -1,14 +1,14 @@
 ﻿import * as React from "react";
 
-export interface IBaseControlsProps<TTransformation> {
-    getCurrentEditor: BaseControls<this, TTransformation>;
-    setCurrentEditor(editor: BaseControls<this, TTransformation>): void;
-    getTransformation: TTransformation;
-    onSetTransformation: (transformation: TTransformation) => void;
+export interface IBaseControlsProps<TTransform> {
+    getCurrentEditor: BaseControls<this, TTransform>;
+    setCurrentEditor(editor: BaseControls<this, TTransform>): void;
+    getTransform: TTransform;
+    onSetTransform: (transform: TTransform) => void;
     visible?: boolean;
 }
 
-export abstract class BaseControls<IProps extends IBaseControlsProps<TTransformation> = IBaseControlsProps<any>, TTransformation = {}, IState = {}> extends React.Component<IProps, IState> {
+export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform> = IBaseControlsProps<any>, TTransform = {}, IState = {}> extends React.Component<IProps, IState> {
     protected buttonIsSelectedClass(comparison: boolean): string {
         return comparison ? "btn--primary" : "btn--secondary";
     }
@@ -21,14 +21,14 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransforma
         }
     }
 
-    setTransformation(
-        transformation: TTransformation
+    setTransform(
+        transform: TTransform
     ): void {
         Object.assign(
-            this.props.getTransformation,
-            transformation
+            this.props.getTransform,
+            transform
         );
-        this.props.onSetTransformation(transformation);
+        this.props.onSetTransform(transform);
     }
 
     abstract onClickSidebar(): void;
