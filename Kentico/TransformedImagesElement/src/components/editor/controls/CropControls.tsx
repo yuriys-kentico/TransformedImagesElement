@@ -39,7 +39,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
         switch (type) {
             case CropType.scale:
                 return (
-                    <div className="fields">
+                    <div className="fields" key={CropType.scale}>
                         <NumberInput
                             type={NumberInputType.pixel}
                             allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
@@ -67,7 +67,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                 );
             case CropType.fit:
                 return (
-                    <div className="fields">
+                    <div className="fields" key={CropType.fit}>
                         <NumberInput
                             type={NumberInputType.pixel}
                             allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
@@ -94,7 +94,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                 );
             case CropType.frame:
                 return (
-                    <div className="fields">
+                    <div className="fields" key={CropType.frame}>
                         <NumberInput
                             type={NumberInputType.pixel}
                             allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
@@ -121,7 +121,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                 );
             case CropType.box:
                 return (
-                    <div className="fields">
+                    <div className="fields" key={CropType.box}>
                         <NumberInput
                             type={NumberInputType.pixel}
                             allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
@@ -170,7 +170,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                 );
             case CropType.zoom:
                 return (
-                    <div className="fields">
+                    <div className="fields" key={CropType.zoom}>
                         <NumberInput
                             type={NumberInputType.pixel}
                             allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}

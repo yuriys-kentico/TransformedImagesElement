@@ -35,7 +35,10 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
         const newType = allowedTypes[(currentTypeIndex + 1) % allowedTypesLength];
 
         this.typeSubject.next(newType);
-        this.setState({ type: newType });
+        this.setState({
+            type: newType,
+            rawValue: null
+        });
     }
 
     private isDigitsOptionallyDotAndDecimals = (value: string, decimals: number) => new RegExp(`^\\d*\\.?\\d{0,${decimals}}$`).test(value);
@@ -45,6 +48,16 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
     private toNumber = (value: string) => parseFloat(value);
 
     private toBetween = (value: number, max: number, min: number) => Math.max(Math.min(value, max), min);
+
+    private ensureBetween = (value: string, max: number, min: number): string => {
+        const tempValue = this.toNumber(value);
+
+        if (tempValue !== NaN && (tempValue > max || tempValue < min)) {
+            return this.toBetween(tempValue, max, min).toString();
+        }
+
+        return value;
+    };
 
     componentDidMount() {
         if (this.input) {
@@ -78,11 +91,7 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
             case NumberInputType.pixel:
                 return rawInput.pipe(
                     filter(v => this.isAllowedCharacters(v, "0-9", 0)),
-                    map(this.toNumber),
-                    map(v => this.toBetween(v, this.props.max, min)),
-                    map(v => {
-                        return v.toString()
-                    }),
+                    map(v => this.ensureBetween(v, this.props.max, min)),
                     map(this.storeValueInState),
                     map(this.toNumber),
                     map(v => this.toBetween(v, this.props.max, min)),
@@ -93,11 +102,7 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
             case NumberInputType.percent:
                 return rawInput.pipe(
                     filter(v => this.isDigitsOptionallyDotAndDecimals(v, 2)),
-                    map(this.toNumber),
-                    map(v => this.toBetween(v, 100, min)),
-                    map(v => {
-                        return v.toString()
-                    }),
+                    map(v => this.ensureBetween(v, 100, min)),
                     map(this.storeValueInState),
                     filter(this.isDigitsWithATrailingDotOrZero),
                     map(this.toNumber),
@@ -108,11 +113,7 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
             case NumberInputType.float:
                 return rawInput.pipe(
                     filter(v => this.isDigitsOptionallyDotAndDecimals(v, 2)),
-                    map(this.toNumber),
-                    map(v => this.toBetween(v, this.props.max, min)),
-                    map(v => {
-                        return v.toString()
-                    }),
+                    map(v => this.ensureBetween(v, this.props.max, min)),
                     map(this.storeValueInState),
                     filter(this.isDigitsWithATrailingDotOrZero),
                     map(this.toNumber),
