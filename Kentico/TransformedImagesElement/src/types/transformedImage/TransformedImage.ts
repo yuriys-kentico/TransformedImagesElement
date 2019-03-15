@@ -90,27 +90,33 @@ export class TransformedImage extends AssetModels.Asset {
             return null;
         }
 
-        const aHex = this.toRounded((a || 0) * 255).toString(16);
-        const rHex = (r || 0).toString(16);
-        const gHex = (g || 0).toString(16);
-        const bHex = (b || 0).toString(16);
+        let aHex: string;
+        let rHex: string;
+        let gHex: string;
+        let bHex: string;
 
-        if (aHex === "0") {
-            if (rHex[0] === rHex[1]
-                && gHex[0] === gHex[1]
-                && bHex[0] === bHex[1]) {
-                return `${rHex[0]}${gHex[0]}${bHex[0]}`;
-            }
-            return `${rHex}${gHex}${bHex}`;
+        const a255 = this.toRounded(a * 255);
+
+        if ((a255 || 0) % 17 === 0
+            && (r || 0) % 17 === 0
+            && (g || 0) % 17 === 0
+            && (b || 0) % 17 === 0) {
+            aHex = (a255 / 17).toString(16);
+            rHex = (r / 17).toString(16);
+            gHex = (g / 17).toString(16);
+            bHex = (b / 17).toString(16);
         } else {
-            if (aHex[0] === aHex[1]
-                && rHex[0] === rHex[1]
-                && gHex[0] === gHex[1]
-                && bHex[0] === bHex[1]) {
-                return `${aHex[0]}${rHex[0]}${gHex[0]}${bHex[0]}`;
-            }
-            return `${aHex}${rHex}${gHex}${bHex}`;
+            aHex = a255.toString(16).padStart(2, "0");
+            rHex = r.toString(16).padStart(2, "0");
+            gHex = g.toString(16).padStart(2, "0");
+            bHex = b.toString(16).padStart(2, "0");
         }
+
+        if ((a || 0) === 0) {
+            aHex = "";
+        }
+
+        return `${aHex}${rHex}${gHex}${bHex}`;
     }
 
     buildUrl(): ImageUrlBuilder {

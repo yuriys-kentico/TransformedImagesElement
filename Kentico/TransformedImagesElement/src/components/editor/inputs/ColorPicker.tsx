@@ -23,7 +23,11 @@ class ColorPicker extends React.Component<IColorPickerProps> {
             ? (
                 <div className="picker">
                     <SketchPicker
-                        color={this.props.value.argb}
+                        color={this.props.value.argb.a === 0 ? {
+                            r: this.props.value.argb.r,
+                            g: this.props.value.argb.g,
+                            b: this.props.value.argb.b
+                        } : this.props.value.argb}
                         onChange={this.props.setValue}
                         presetColors={OPTIONAL_CONFIG.colorPickerDefaultColors}
                     />
@@ -42,7 +46,9 @@ class ColorPicker extends React.Component<IColorPickerProps> {
                 <button
                     className="btn colorBox"
                     onClick={this.props.togglePicker}
-                    style={{ background: `rgba(${this.props.value.argb.r},${this.props.value.argb.g},${this.props.value.argb.b},${this.props.value.argb.a})` }}
+                    style={{
+                        background: `rgba(${this.props.value.argb.r},${this.props.value.argb.g},${this.props.value.argb.b},${this.props.value.argb.a === 0 ? 1 : this.props.value.argb.a})`
+                    }}
                 />
                 <div
                     className="colorBoxBackground"
