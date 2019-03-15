@@ -2,7 +2,7 @@
 import { CustomPicker, SketchPicker, ColorChangeHandler } from "react-color";
 
 import { Checkerboard } from "../../../types/editor/Checkerboard";
-import { OPTIONAL_CONFIG } from "../../Initialize";
+import { OPTIONAL_CONFIG } from "../../../types/customElement/IElementConfig";
 
 import { Color } from '../controls/BackgroundControls';
 

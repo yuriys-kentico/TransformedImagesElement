@@ -21,21 +21,29 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
         }
     }
 
-    setTransform(
-        transform: TTransform
+    setTransform<K extends keyof TTransform>(
+        transform: (Pick<TTransform, K> | TTransform | null)
     ): void {
+        const prevTransform = this.props.getTransform;
+
         Object.assign(
-            this.props.getTransform,
+            prevTransform,
             transform
         );
-        this.props.onSetTransform(transform);
+
+        this.props.onSetTransform(prevTransform);
     }
 
     abstract onClickSidebar(): void;
+
     abstract onMouseDown(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean;
+
     abstract onMouseMove(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean;
+
     abstract onMouseUp(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean;
+
     abstract getImageOverlay(): React.ReactNode;
+
     protected abstract renderControls(): React.ReactNode;
 
     render() {

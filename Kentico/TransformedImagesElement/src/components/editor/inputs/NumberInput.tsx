@@ -2,6 +2,8 @@
 import { fromEvent, Observable, Subscriber } from "rxjs";
 import { map, filter, switchMap } from 'rxjs/operators';
 
+import { BaseInput, IInputState, IInputProps } from './BaseInput';
+
 export enum NumberInputType {
     pixel = "px",
     percent = "%",
@@ -9,63 +11,40 @@ export enum NumberInputType {
 }
 
 export interface INumberInputProps<TType, TValue> extends IInputProps<TType, TValue> {
+    allowedTypes: NumberInputType[];
     max: TValue;
     min?: TValue;
 }
 
-export interface IInputProps<TType, TValue> {
-    type: TType;
-    value: TValue;
-    setValue(value: TValue): void;
-    tooltip: string;
-    disabled?: boolean;
-}
-
-export interface IInputState<TType> {
-    type?: TType;
-    rawValue: string;
-}
-
-export class NumberInput extends React.Component<INumberInputProps<NumberInputType, number>, IInputState<NumberInputType>> {
-    private input: HTMLInputElement;
+export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, number>, IInputState<NumberInputType>, NumberInputType, number> {
     private typeSubject: Subscriber<NumberInputType> = new Subscriber();
 
     state: IInputState<NumberInputType> = {
         type: null,
-        rawValue: null
+        rawValue: null,
+        isValid: true,
     }
 
     private getType = () => this.state.type || this.props.type;
 
-    private toggleType(type: NumberInputType): void {
-        let newType: NumberInputType;
+    private switchType(type: NumberInputType): void {
+        const allowedTypes = this.props.allowedTypes;
+        const allowedTypesLength = allowedTypes.length;
+        const currentTypeIndex = allowedTypes.indexOf(type);
 
-        switch (type) {
-            case NumberInputType.pixel:
-                newType = NumberInputType.percent;
-                break;
-            case NumberInputType.percent:
-                newType = NumberInputType.pixel;
-                break;
-        }
+        const newType = allowedTypes[(currentTypeIndex + 1) % allowedTypesLength];
 
         this.typeSubject.next(newType);
         this.setState({ type: newType });
     }
 
-    private isDigitsOnly = (value: string) => /^\d*$/.test(value);
-
     private isDigitsOptionallyDotAndDecimals = (value: string, decimals: number) => new RegExp(`^\\d*\\.?\\d{0,${decimals}}$`).test(value);
 
     private isDigitsWithATrailingDotOrZero = (value: string) => !/^\d*?\.0?$/.test(value);
 
-    private storeValueInState = (value: string) => { this.setState({ rawValue: value }); return value; };
-
     private toNumber = (value: string) => parseFloat(value);
 
     private toBetween = (value: number, max: number, min: number) => Math.max(Math.min(value, max), min);
-
-    private toRounded = (value: number, decimals: number) => Number(`${Math.round(Number(`${value}e${decimals}`))}e-${decimals}`);
 
     componentDidMount() {
         if (this.input) {
@@ -81,7 +60,7 @@ export class NumberInput extends React.Component<INumberInputProps<NumberInputTy
             ).subscribe(
                 v => {
                     this.props.setValue(v);
-                    this.setState({ rawValue: null });
+                    this.setState({ isValid: true });
                 });
 
             //const onKeydown = fromEvent<React.KeyboardEvent<HTMLInputElement>>(this.input, "keydown");
@@ -98,7 +77,12 @@ export class NumberInput extends React.Component<INumberInputProps<NumberInputTy
         switch (type) {
             case NumberInputType.pixel:
                 return rawInput.pipe(
-                    filter(this.isDigitsOnly),
+                    filter(v => this.isAllowedCharacters(v, "0-9", 0)),
+                    map(this.toNumber),
+                    map(v => this.toBetween(v, this.props.max, min)),
+                    map(v => {
+                        return v.toString()
+                    }),
                     map(this.storeValueInState),
                     map(this.toNumber),
                     map(v => this.toBetween(v, this.props.max, min)),
@@ -109,10 +93,14 @@ export class NumberInput extends React.Component<INumberInputProps<NumberInputTy
             case NumberInputType.percent:
                 return rawInput.pipe(
                     filter(v => this.isDigitsOptionallyDotAndDecimals(v, 2)),
+                    map(this.toNumber),
+                    map(v => this.toBetween(v, 100, min)),
+                    map(v => {
+                        return v.toString()
+                    }),
                     map(this.storeValueInState),
                     filter(this.isDigitsWithATrailingDotOrZero),
                     map(this.toNumber),
-                    map(v => this.toBetween(v, 100, min)),
                     map(v => v / 100),
                     map(v => this.toRounded(v, 4))
                 )
@@ -120,43 +108,30 @@ export class NumberInput extends React.Component<INumberInputProps<NumberInputTy
             case NumberInputType.float:
                 return rawInput.pipe(
                     filter(v => this.isDigitsOptionallyDotAndDecimals(v, 2)),
+                    map(this.toNumber),
+                    map(v => this.toBetween(v, this.props.max, min)),
+                    map(v => {
+                        return v.toString()
+                    }),
                     map(this.storeValueInState),
                     filter(this.isDigitsWithATrailingDotOrZero),
                     map(this.toNumber),
-                    map(v => this.toBetween(v, this.props.max, min)),
                     map(v => this.toRounded(v, 2))
                 )
         }
     }
 
-    private parseValue(): number | string {
-        if (this.state.rawValue !== null) {
-            return this.state.rawValue;
-        }
-        else if (this.props.value !== null) {
-            let max = this.props.max;
+    getValue(value: number): string {
+        let max = this.props.max;
 
-            switch (this.getType()) {
-                case NumberInputType.pixel:
-                    return this.toRounded(this.props.value * max, 0);
-                case NumberInputType.percent:
-                    return this.props.value * 100;
-                case NumberInputType.float:
-                    return this.props.value;
-            }
+        switch (this.getType()) {
+            case NumberInputType.pixel:
+                return this.toRounded(value * max, 0).toString();
+            case NumberInputType.percent:
+                return (value * 100).toString();
+            case NumberInputType.float:
+                return value.toString();
         }
-    }
-
-    renderInput(): React.ReactNode {
-        return (
-            <input
-                disabled={this.props.disabled}
-                className="text-field__input"
-                ref={e => this.input = e}
-                value={this.parseValue()}
-                onChange={() => null}
-            />
-        );
     }
 
     renderLabel(): React.ReactNode {
@@ -169,7 +144,7 @@ export class NumberInput extends React.Component<INumberInputProps<NumberInputTy
             case NumberInputType.pixel:
             case NumberInputType.percent:
                 title = "Toggle between pixels and %";
-                onClick = () => this.toggleType(type);
+                onClick = () => this.switchType(type);
         }
 
         return (
@@ -178,21 +153,6 @@ export class NumberInput extends React.Component<INumberInputProps<NumberInputTy
                 onClick={onClick}
             >
                 {type}
-            </span>
-        );
-    }
-
-    render() {
-        return (
-            <span
-                className={`input ${this.state.rawValue !== null
-                    ? "text-field--has-error"
-                    : ""}`}
-                data-balloon={this.props.tooltip}
-                data-balloon-pos="down"
-            >
-                {this.renderInput()}
-                {this.renderLabel()}
             </span>
         );
     }

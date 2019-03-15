@@ -1,24 +1,16 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-
+import { Observable } from "rxjs";
 import { ContentManagementClient, AssetModels, AssetResponses } from "kentico-cloud-content-management";
 
 import { ICustomElement } from "./../types/customElement/ICustomElement";
 import { IContext } from "./../types/customElement/IContext";
 import { TransformedImageModel } from "./../types/transformedImage/TransformedImageModel";
 import { TransformedImage } from "./../types/transformedImage/TransformedImage";
+import { InvalidUsage } from "./InvalidUsage";
 
 import { TransformedImagesElement, IElementProps, TransformedImagesElementMode } from "./TransformedImagesElement";
-import { InvalidUsage } from "./InvalidUsage";
-import { Observable } from "rxjs";
-import { IOptionalConfig } from "../types/customElement/IElementConfig";
-
-export const OPTIONAL_CONFIG: IOptionalConfig = {
-    editorDefaultToPreview: false,
-    colorPickerDefaultColors: ["#D0021B", "#F5A623", "#F8E71C", "#7ED321", "#417505",
-        "#BD10E0", "#9013FE", "#4A90E2", "#50E3C2", "#B8E986", "#000000",
-        "#4A4A4A", "#9B9B9B", "#FFFFFF"]
-}
+import { OPTIONAL_CONFIG } from "../types/customElement/IElementConfig";
 
 export function initElementFromDelivery(element: ICustomElement, context: IContext): void {
     const loadAssetsFromDelivery = (

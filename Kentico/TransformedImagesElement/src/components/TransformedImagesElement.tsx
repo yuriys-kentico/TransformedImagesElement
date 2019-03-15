@@ -4,16 +4,15 @@ import { Observable } from "rxjs";
 
 import { IContext } from "../types/customElement/IContext";
 import { ICustomElement } from "../types/customElement/ICustomElement";
-import { IElementConfig, IRequiredConfig } from "../types/customElement/IElementConfig";
+import { IElementConfig, IRequiredConfig, OPTIONAL_CONFIG } from "../types/customElement/IElementConfig";
 import { TransformedImage } from "../types/transformedImage/TransformedImage";
-import { IImageTransforms } from "../types/transformedImage/IImageTransforms";
+import { IImageTransforms, cloneTransforms } from "../types/transformedImage/IImageTransforms";
 
 import { ImageListingTile } from "./listing/ImageListingTile";
 import { ListingButtons } from "./listing/ListingButtons";
 import { SelectionButtons } from "./selection/SelectionButtons";
 import { TransformsEditor } from "./editor/TransformsEditor";
 import { EditorButtons } from "./editor/EditorButtons";
-import { OPTIONAL_CONFIG } from "./Initialize";
 
 export enum TransformedImagesElementMode {
     configuration,
@@ -94,12 +93,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
     }
 
     storeEditedImage(image: TransformedImage) {
-        const transformsClone = {
-            resize: { ...image.transforms.resize },
-            crop: { ...image.transforms.crop },
-            background: { ...image.transforms.background },
-            format: { ...image.transforms.format }
-        };
+        const transformsClone = cloneTransforms(image.transforms);
 
         this.setState({
             editedImage: image,

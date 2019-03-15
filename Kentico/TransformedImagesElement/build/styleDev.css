@@ -202,21 +202,21 @@ body {
             right: calc(100% + .5em); }
             .imageEditor .editor .editorControls .control .fields .input .picker .sketch-picker > div:nth-of-type(3) {
               display: none !important; }
-          .imageEditor .editor .editorControls .control .fields .input input {
+          .imageEditor .editor .editorControls .control .fields .input > input {
             width: 3.5em;
             text-align: right;
             min-width: initial;
             flex: 1; }
-            .imageEditor .editor .editorControls .control .fields .input input + span {
+            .imageEditor .editor .editorControls .control .fields .input > input + span {
               padding: .375em .25em 0 .25em;
               margin: 0em; }
-              .imageEditor .editor .editorControls .control .fields .input input + span[title] {
+              .imageEditor .editor .editorControls .control .fields .input > input + span[title] {
                 color: #2196f3;
                 cursor: pointer; }
-          .imageEditor .editor .editorControls .control .fields .input span {
+          .imageEditor .editor .editorControls .control .fields .input > span {
             padding: .375em .25em 0 .25em;
             margin: 0em; }
-            .imageEditor .editor .editorControls .control .fields .input span + input {
+            .imageEditor .editor .editorControls .control .fields .input > span + input {
               width: 3.5em;
               text-align: right;
               min-width: initial;

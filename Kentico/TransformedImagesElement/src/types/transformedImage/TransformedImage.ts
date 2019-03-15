@@ -4,7 +4,7 @@ import { FieldModels } from "kentico-cloud-delivery/_commonjs/fields/field-model
 import { ImageFitModeEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
 
 import { TransformedImageModel } from "./TransformedImageModel";
-import { IImageTransforms, ResizeType, CropType } from "./IImageTransforms";
+import { IImageTransforms, CropType } from "./IImageTransforms";
 
 import { Color } from '../../components/editor/controls/BackgroundControls';
 
@@ -13,14 +13,46 @@ export class TransformedImage extends AssetModels.Asset {
     private baseImageUrl: string;
 
     transforms: IImageTransforms = {
-        resize: {
-            type: ResizeType.fit
-        },
         crop: {
-            type: CropType.border
+            type: CropType.scale,
+            scale: {
+                xFloat: null,
+                yFloat: null
+            },
+            fit: {
+                xFloat: null,
+                yFloat: null
+            },
+            frame: {
+                xFloat: null,
+                yFloat: null
+            },
+            box: {
+                xFloat: null,
+                yFloat: null,
+                wFloat: null,
+                hFloat: null
+            },
+            zoom: {
+                xFloat: null,
+                yFloat: null,
+                zFloat: null
+            },
+            resize: {
+                xFloat: null,
+                yFloat: null,
+            },
+            devicePixelRatio: null
         },
-        background: {},
-        format: {}
+        background: {
+            color: null,
+        },
+        format: {
+            format: null,
+            lossless: null,
+            quality: null,
+            autoWebp: null,
+        }
     };
 
     constructor(
@@ -37,6 +69,8 @@ export class TransformedImage extends AssetModels.Asset {
         }
     }
 
+    private static toRounded = (value: number, decimals: number = 0) => Number(`${Math.round(Number(`${value}e${decimals}`))}e-${decimals}`);
+
     static assetIsImage(asset: AssetModels.Asset): boolean {
         const allowedImageTypes = [
             "image/jpeg",
@@ -49,26 +83,32 @@ export class TransformedImage extends AssetModels.Asset {
             && allowedImageTypes.indexOf(asset.type) > -1;
     }
 
-    private static isRepeatedCharacter = (value: string, count: number) => new RegExp(`(.)\\1{${count - 1}}$`).test(value);
-
     static getBackgroundColor(color: Color): string {
         const { a, r, g, b } = color.argb;
 
-        const rHex = r.toString(16);
-        const gHex = g.toString(16);
-        const bHex = b.toString(16);
+        if (a === 0 && r === 0 && g === 0 && b === 0) {
+            return null;
+        }
 
-        const aHex = a !== 0 ? Math.round((a * 255)).toString(16) : "";
-        const a0 = this.isRepeatedCharacter(aHex, 2) ? aHex[0] : "";
+        const aHex = this.toRounded((a || 0) * 255).toString(16);
+        const rHex = (r || 0).toString(16);
+        const gHex = (g || 0).toString(16);
+        const bHex = (b || 0).toString(16);
 
-        if (this.isRepeatedCharacter(rHex, 2)
-            && this.isRepeatedCharacter(gHex, 2)
-            && this.isRepeatedCharacter(bHex, 2)
-        ) {
-            return `${a0}${rHex[0]}${gHex[0]}${bHex[0]}`;
-        } else if (this.isRepeatedCharacter(aHex, 2)) {
-            return `${a0}${rHex}${gHex}${bHex}`;
+        if (aHex === "0") {
+            if (rHex[0] === rHex[1]
+                && gHex[0] === gHex[1]
+                && bHex[0] === bHex[1]) {
+                return `${rHex[0]}${gHex[0]}${bHex[0]}`;
+            }
+            return `${rHex}${gHex}${bHex}`;
         } else {
+            if (aHex[0] === aHex[1]
+                && rHex[0] === rHex[1]
+                && gHex[0] === gHex[1]
+                && bHex[0] === bHex[1]) {
+                return `${aHex[0]}${rHex[0]}${gHex[0]}${bHex[0]}`;
+            }
             return `${aHex}${rHex}${gHex}${bHex}`;
         }
     }
@@ -79,53 +119,86 @@ export class TransformedImage extends AssetModels.Asset {
 
     buildEditedUrl(): ImageUrlBuilder {
         const builder = this.buildUrl();
-        const { crop, resize, background } = this.transforms;
+        const { crop, background } = this.transforms;
 
         switch (crop.type) {
+            case CropType.scale:
+                if (crop.scale.xFloat > 0
+                    && crop.scale.yFloat > 0) {
+                    builder
+                        .withFitMode(ImageFitModeEnum.Scale)
+                        .withWidth(crop.scale.xFloat)
+                        .withHeight(crop.scale.yFloat);
+                }
+                break;
+            case CropType.fit:
+                if (crop.fit.xFloat > 0
+                    && crop.fit.yFloat > 0) {
+                    builder
+                        .withFitMode(ImageFitModeEnum.Clip)
+                        .withWidth(crop.fit.xFloat)
+                        .withHeight(crop.fit.yFloat);
+                }
+                break;
+            case CropType.frame:
+                if (crop.frame.xFloat > 0
+                    && crop.frame.yFloat > 0) {
+                    // Fit=crop does not work with floats
+                    builder
+                        .withRectangleCrop(.5, .5, crop.frame.xFloat, crop.frame.yFloat);
+                }
+                break;
             case CropType.box:
-                if (crop.widthPercent > 0
-                    && crop.heightPercent > 0
-                    && crop.xPercent > 0
-                    && crop.yPercent > 0) {
-                    builder.withRectangleCrop(crop.xPercent, crop.yPercent, crop.widthPercent, crop.heightPercent);
+                if (crop.box.xFloat > 0
+                    && crop.box.yFloat > 0
+                    && crop.box.wFloat > 0
+                    && crop.box.hFloat > 0) {
+                    builder
+                        .withRectangleCrop(crop.box.xFloat, crop.box.yFloat, crop.box.wFloat, crop.box.hFloat);
                 }
                 break;
             case CropType.zoom:
-                if (crop.xPercent > 0
-                    && crop.yPercent > 0
-                    && crop.zoom > 0) {
-                    builder.withFocalPointCrop(crop.xPercent, crop.yPercent, crop.zoom);
+                if (crop.zoom.xFloat > 0
+                    && crop.zoom.yFloat > 0
+                    && crop.zoom.zFloat > 0) {
+                    builder
+                        .withFocalPointCrop(crop.zoom.xFloat, crop.zoom.yFloat, crop.zoom.zFloat);
                 }
                 break;
         }
 
-        if ((resize.heightPercent > 0
-            || resize.widthPercent > 0)
-            && crop.type === CropType.border) {
-            switch (resize.type) {
-                case ResizeType.crop:
-                    builder.withFitMode(ImageFitModeEnum.Crop);
-                    break;
-                case ResizeType.fit:
-                    builder.withFitMode(ImageFitModeEnum.Clip);
-                    break;
-                case ResizeType.scale:
-                    builder.withFitMode(ImageFitModeEnum.Scale);
-                    break;
-                default:
-            }
+        switch (crop.type) {
+            case CropType.frame:
+            case CropType.box:
+                if (crop.resize.xFloat > 0) {
+                    builder
+                        .withWidth(crop.resize.xFloat);
+                }
+                if (crop.resize.yFloat > 0) {
+                    builder
+                        .withHeight(crop.resize.yFloat);
+                }
+                break;
+            case CropType.zoom:
+                if (crop.resize.xFloat > 0
+                    && crop.resize.yFloat > 0) {
+                    builder
+                        .withWidth(crop.resize.xFloat)
+                        .withHeight(crop.resize.yFloat);
+                }
+                break;
         }
 
-        if (resize.heightPercent > 0) {
-            builder.withHeight(resize.heightPercent);
-        }
-
-        if (resize.widthPercent > 0) {
-            builder.withWidth(resize.widthPercent);
-        }
-
-        if (resize.devicePixelRatio) {
-            builder.withDpr(resize.devicePixelRatio);
+        switch (crop.type) {
+            case CropType.frame:
+            case CropType.box:
+            case CropType.zoom:
+                if (crop.resize.xFloat > 0
+                    && crop.resize.yFloat > 0) {
+                    builder
+                        .withDpr(crop.devicePixelRatio);
+                }
+                break;
         }
 
         if (background.color) {

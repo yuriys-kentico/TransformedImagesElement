@@ -1,5 +1,7 @@
 ﻿import * as React from "react";
 
+import { SwitchInput } from "./inputs/SwitchInput";
+
 export interface IEditorButtonsProps {
     onClickCancel(): void;
     onClickUpdate(): void;
@@ -25,23 +27,10 @@ export class EditorButtons extends React.Component<IEditorButtonsProps> {
                         Update
                     </button>
                 </span>
-                <div className="switch-wrapper">
-                    <input
-                        id="switchId"
-                        type="checkbox"
-                        hidden={true}
-                        checked={this.props.usePreview}
-                        readOnly={true}
-                        onClick={() => this.props.onClickPreview()}
-                    />
-                    <label
-                        className="switch"
-                        htmlFor="switchId"
-                    />
-                    <span className="switch__label">
-                        Preview
-                    </span>
-                </div>
+                <SwitchInput
+                    checked={this.props.usePreview}
+                    onClick={() => this.props.onClickPreview()}
+                />
             </div>
         );
     }

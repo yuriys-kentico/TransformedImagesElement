@@ -2,11 +2,9 @@
 
 import { TransformedImage } from "../../types/transformedImage/TransformedImage";
 import { Checkerboard } from "../../types/editor/Checkerboard";
-import { ResizeType } from "../../types/transformedImage/IImageTransforms";
 
 import { BaseControls } from "./controls/BaseControls";
 import { BackgroundControls, IBackgroundControlsProps } from "./controls/BackgroundControls";
-import { ResizeControls, IResizeControlsProps } from "./controls/ResizeControls";
 import { CropControls, ICropControlsProps } from "./controls/CropControls";
 
 export enum EditorMode {
@@ -116,18 +114,6 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                         e.nativeEvent.stopImmediatePropagation();
                     }}
                 >
-
-                    <ResizeControls
-                        getCurrentEditor={currentEditor as BaseControls<IResizeControlsProps>}
-                        setCurrentEditor={editor => {
-                            currentEditor = editor;
-                            this.setState({ currentEditor: editor })
-                        }}
-                        getTransform={transforms.resize}
-                        onSetTransform={() => this.forceUpdate()}
-                        imageWidth={this.props.editedImage.imageWidth}
-                        imageHeight={this.props.editedImage.imageHeight}
-                    />
                     <CropControls
                         getCurrentEditor={currentEditor as BaseControls<ICropControlsProps>}
                         setCurrentEditor={editor => {
@@ -135,7 +121,6 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                         }}
                         getTransform={transforms.crop}
                         onSetTransform={() => this.forceUpdate()}
-                        visible={transforms.resize.type === ResizeType.crop}
                         imageWidth={this.props.editedImage.imageWidth}
                         imageHeight={this.props.editedImage.imageHeight}
                     />

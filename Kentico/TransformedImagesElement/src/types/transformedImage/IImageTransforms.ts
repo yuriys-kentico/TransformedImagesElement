@@ -3,46 +3,74 @@ import { Color } from '../../components/editor/controls/BackgroundControls';
 
 export interface IImageTransforms {
     crop: ICropTransform;
-    resize: IResizeTransform;
     background: IBackgroundTransform;
     format: IFormatTransform;
 }
 
-export interface ICropTransform {
-    type?: CropType;
-    xPercent?: number;
-    yPercent?: number;
-    widthPercent?: number;
-    heightPercent?: number;
-    zoom?: number;
-}
-
 export enum CropType {
-    border = "Border",
-    box = "Box",
-    zoom = "Zoom"
+    scale = "scale",
+    fit = "fit",
+    frame = "frame",
+    box = "box",
+    zoom = "zoom"
 }
 
-export interface IResizeTransform {
-    type?: ResizeType,
-    widthPercent?: number;
-    heightPercent?: number;
-    devicePixelRatio?: number;
-}
-
-export enum ResizeType {
-    crop = "Crop",
-    fit = "Fit",
-    scale = "Scale"
+export interface ICropTransform {
+    type: CropType;
+    scale: {
+        xFloat: number;
+        yFloat: number;
+    },
+    fit: {
+        xFloat: number;
+        yFloat: number;
+    },
+    frame: {
+        xFloat: number;
+        yFloat: number;
+    },
+    box: {
+        xFloat: number;
+        yFloat: number;
+        wFloat: number;
+        hFloat: number;
+    },
+    zoom: {
+        xFloat: number;
+        yFloat: number;
+        zFloat: number;
+    },
+    resize: {
+        xFloat: number;
+        yFloat: number;
+    }
+    devicePixelRatio: number;
 }
 
 export interface IBackgroundTransform {
-    color?: Color;
+    color: Color;
 }
 
 export interface IFormatTransform {
-    format?: ImageFormatEnum;
-    lossless?: ImageCompressionEnum;
-    quality?: number;
-    autoWebp?: boolean;
+    format: ImageFormatEnum;
+    lossless: ImageCompressionEnum;
+    quality: number;
+    autoWebp: boolean;
+}
+
+export function cloneTransforms(transforms: IImageTransforms): IImageTransforms {
+    return {
+        crop: {
+            type: transforms.crop.type,
+            [CropType.scale]: { ...transforms.crop.scale },
+            [CropType.fit]: { ...transforms.crop.fit },
+            [CropType.frame]: { ...transforms.crop.frame },
+            [CropType.box]: { ...transforms.crop.box },
+            [CropType.zoom]: { ...transforms.crop.zoom },
+            resize: { ...transforms.crop.resize },
+            devicePixelRatio: transforms.crop.devicePixelRatio
+        },
+        background: { ...transforms.background },
+        format: { ...transforms.format }
+    }
 }
