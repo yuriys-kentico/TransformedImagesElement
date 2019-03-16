@@ -1,10 +1,12 @@
 ﻿import * as React from "react";
+import { ImageCompressionEnum, ImageFormatEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
+
+import { IFormatTransform } from "../../../types/transformedImage/Transforms";
 
 import { BaseControls, IBaseControlsProps } from "./BaseControls";
-import { IFormatTransform } from "../../../types/transformedImage/Transforms";
 import { SwitchInput } from "../inputs/SwitchInput";
 import { NumberInput, NumberInputType } from "../inputs/NumberInput";
-import { ImageCompressionEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
+import { DropdownInput } from "../inputs/DropdownInput";
 
 export interface IFormatControlsProps extends IBaseControlsProps<IFormatTransform> {
 }
@@ -42,12 +44,27 @@ export class FormatControls extends BaseControls<IFormatControlsProps, IFormatTr
             <div>
                 <div className="fields vertical">
                     <div className="fieldsBlock">
-                        {// dropdown
-                        }
                         <SwitchInput
                             checked={format.autoWebp}
                             onClick={() => this.setTransform({ autoWebp: !format.autoWebp })}
                             label="Auto Webp"
+                        />
+                        <DropdownInput
+                            selected={format.format}
+                            setSelected={s => {
+                                this.setTransform({ format: s }
+                                )
+                            }}
+                            options={[
+                                "Format...",
+                                ImageFormatEnum.Gif,
+                                ImageFormatEnum.Png,
+                                ImageFormatEnum.Png8,
+                                ImageFormatEnum.Jpg,
+                                ImageFormatEnum.Pjpg,
+                                ImageFormatEnum.Webp
+                            ]}
+                            tooltip="Format"
                         />
                     </div>
                     <div className="fieldsBlock">
@@ -70,8 +87,8 @@ export class FormatControls extends BaseControls<IFormatControlsProps, IFormatTr
                             label="Lossless"
                         />
                         <NumberInput
-                            type={NumberInputType.float}
-                            allowedTypes={[NumberInputType.float]}
+                            type={NumberInputType.int}
+                            allowedTypes={[NumberInputType.int]}
                             value={format.quality || null}
                             max={100}
                             tooltip="Quality"

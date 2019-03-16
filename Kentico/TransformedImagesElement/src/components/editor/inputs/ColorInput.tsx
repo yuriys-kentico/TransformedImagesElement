@@ -3,11 +3,12 @@ import { fromEvent, Observable } from "rxjs";
 import { map, filter } from 'rxjs/operators';
 
 import { Color } from "../../../types/transformedImage/Color";
+import { NumberUtils } from '../../../types/NumberUtils';
 
 import { BaseInput, IInputProps, IInputState } from './BaseInput';
 
 export enum ColorInputType {
-    hex = "#"
+    hex = "HEX"
 }
 
 export class ColorInput extends BaseInput<IInputProps<ColorInputType, Color>, IInputState<ColorInputType>, ColorInputType, Color> {
@@ -16,8 +17,6 @@ export class ColorInput extends BaseInput<IInputProps<ColorInputType, Color>, II
         rawValue: null,
         isValid: true
     }
-
-    private isHexadecimalNumbers = (value: string) => /^([0-9a-fA-F][0-9a-fA-F]){3,4}$|^[0-9a-fA-F]{3,4}$|^$/.test(value);
 
     componentDidMount() {
         if (this.input) {
@@ -39,7 +38,7 @@ export class ColorInput extends BaseInput<IInputProps<ColorInputType, Color>, II
         return rawInput.pipe(
             filter(v => this.isAllowedCharacters(v, "0-9a-fA-F", 0, 8)),
             map(this.storeValueInState),
-            filter(this.isHexadecimalNumbers),
+            filter(NumberUtils.isHexNumbers),
             map(Color.fromHex),
         );
     }
@@ -51,7 +50,7 @@ export class ColorInput extends BaseInput<IInputProps<ColorInputType, Color>, II
     renderLabel(): React.ReactNode {
         return (
             <span>
-                #
+                {this.props.type}
             </span>
         );
     }

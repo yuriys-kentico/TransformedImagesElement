@@ -2,12 +2,15 @@
 import { fromEvent, Observable, Subscriber } from "rxjs";
 import { map, filter, switchMap } from 'rxjs/operators';
 
+import { NumberUtils } from '../../../types/NumberUtils';
+
 import { BaseInput, IInputState, IInputProps } from './BaseInput';
 
 export enum NumberInputType {
+    float = "#.##",
+    int = "###",
     pixel = "px",
-    percent = "%",
-    float = ".01"
+    percent = "%"
 }
 
 export interface INumberInputProps<TType, TValue> extends IInputProps<TType, TValue> {
@@ -41,24 +44,6 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
         });
     }
 
-    private isDigitsOptionallyDotAndDecimals = (value: string, decimals: number) => new RegExp(`^\\d*\\.?\\d{0,${decimals}}$`).test(value);
-
-    private isDigitsWithATrailingDotOrZero = (value: string) => !/^\d*?\.0?$/.test(value);
-
-    private toNumber = (value: string) => parseFloat(value);
-
-    private toBetween = (value: number, max: number, min: number) => Math.max(Math.min(value, max), min);
-
-    private ensureBetween = (value: string, max: number, min: number): string => {
-        const tempValue = this.toNumber(value);
-
-        if (tempValue !== NaN && (tempValue > max || tempValue < min)) {
-            return this.toBetween(tempValue, max, min).toString();
-        }
-
-        return value;
-    };
-
     componentDidMount() {
         if (this.input) {
             const rawInput = fromEvent<React.FormEvent<HTMLInputElement>>(this.input, "input").pipe(
@@ -88,36 +73,46 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
         const min = this.props.min || 0;
 
         switch (type) {
+            case NumberInputType.int:
+                return rawInput.pipe(
+                    filter(v => this.isAllowedCharacters(v, "0-9", 0)),
+                    map(v => NumberUtils.ensureBetween(v, this.props.max, min)),
+                    map(this.storeValueInState),
+                    map(NumberUtils.toNumber),
+                    map(v => NumberUtils.toBetween(v, this.props.max, min)),
+                    map(v => NumberUtils.toRounded(v, 4))
+                )
+
             case NumberInputType.pixel:
                 return rawInput.pipe(
                     filter(v => this.isAllowedCharacters(v, "0-9", 0)),
-                    map(v => this.ensureBetween(v, this.props.max, min)),
+                    map(v => NumberUtils.ensureBetween(v, this.props.max, min)),
                     map(this.storeValueInState),
-                    map(this.toNumber),
-                    map(v => this.toBetween(v, this.props.max, min)),
+                    map(NumberUtils.toNumber),
+                    map(v => NumberUtils.toBetween(v, this.props.max, min)),
                     map(v => v / this.props.max),
-                    map(v => this.toRounded(v, 4))
+                    map(v => NumberUtils.toRounded(v, 4))
                 )
 
             case NumberInputType.percent:
                 return rawInput.pipe(
-                    filter(v => this.isDigitsOptionallyDotAndDecimals(v, 2)),
-                    map(v => this.ensureBetween(v, 100, min)),
+                    filter(v => NumberUtils.isDigitsOptionallyDotAndDecimals(v, 2)),
+                    map(v => NumberUtils.ensureBetween(v, 100, min)),
                     map(this.storeValueInState),
-                    filter(this.isDigitsWithATrailingDotOrZero),
-                    map(this.toNumber),
+                    filter(NumberUtils.isDigitsWithATrailingDotOrZero),
+                    map(NumberUtils.toNumber),
                     map(v => v / 100),
-                    map(v => this.toRounded(v, 4))
+                    map(v => NumberUtils.toRounded(v, 4))
                 )
 
             case NumberInputType.float:
                 return rawInput.pipe(
-                    filter(v => this.isDigitsOptionallyDotAndDecimals(v, 2)),
-                    map(v => this.ensureBetween(v, this.props.max, min)),
+                    filter(v => NumberUtils.isDigitsOptionallyDotAndDecimals(v, 2)),
+                    map(v => NumberUtils.ensureBetween(v, this.props.max, min)),
                     map(this.storeValueInState),
-                    filter(this.isDigitsWithATrailingDotOrZero),
-                    map(this.toNumber),
-                    map(v => this.toRounded(v, 2))
+                    filter(NumberUtils.isDigitsWithATrailingDotOrZero),
+                    map(NumberUtils.toNumber),
+                    map(v => NumberUtils.toRounded(v, 2))
                 )
         }
     }
@@ -126,8 +121,10 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
         let max = this.props.max;
 
         switch (this.getType()) {
+            case NumberInputType.int:
+                return NumberUtils.toRounded(value, 0).toString();
             case NumberInputType.pixel:
-                return this.toRounded(value * max, 0).toString();
+                return NumberUtils.toRounded(value * max, 0).toString();
             case NumberInputType.percent:
                 return (value * 100).toString();
             case NumberInputType.float:

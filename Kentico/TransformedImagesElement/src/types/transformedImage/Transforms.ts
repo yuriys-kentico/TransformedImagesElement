@@ -71,7 +71,7 @@ export class Transforms implements ITransforms {
         };
         this.background = {
             color: background.color
-                ? new Color(background.color.argb)
+                ? new Color(background.color.internalRgba)
                 : new Color({ r: 0, g: 0, b: 0 })
         };
         this.format = { ...format };

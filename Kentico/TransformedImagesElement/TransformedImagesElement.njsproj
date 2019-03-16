@@ -52,12 +52,14 @@
     <TypeScriptCompile Include="src\components\editor\inputs\BaseInput.tsx" />
     <TypeScriptCompile Include="src\components\editor\inputs\ColorPicker.tsx" />
     <TypeScriptCompile Include="src\components\editor\inputs\ColorInput.tsx" />
+    <TypeScriptCompile Include="src\components\editor\inputs\DropdownInput.tsx" />
     <TypeScriptCompile Include="src\components\editor\inputs\SwitchInput.tsx" />
     <TypeScriptCompile Include="src\components\editor\inputs\NumberInput.tsx" />
     <TypeScriptCompile Include="src\components\editor\EditorButtons.tsx" />
     <TypeScriptCompile Include="src\components\InvalidUsage.tsx" />
     <TypeScriptCompile Include="src\types\editor\Checkerboard.ts" />
     <TypeScriptCompile Include="src\components\Initialize.tsx" />
+    <TypeScriptCompile Include="src\types\NumberUtils.ts" />
     <TypeScriptCompile Include="src\types\react-html-id.d.ts" />
     <TypeScriptCompile Include="src\types\transformedImage\Color.ts" />
     <TypeScriptCompile Include="src\types\transformedImage\Transforms.ts" />

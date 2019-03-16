@@ -32,19 +32,23 @@ body {
             color: #9e9e9e;
         }
 
+        .spacer {
+            flex: 1;
+        }
+
         button {
             margin-top: .5em;
             margin-bottom: .5em;
         }
 
         .switch-wrapper {
-            margin-left: .5em;
+            margin-right: .5em;
         }
 
         .urlInput {
             width: initial;
             flex: 1;
-            margin: 0 0 0 1em;
+            margin-right: .5em;
             direction: rtl;
         }
     }
@@ -311,25 +315,26 @@ body {
                         width: 100%;
 
                         + .input {
-                            padding: 0 0 0 0.2em;
+                            padding: 0 0 0 0.5em;
                         }
 
                         .colorBox {
                             z-index: 1;
                             position: absolute;
                             height: 100%;
-                            width: calc(100% - .2em);
+                            width: calc(100% - .5em);
                         }
 
                         .colorBoxBackground {
                             position: absolute;
                             height: 100%;
-                            width: calc(100% - .2em);
+                            width: calc(100% - .5em);
                         }
 
                         .picker {
                             position: absolute;
                             right: calc(100% + .5em);
+                            z-index: 1000;
 
                             .sketch-picker {
                                 > div:nth-of-type(3) {

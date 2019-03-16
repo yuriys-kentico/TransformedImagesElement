@@ -55,7 +55,7 @@ export class BackgroundControls extends BaseControls<IBackgroundControlsProps, I
                     <ColorInput
                         type={ColorInputType.hex}
                         value={background.color || this.emptyColor}
-                        tooltip="Hex color"
+                        tooltip="Canvas color"
                         isLabelFirst={true}
                         setValue={value => {
                             this.setTransform({ color: value })
@@ -71,9 +71,8 @@ export class BackgroundControls extends BaseControls<IBackgroundControlsProps, I
                         value={background.color || this.emptyColor}
                         tooltip="Pick a color"
                         setValue={value => {
-                            value.rgb.a = value.rgb.a * 255;
                             this.setTransform({
-                                color: new Color(value.rgb)
+                                color: Color.fromPickerFormat(value.rgb)
                             })
                         }}
                     />

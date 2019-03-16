@@ -19,15 +19,17 @@ body {
     margin-left: .5em;
     font-size: .9em;
     color: #9e9e9e; }
+  .imageSelection .selectionBar .spacer, .imageListing .selectionBar .spacer, .imageEditor .selectionBar .spacer {
+    flex: 1; }
   .imageSelection .selectionBar button, .imageListing .selectionBar button, .imageEditor .selectionBar button {
     margin-top: .5em;
     margin-bottom: .5em; }
   .imageSelection .selectionBar .switch-wrapper, .imageListing .selectionBar .switch-wrapper, .imageEditor .selectionBar .switch-wrapper {
-    margin-left: .5em; }
+    margin-right: .5em; }
   .imageSelection .selectionBar .urlInput, .imageListing .selectionBar .urlInput, .imageEditor .selectionBar .urlInput {
     width: initial;
     flex: 1;
-    margin: 0 0 0 1em;
+    margin-right: .5em;
     direction: rtl; }
 
 .imageSelection .list, .imageListing .list {
@@ -201,19 +203,20 @@ body {
           display: flex;
           width: 100%; }
           .imageEditor .editor .editorControls .control .fields .input + .input {
-            padding: 0 0 0 0.2em; }
+            padding: 0 0 0 0.5em; }
           .imageEditor .editor .editorControls .control .fields .input .colorBox {
             z-index: 1;
             position: absolute;
             height: 100%;
-            width: calc(100% - .2em); }
+            width: calc(100% - .5em); }
           .imageEditor .editor .editorControls .control .fields .input .colorBoxBackground {
             position: absolute;
             height: 100%;
-            width: calc(100% - .2em); }
+            width: calc(100% - .5em); }
           .imageEditor .editor .editorControls .control .fields .input .picker {
             position: absolute;
-            right: calc(100% + .5em); }
+            right: calc(100% + .5em);
+            z-index: 1000; }
             .imageEditor .editor .editorControls .control .fields .input .picker .sketch-picker > div:nth-of-type(3) {
               display: none !important; }
           .imageEditor .editor .editorControls .control .fields .input > input {

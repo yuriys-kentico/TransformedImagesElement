@@ -1,131 +1,172 @@
+import { NumberUtils } from "../NumberUtils";
+
+interface IRgba {
+    readonly r: number;
+    readonly g: number;
+    readonly b: number;
+    readonly a: number;
+}
+
+interface IHex {
+    readonly r: string;
+    readonly g: string;
+    readonly b: string;
+    readonly a: string;
+}
+
 export class Color {
-    argb: {
-        a: number,
-        r: number,
-        g: number,
-        b: number
+    internalRgba: IRgba;
+
+    get rgba(): (Pick<IRgba, "r" | "g" | "b" | "a"> | IRgba | null) {
+        return this.internalRgba;
     }
 
-    constructor(rgba: { r: number, g: number, b: number, a?: number }) {
-        this.argb = {
-            a: this.toRounded(rgba.a) || 255,
-            r: this.toRounded(rgba.r) || 0,
-            g: this.toRounded(rgba.g) || 0,
-            b: this.toRounded(rgba.b) || 0
+    set rgba(
+        rgba: (Pick<IRgba, "r" | "g" | "b" | "a"> | IRgba | null)
+    ) {
+        this.internalRgba = rgba;
+    }
+
+    get hex(): (Pick<IHex, "r" | "g" | "b" | "a"> | IHex | null) {
+        const { a, r, g, b } = this.internalRgba;
+
+        const rHex = NumberUtils.toHex(r);
+        const gHex = NumberUtils.toHex(g);
+        const bHex = NumberUtils.toHex(b);
+        let aHex: string;
+
+        if (a === 0 || a === 255) {
+            aHex = "";
+        } else {
+            aHex = NumberUtils.toHex(a);
+        }
+
+        return {
+            r: rHex,
+            g: gHex,
+            b: bHex,
+            a: aHex
+        }
+    }
+
+    set hex(
+        argbHex: (Pick<IHex, "a" | "r" | "g" | "b"> | IHex | null)
+    ) {
+        this.internalRgba = {
+            r: Number(`0x${argbHex.r}`) || 0,
+            g: Number(`0x${argbHex.g}`) || 0,
+            b: Number(`0x${argbHex.b}`) || 0,
+            a: Number(`0x${argbHex.a}`) || 0
         };
     }
 
-    private toHex = (value: number) => value.toString(16).padStart(2, "0");
+    static fromHex(argbHex: string) {
+        const doubleCharacter = (c: string) => c + c;
 
-    private isOneLetterHex = (value: number) => (value || 0) % 17 === 0;
+        if (argbHex.length === 3) {
+            argbHex = `0${argbHex}`;
+        }
 
-    protected toRounded = (value: number, decimals: number = 0) => Number(`${Math.round(Number(`${value}e${decimals}`))}e-${decimals}`);
+        if (argbHex.length === 4) {
+            argbHex = [...argbHex].map(doubleCharacter).join("");
+        }
+
+        if (argbHex.length === 6) {
+            argbHex = `00${argbHex}`;
+        }
+
+        let a = Number(`0x${argbHex.slice(0, 2)}`) || 0;
+        const r = Number(`0x${argbHex.slice(2, 4)}`) || 0;
+        const g = Number(`0x${argbHex.slice(4, 6)}`) || 0;
+        const b = Number(`0x${argbHex.slice(6, 8)}`) || 0;
+
+        return new Color({
+            r: r,
+            g: g,
+            b: b,
+            a: a
+        });
+    };
+
+    constructor(rgba: { r: number, g: number, b: number, a?: number }) {
+        this.rgba = rgba
+            ? {
+                a: NumberUtils.toRounded(rgba.a) || 255,
+                r: NumberUtils.toRounded(rgba.r) || 0,
+                g: NumberUtils.toRounded(rgba.g) || 0,
+                b: NumberUtils.toRounded(rgba.b) || 0
+            }
+            : { a: 255, r: 0, g: 0, b: 0 };
+    }
 
     isEmpty(): boolean {
-        const { a, r, g, b } = this.argb;
+        const { a, r, g, b } = this.rgba;
         return (a === 0 || a === 255)
             && r === 0
             && g === 0
             && b === 0;
     }
 
-    toHexArray(): string[] {
-        if (this.isEmpty()) {
-            return ["", "", "", ""];
-        }
-
-        const { a, r, g, b } = this.argb;
-
-        let aHex = this.toHex(a);
-        const rHex = this.toHex(r);
-        const gHex = this.toHex(g);
-        const bHex = this.toHex(b);
-
-        if (a === 0 || a === 255) {
-            aHex = "";
-        }
-
-        return [aHex, rHex, gHex, bHex];
-    }
-
     toHexString(): string {
-        return this.toHexArray().join("");
+        return `${this.hex.a}${this.hex.r}${this.hex.g}${this.hex.b}`;
     }
 
-    toShortHexArray(): string[] {
+    toShortHexString(): string {
         if (this.isEmpty()) {
-            return ["", "", "", ""];
+            return "";
         }
 
-        const { a, r, g, b } = this.argb;
+        const { a, r, g, b } = this.internalRgba;
 
-        if (this.isOneLetterHex(a)
-            && this.isOneLetterHex(r)
-            && this.isOneLetterHex(g)
-            && this.isOneLetterHex(b)
+        if (NumberUtils.isHexOneChar(a)
+            && NumberUtils.isHexOneChar(r)
+            && NumberUtils.isHexOneChar(g)
+            && NumberUtils.isHexOneChar(b)
         ) {
-            let aHex = this.toHex(a / 17);
-            const rHex = this.toHex(r / 17);
-            const gHex = this.toHex(g / 17);
-            const bHex = this.toHex(b / 17);
+            let aHex = NumberUtils.toHex(a / 17, 1);
+            const rHex = NumberUtils.toHex(r / 17, 1);
+            const gHex = NumberUtils.toHex(g / 17, 1);
+            const bHex = NumberUtils.toHex(b / 17, 1);
 
             if (a === 0 || a === 255) {
                 aHex = "";
             }
 
-            return [aHex, rHex, gHex, bHex];
+            return `${aHex}${rHex}${gHex}${bHex}`;
         }
 
-        return this.toHexArray();
-    }
-
-    toShortHexString(): string {
-        return this.toShortHexArray().join("");
+        return this.toHexString();
     }
 
     toCssRgba(): string {
-        const { a, r, g, b } = this.argb;
+        const { a, r, g, b } = this.rgba;
 
-        return `rgba(${r},${g},${b},${a === 0 ? 1 : this.toRounded(a / 255, 4)})`;
+        return `rgba(${r},${g},${b},${a === 0 ? 1 : NumberUtils.toRounded(a / 255, 4)})`;
     }
 
     toRgb() {
         return {
-            r: this.argb.r,
-            g: this.argb.g,
-            b: this.argb.b
+            r: this.rgba.r,
+            g: this.rgba.g,
+            b: this.rgba.b
         }
     }
 
     toPickerFormat() {
         return {
-            a: this.toRounded(this.argb.a / 255, 4),
-            r: this.argb.r,
-            g: this.argb.g,
-            b: this.argb.b
+            a: NumberUtils.toRounded(this.rgba.a / 255, 4),
+            r: this.rgba.r,
+            g: this.rgba.g,
+            b: this.rgba.b
         }
     }
 
-    static fromHex(value: string): Color {
-        const doubleCharacter = (c: string) => c + c;
-
-        if (value.length === 3) {
-            value = `0${value}`;
-        }
-
-        if (value.length === 4) {
-            value = [...value].map(doubleCharacter).join("");
-        }
-
-        if (value.length === 6) {
-            value = `00${value}`;
-        }
-
-        let a = Number(`0x${value.slice(0, 2)}`) || 0;
-        const r = Number(`0x${value.slice(2, 4)}`) || 0;
-        const g = Number(`0x${value.slice(4, 6)}`) || 0;
-        const b = Number(`0x${value.slice(6, 8)}`) || 0;
-
-        return new Color({ r, g, b, a });
+    static fromPickerFormat(rgba: { r: number, g: number, b: number, a?: number }): Color {
+        return new Color({
+            r: rgba.r,
+            g: rgba.g,
+            b: rgba.b,
+            a: NumberUtils.toRounded((rgba.a || 1) * 255)
+        });
     };
 }

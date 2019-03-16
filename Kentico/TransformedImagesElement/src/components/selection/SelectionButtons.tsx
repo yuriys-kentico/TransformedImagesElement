@@ -21,6 +21,7 @@ export class SelectionButtons extends React.Component<ISelectionButtonsProps> {
 
         return (
             <div className="selectionBar">
+                <span className="spacer" />
                 <span>
                     <button
                         className="btn btn--destructive"

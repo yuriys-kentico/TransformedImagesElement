@@ -22,8 +22,6 @@ export abstract class BaseInput<TProps extends IInputProps<TType, TValue>, TStat
 
     protected storeValueInState = (value: string) => { this.setState({ rawValue: value, isValid: false }); return value; };
 
-    protected toRounded = (value: number, decimals: number = 0) => Number(`${Math.round(Number(`${value}e${decimals}`))}e-${decimals}`);
-
     abstract getValue(value: (() => TValue) | TValue): string;
 
     private parseValue(): string {

@@ -22,7 +22,7 @@ class ColorPicker extends React.Component<IColorPickerProps> {
             ? (
                 <div className="picker">
                     <SketchPicker
-                        color={this.props.value.argb.a === 0
+                        color={this.props.value.rgba.a === 0
                             ? this.props.value.toRgb()
                             : this.props.value.toPickerFormat()}
                         onChange={this.props.setValue}
