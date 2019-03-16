@@ -1,9 +1,10 @@
 ﻿import * as React from "react";
 
 import { BaseControls, IBaseControlsProps } from "./BaseControls";
-import { ICropTransform, CropType } from "../../../types/transformedImage/IImageTransforms";
+import { ICropTransform, CropType } from "../../../types/transformedImage/Transforms";
 
 import { NumberInput, NumberInputType } from "../inputs/NumberInput";
+import { OPTIONAL_CONFIG } from "../../../types/customElement/IElementConfig";
 
 export interface ICropControlsProps extends IBaseControlsProps<ICropTransform> {
     imageWidth: number;
@@ -11,6 +12,12 @@ export interface ICropControlsProps extends IBaseControlsProps<ICropTransform> {
 }
 
 export class CropControls extends BaseControls<ICropControlsProps, ICropTransform> {
+    private defaultNumberType = OPTIONAL_CONFIG.inputsDefaultToPercent
+        ? NumberInputType.percent
+        : NumberInputType.pixel;
+
+    private allowedTypes = [NumberInputType.pixel, NumberInputType.percent];
+
     onClickSidebar(): void {
     }
 
@@ -41,8 +48,8 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                 return (
                     <div className="fields" key={CropType.scale}>
                         <NumberInput
-                            type={NumberInputType.pixel}
-                            allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
+                            type={this.defaultNumberType}
+                            allowedTypes={this.allowedTypes}
                             value={scale.xFloat || null}
                             max={this.props.imageWidth}
                             tooltip="Width"
@@ -53,8 +60,8 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             }}
                         />
                         <NumberInput
-                            type={NumberInputType.pixel}
-                            allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
+                            type={this.defaultNumberType}
+                            allowedTypes={this.allowedTypes}
                             value={scale.yFloat || null}
                             max={this.props.imageHeight}
                             tooltip="Height"
@@ -69,8 +76,8 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                 return (
                     <div className="fields" key={CropType.fit}>
                         <NumberInput
-                            type={NumberInputType.pixel}
-                            allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
+                            type={this.defaultNumberType}
+                            allowedTypes={this.allowedTypes}
                             value={fit.xFloat || null}
                             max={this.props.imageWidth}
                             tooltip="Width"
@@ -80,8 +87,8 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             }}
                         />
                         <NumberInput
-                            type={NumberInputType.pixel}
-                            allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
+                            type={this.defaultNumberType}
+                            allowedTypes={this.allowedTypes}
                             value={fit.yFloat || null}
                             max={this.props.imageHeight}
                             tooltip="Height"
@@ -96,8 +103,8 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                 return (
                     <div className="fields" key={CropType.frame}>
                         <NumberInput
-                            type={NumberInputType.pixel}
-                            allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
+                            type={this.defaultNumberType}
+                            allowedTypes={this.allowedTypes}
                             value={frame.xFloat || null}
                             max={this.props.imageWidth}
                             tooltip="Width"
@@ -107,8 +114,8 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             }}
                         />
                         <NumberInput
-                            type={NumberInputType.pixel}
-                            allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
+                            type={this.defaultNumberType}
+                            allowedTypes={this.allowedTypes}
                             value={frame.yFloat || null}
                             max={this.props.imageHeight}
                             tooltip="Height"
@@ -121,91 +128,99 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                 );
             case CropType.box:
                 return (
-                    <div className="fields" key={CropType.box}>
-                        <NumberInput
-                            type={NumberInputType.pixel}
-                            allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
-                            value={box.xFloat || null}
-                            max={this.props.imageWidth}
-                            tooltip="Start X"
-                            setValue={value => {
-                                crop.box.xFloat = value;
-                                this.setTransform({ box: crop.box })
-                            }}
-                        />
-                        <NumberInput
-                            type={NumberInputType.pixel}
-                            allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
-                            value={box.yFloat || null}
-                            max={this.props.imageWidth}
-                            tooltip="Start Y"
-                            setValue={value => {
-                                crop.box.yFloat = value;
-                                this.setTransform({ box: crop.box })
-                            }}
-                        />
-                        <NumberInput
-                            type={NumberInputType.pixel}
-                            allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
-                            value={box.wFloat || null}
-                            max={this.props.imageWidth}
-                            tooltip="Width"
-                            setValue={value => {
-                                crop.box.wFloat = value;
-                                this.setTransform({ box: crop.box })
-                            }}
-                        />
-                        <NumberInput
-                            type={NumberInputType.pixel}
-                            allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
-                            value={box.hFloat || null}
-                            max={this.props.imageWidth}
-                            tooltip="Height"
-                            setValue={value => {
-                                crop.box.hFloat = value;
-                                this.setTransform({ box: crop.box })
-                            }}
-                        />
+                    <div className="fields vertical" key={CropType.box}>
+                        <div className="fieldsBlock">
+                            <NumberInput
+                                type={this.defaultNumberType}
+                                allowedTypes={this.allowedTypes}
+                                value={box.xFloat || null}
+                                max={this.props.imageWidth}
+                                tooltip="Start X"
+                                setValue={value => {
+                                    crop.box.xFloat = value;
+                                    this.setTransform({ box: crop.box })
+                                }}
+                            />
+                            <NumberInput
+                                type={this.defaultNumberType}
+                                allowedTypes={this.allowedTypes}
+                                value={box.yFloat || null}
+                                max={this.props.imageWidth}
+                                tooltip="Start Y"
+                                setValue={value => {
+                                    crop.box.yFloat = value;
+                                    this.setTransform({ box: crop.box })
+                                }}
+                            />
+                        </div>
+                        <div className="fieldsBlock">
+                            <NumberInput
+                                type={this.defaultNumberType}
+                                allowedTypes={this.allowedTypes}
+                                value={box.wFloat || null}
+                                max={this.props.imageWidth}
+                                tooltip="Width"
+                                setValue={value => {
+                                    crop.box.wFloat = value;
+                                    this.setTransform({ box: crop.box })
+                                }}
+                            />
+                            <NumberInput
+                                type={this.defaultNumberType}
+                                allowedTypes={this.allowedTypes}
+                                value={box.hFloat || null}
+                                max={this.props.imageWidth}
+                                tooltip="Height"
+                                setValue={value => {
+                                    crop.box.hFloat = value;
+                                    this.setTransform({ box: crop.box })
+                                }}
+                            />
+                        </div>
                     </div>
                 );
             case CropType.zoom:
                 return (
-                    <div className="fields" key={CropType.zoom}>
-                        <NumberInput
-                            type={NumberInputType.pixel}
-                            allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
-                            value={zoom.xFloat || null}
-                            max={this.props.imageWidth}
-                            tooltip="Center X"
-                            setValue={value => {
-                                crop.zoom.xFloat = value;
-                                this.setTransform({ zoom: crop.zoom })
-                            }}
-                        />
-                        <NumberInput
-                            type={NumberInputType.pixel}
-                            allowedTypes={[NumberInputType.pixel, NumberInputType.percent]}
-                            value={zoom.yFloat || null}
-                            max={this.props.imageWidth}
-                            tooltip="Center Y"
-                            setValue={value => {
-                                crop.zoom.yFloat = value;
-                                this.setTransform({ zoom: crop.zoom })
-                            }}
-                        />
-                        <NumberInput
-                            type={NumberInputType.float}
-                            allowedTypes={[NumberInputType.float]}
-                            value={zoom.zFloat || null}
-                            max={100}
-                            min={1}
-                            tooltip="Zoom"
-                            setValue={value => {
-                                crop.zoom.zFloat = value;
-                                this.setTransform({ zoom: crop.zoom })
-                            }}
-                        />
-                    </div>
+                    <div className="fields vertical" key={CropType.zoom}>
+                        <div className="fieldsBlock">
+                            <NumberInput
+                                type={this.defaultNumberType}
+                                allowedTypes={this.allowedTypes}
+                                value={zoom.xFloat || null}
+                                max={this.props.imageWidth}
+                                tooltip="Center X"
+                                setValue={value => {
+                                    crop.zoom.xFloat = value;
+                                    this.setTransform({ zoom: crop.zoom })
+                                }}
+                            />
+                            <NumberInput
+                                type={this.defaultNumberType}
+                                allowedTypes={this.allowedTypes}
+                                value={zoom.yFloat || null}
+                                max={this.props.imageWidth}
+                                tooltip="Center Y"
+                                setValue={value => {
+                                    crop.zoom.yFloat = value;
+                                    this.setTransform({ zoom: crop.zoom })
+                                }}
+                            />
+                        </div>
+                        <div className="fieldsBlock">
+                            <NumberInput
+                                type={NumberInputType.float}
+                                allowedTypes={[NumberInputType.float]}
+                                value={zoom.zFloat || null}
+                                max={100}
+                                min={1}
+                                tooltip="Zoom"
+                                setValue={value => {
+                                    crop.zoom.zFloat = value;
+                                    this.setTransform({ zoom: crop.zoom })
+                                }}
+                            />
+                        </div>
+                    </div >
                 );
         }
     }

@@ -1,7 +1,8 @@
 ﻿import * as React from "react";
 
 import { BaseControls, IBaseControlsProps } from "./BaseControls";
-import { IBackgroundTransform } from "../../../types/transformedImage/IImageTransforms";
+import { IBackgroundTransform } from "../../../types/transformedImage/Transforms";
+import { Color } from "../../../types/transformedImage/Color";
 
 import ColorPicker from "../inputs/ColorPicker";
 import { ColorInput, ColorInputType } from "../inputs/ColorInput";
@@ -13,14 +14,8 @@ export interface IBackgroundControlsState {
     pickerOpen: boolean;
 }
 
-export interface Color {
-    argb: { a?: number, r: number, g: number, b: number }
-}
-
 export class BackgroundControls extends BaseControls<IBackgroundControlsProps, IBackgroundTransform, IBackgroundControlsState> {
-    private emptyColor: Color = {
-        argb: { a: 1, r: 0, g: 0, b: 0 }
-    }
+    private emptyColor: Color = new Color({ r: 0, g: 0, b: 0 });
 
     state: IBackgroundControlsState = {
         pickerOpen: false
@@ -76,8 +71,9 @@ export class BackgroundControls extends BaseControls<IBackgroundControlsProps, I
                         value={background.color || this.emptyColor}
                         tooltip="Pick a color"
                         setValue={value => {
+                            value.rgb.a = value.rgb.a * 255;
                             this.setTransform({
-                                color: { argb: Object.assign({}, value.rgb) }
+                                color: new Color(value.rgb)
                             })
                         }}
                     />

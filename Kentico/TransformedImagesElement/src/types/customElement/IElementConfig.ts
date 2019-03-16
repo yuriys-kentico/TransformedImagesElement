@@ -1,5 +1,6 @@
 export interface IOptionalConfig {
     editorDefaultToPreview: boolean;
+    inputsDefaultToPercent: boolean;
     colorPickerDefaultColors: string[]
 }
 export interface IRequiredConfig {
@@ -11,7 +12,20 @@ export interface IElementConfig extends IOptionalConfig, IRequiredConfig {
 
 export const OPTIONAL_CONFIG: IOptionalConfig = {
     editorDefaultToPreview: false,
-    colorPickerDefaultColors: ["#D0021B", "#F5A623", "#F8E71C", "#7ED321", "#417505",
-        "#BD10E0", "#9013FE", "#4A90E2", "#50E3C2", "#B8E986", "#000000",
-        "#4A4A4A", "#9B9B9B", "#FFFFFF"]
+    inputsDefaultToPercent: false,
+    colorPickerDefaultColors: [
+        "#4caf50",
+        "#fb8c00",
+        "#ef5350",
+        "#fbc02d",
+        "#2196f3",
+        "#ff9800",
+        "#d32f2f",
+        "#f5f5f5",
+        "#9B9B9B",
+        "#616161",
+        "#424242",
+        "#000000",
+        "#FFFFFF"
+    ]
 }

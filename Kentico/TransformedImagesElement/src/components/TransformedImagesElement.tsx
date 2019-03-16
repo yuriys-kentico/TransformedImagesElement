@@ -6,7 +6,7 @@ import { IContext } from "../types/customElement/IContext";
 import { ICustomElement } from "../types/customElement/ICustomElement";
 import { IElementConfig, IRequiredConfig, OPTIONAL_CONFIG } from "../types/customElement/IElementConfig";
 import { TransformedImage } from "../types/transformedImage/TransformedImage";
-import { IImageTransforms, cloneTransforms } from "../types/transformedImage/IImageTransforms";
+import { Transforms, ITransforms } from "../types/transformedImage/Transforms";
 
 import { ImageListingTile } from "./listing/ImageListingTile";
 import { ListingButtons } from "./listing/ListingButtons";
@@ -35,9 +35,10 @@ export interface IElementState {
     selectedImages: TransformedImage[];
     previousSelectedImages?: TransformedImage[];
     editedImage?: TransformedImage;
-    previousEditedTransforms?: IImageTransforms;
+    previousEditedTransforms?: ITransforms;
     mode: TransformedImagesElementMode;
     editorUsePreview: boolean;
+    editedImageUrl?: string;
 }
 
 // Expose access to Kentico custom element API
@@ -53,7 +54,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         rawImages: this.props.initialRawImages,
         selectedImages: this.props.initialSelectedImages,
         mode: this.props.initialMode,
-        editorUsePreview: OPTIONAL_CONFIG.editorDefaultToPreview
+        editorUsePreview: OPTIONAL_CONFIG.editorDefaultToPreview,
     };
 
     setMode = (mode: TransformedImagesElementMode) => {
@@ -93,7 +94,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
     }
 
     storeEditedImage(image: TransformedImage) {
-        const transformsClone = cloneTransforms(image.transforms);
+        const transformsClone = Transforms.clone(image.transforms);
 
         this.setState({
             editedImage: image,
@@ -263,6 +264,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                         <TransformsEditor
                             editedImage={this.state.editedImage}
                             isPreview={() => this.state.editorUsePreview}
+                            updateUrl={url => this.setState({ editedImageUrl: url })}
                         />
                         <EditorButtons
                             onClickCancel={() => {
@@ -278,6 +280,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                                     : this.setState({ editorUsePreview: true })
                             }}
                             usePreview={this.state.editorUsePreview}
+                            editedImageUrl={this.state.editedImageUrl}
                         />
                     </div>
                 );

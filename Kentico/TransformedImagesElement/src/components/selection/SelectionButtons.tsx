@@ -23,7 +23,7 @@ export class SelectionButtons extends React.Component<ISelectionButtonsProps> {
             <div className="selectionBar">
                 <span>
                     <button
-                        className="btn btn--secondary"
+                        className="btn btn--destructive"
                         onClick={() => this.props.onClickCancel()}
                     >
                         Cancel

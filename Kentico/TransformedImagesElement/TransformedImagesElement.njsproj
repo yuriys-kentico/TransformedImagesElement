@@ -45,6 +45,7 @@
     <Content Include="tsconfig.json" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <TypeScriptCompile Include="src\components\editor\controls\FormatControls.tsx" />
     <TypeScriptCompile Include="src\components\editor\controls\BackgroundControls.tsx" />
     <TypeScriptCompile Include="src\components\editor\controls\BaseControls.tsx" />
     <TypeScriptCompile Include="src\components\editor\controls\CropControls.tsx" />
@@ -58,7 +59,8 @@
     <TypeScriptCompile Include="src\types\editor\Checkerboard.ts" />
     <TypeScriptCompile Include="src\components\Initialize.tsx" />
     <TypeScriptCompile Include="src\types\react-html-id.d.ts" />
-    <TypeScriptCompile Include="src\types\transformedImage\IImageTransforms.ts" />
+    <TypeScriptCompile Include="src\types\transformedImage\Color.ts" />
+    <TypeScriptCompile Include="src\types\transformedImage\Transforms.ts" />
     <TypeScriptCompile Include="src\types\transformedImage\TransformedImageModel.ts" />
     <TypeScriptCompile Include="src\types\transformedImage\TransformedImage.ts" />
     <TypeScriptCompile Include="src\types\customElement\ICustomElement.ts" />

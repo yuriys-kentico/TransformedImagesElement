@@ -1,10 +1,10 @@
 import { FieldModels } from "kentico-cloud-delivery/_commonjs/fields/field-models";
 
-import { IImageTransforms } from "./IImageTransforms";
+import { ITransforms } from "./Transforms";
 
 export class TransformedImageModel extends FieldModels.AssetModel {
     id: string;
-    transforms: IImageTransforms;
+    transforms: ITransforms;
 
     constructor(
         name: string,
@@ -13,7 +13,7 @@ export class TransformedImageModel extends FieldModels.AssetModel {
         description: string,
         url: string,
         id: string,
-        transforms: IImageTransforms
+        transforms: ITransforms
     ) {
         super(
             name,
@@ -26,4 +26,4 @@ export class TransformedImageModel extends FieldModels.AssetModel {
         this.id = id;
         this.transforms = transforms;
     }
-};
+}

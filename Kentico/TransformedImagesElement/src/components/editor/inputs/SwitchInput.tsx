@@ -4,6 +4,7 @@ import { enableUniqueIds } from "react-html-id";
 export interface ISwitchInputProps {
     onClick(): void;
     checked: boolean;
+    label: string;
 }
 
 export class SwitchInput extends React.PureComponent<ISwitchInputProps> {
@@ -15,7 +16,7 @@ export class SwitchInput extends React.PureComponent<ISwitchInputProps> {
 
     render() {
         return (
-            <div className="switch-wrapper">
+            <div className="input switch-wrapper">
                 <input
                     id={this.nextUniqueId()}
                     type="checkbox"
@@ -29,8 +30,8 @@ export class SwitchInput extends React.PureComponent<ISwitchInputProps> {
                     htmlFor={this.lastUniqueId()}
                 />
                 <span className="switch__label">
-                    Preview
-                    </span>
+                    {this.props.label}
+                </span>
             </div>
         );
     }

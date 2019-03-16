@@ -75,8 +75,17 @@ export function initElementFromDelivery(element: ICustomElement, context: IConte
                 error => showError(error)
             );
 
-        OPTIONAL_CONFIG.editorDefaultToPreview = Boolean(element.config.editorDefaultToPreview);
-        OPTIONAL_CONFIG.colorPickerDefaultColors = element.config.colorPickerDefaultColors;
+        if (element.config.editorDefaultToPreview) {
+            OPTIONAL_CONFIG.editorDefaultToPreview = element.config.editorDefaultToPreview;
+        }
+
+        if (element.config.inputsDefaultToPercent) {
+            OPTIONAL_CONFIG.inputsDefaultToPercent = element.config.inputsDefaultToPercent;
+        }
+
+        if (element.config.colorPickerDefaultColors) {
+            OPTIONAL_CONFIG.colorPickerDefaultColors = element.config.colorPickerDefaultColors;
+        }
     }
     catch (error) {
         showError(error);

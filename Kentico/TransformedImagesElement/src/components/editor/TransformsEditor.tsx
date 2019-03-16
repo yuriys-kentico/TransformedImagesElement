@@ -6,6 +6,7 @@ import { Checkerboard } from "../../types/editor/Checkerboard";
 import { BaseControls } from "./controls/BaseControls";
 import { BackgroundControls, IBackgroundControlsProps } from "./controls/BackgroundControls";
 import { CropControls, ICropControlsProps } from "./controls/CropControls";
+import { FormatControls, IFormatControlsProps } from "./controls/FormatControls";
 
 export enum EditorMode {
     preview,
@@ -16,6 +17,7 @@ export enum EditorMode {
 export interface IImageEditorProps {
     editedImage: TransformedImage;
     isPreview: () => boolean;
+    updateUrl: (url: string) => void;
 }
 
 export interface IImageEditorState {
@@ -63,6 +65,15 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
         }
     }
 
+    update(): void {
+        this.props.updateUrl(this.props.editedImage.buildEditedUrl().getUrl());
+        this.forceUpdate();
+    }
+
+    componentDidMount() {
+        this.props.updateUrl(this.props.editedImage.buildEditedUrl().getUrl());
+    }
+
     render() {
         let currentEditor = this.state.currentEditor;
         const transforms = this.props.editedImage.transforms;
@@ -84,15 +95,15 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                             className="imageMask"
                             onMouseDown={e => {
                                 if (this.state.currentEditor.onMouseDown(e))
-                                    this.forceUpdate()
+                                    this.update()
                             }}
                             onMouseMove={e => {
                                 if (this.state.currentEditor.onMouseMove(e))
-                                    this.forceUpdate()
+                                    this.update()
                             }}
                             onMouseUp={e => {
                                 if (this.state.currentEditor.onMouseUp(e))
-                                    this.forceUpdate()
+                                    this.update()
                             }}
                         >
                             {this.state.currentEditor
@@ -120,7 +131,7 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                             this.setState({ currentEditor: editor })
                         }}
                         getTransform={transforms.crop}
-                        onSetTransform={() => this.forceUpdate()}
+                        onSetTransform={() => this.update()}
                         imageWidth={this.props.editedImage.imageWidth}
                         imageHeight={this.props.editedImage.imageHeight}
                     />
@@ -130,7 +141,15 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                             this.setState({ currentEditor: editor })
                         }}
                         getTransform={transforms.background}
-                        onSetTransform={() => this.forceUpdate()}
+                        onSetTransform={() => this.update()}
+                    />
+                    <FormatControls
+                        getCurrentEditor={currentEditor as BaseControls<IFormatControlsProps>}
+                        setCurrentEditor={editor => {
+                            this.setState({ currentEditor: editor })
+                        }}
+                        getTransform={transforms.format}
+                        onSetTransform={() => this.update()}
                     />
                 </div>
             </div >

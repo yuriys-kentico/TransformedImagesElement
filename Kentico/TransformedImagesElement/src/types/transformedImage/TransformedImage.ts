@@ -1,59 +1,17 @@
 import { AssetModels } from "kentico-cloud-content-management";
 import { ImageUrlBuilder } from "kentico-cloud-delivery/_commonjs/images/image-url-builder";
 import { FieldModels } from "kentico-cloud-delivery/_commonjs/fields/field-models";
-import { ImageFitModeEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
+import { ImageFitModeEnum, ImageCompressionEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
 
 import { TransformedImageModel } from "./TransformedImageModel";
-import { IImageTransforms, CropType } from "./IImageTransforms";
-
-import { Color } from '../../components/editor/controls/BackgroundControls';
+import { ITransforms, CropType, Transforms } from "./Transforms";
+import { Color } from "./Color";
 
 export class TransformedImage extends AssetModels.Asset {
     private imageEndpoint: string = "https://assets-us-01.kc-usercontent.com";
     private baseImageUrl: string;
 
-    transforms: IImageTransforms = {
-        crop: {
-            type: CropType.scale,
-            scale: {
-                xFloat: null,
-                yFloat: null
-            },
-            fit: {
-                xFloat: null,
-                yFloat: null
-            },
-            frame: {
-                xFloat: null,
-                yFloat: null
-            },
-            box: {
-                xFloat: null,
-                yFloat: null,
-                wFloat: null,
-                hFloat: null
-            },
-            zoom: {
-                xFloat: null,
-                yFloat: null,
-                zFloat: null
-            },
-            resize: {
-                xFloat: null,
-                yFloat: null,
-            },
-            devicePixelRatio: null
-        },
-        background: {
-            color: null,
-        },
-        format: {
-            format: null,
-            lossless: null,
-            quality: null,
-            autoWebp: null,
-        }
-    };
+    transforms: ITransforms;
 
     constructor(
         projectId: string,
@@ -65,11 +23,31 @@ export class TransformedImage extends AssetModels.Asset {
         this.baseImageUrl = `${this.imageEndpoint}/${projectId}/${image.fileReference.id}/${image.fileName}`;
 
         if (model && model.transforms) {
-            this.transforms = model.transforms;
+            this.transforms = new Transforms(model.transforms);
+        } else {
+            this.transforms = new Transforms({
+                crop: {
+                    type: CropType.scale,
+                    scale: { xFloat: 0, yFloat: 0 },
+                    fit: { xFloat: 0, yFloat: 0 },
+                    frame: { xFloat: 0, yFloat: 0 },
+                    box: { xFloat: 0, yFloat: 0, wFloat: 0, hFloat: 0 },
+                    zoom: { xFloat: 0, yFloat: 0, zFloat: 0 },
+                    resize: { xFloat: 0, yFloat: 0 },
+                    devicePixelRatio: 0
+                },
+                background: {
+                    color: new Color({ r: 0, g: 0, b: 0 })
+                },
+                format: {
+                    format: null,
+                    autoWebp: false,
+                    lossless: null,
+                    quality: 0
+                }
+            });
         }
     }
-
-    private static toRounded = (value: number, decimals: number = 0) => Number(`${Math.round(Number(`${value}e${decimals}`))}e-${decimals}`);
 
     static assetIsImage(asset: AssetModels.Asset): boolean {
         const allowedImageTypes = [
@@ -83,49 +61,13 @@ export class TransformedImage extends AssetModels.Asset {
             && allowedImageTypes.indexOf(asset.type) > -1;
     }
 
-    static getBackgroundColor(color: Color): string {
-        const { a, r, g, b } = color.argb;
-
-        if (a === 0 && r === 0 && g === 0 && b === 0) {
-            return null;
-        }
-
-        let aHex: string;
-        let rHex: string;
-        let gHex: string;
-        let bHex: string;
-
-        const a255 = this.toRounded(a * 255);
-
-        if ((a255 || 0) % 17 === 0
-            && (r || 0) % 17 === 0
-            && (g || 0) % 17 === 0
-            && (b || 0) % 17 === 0) {
-            aHex = (a255 / 17).toString(16);
-            rHex = (r / 17).toString(16);
-            gHex = (g / 17).toString(16);
-            bHex = (b / 17).toString(16);
-        } else {
-            aHex = a255.toString(16).padStart(2, "0");
-            rHex = r.toString(16).padStart(2, "0");
-            gHex = g.toString(16).padStart(2, "0");
-            bHex = b.toString(16).padStart(2, "0");
-        }
-
-        if ((a || 0) === 0) {
-            aHex = "";
-        }
-
-        return `${aHex}${rHex}${gHex}${bHex}`;
-    }
-
     buildUrl(): ImageUrlBuilder {
         return new ImageUrlBuilder(this.baseImageUrl);
     }
 
     buildEditedUrl(): ImageUrlBuilder {
         const builder = this.buildUrl();
-        const { crop, background } = this.transforms;
+        const { crop, background, format } = this.transforms;
 
         switch (crop.type) {
             case CropType.scale:
@@ -151,7 +93,7 @@ export class TransformedImage extends AssetModels.Asset {
                     && crop.frame.yFloat > 0) {
                     // Fit=crop does not work with floats
                     builder
-                        .withRectangleCrop(.5, .5, crop.frame.xFloat, crop.frame.yFloat);
+                        .withRectangleCrop((1 - crop.frame.xFloat) / 2, (1 - crop.frame.yFloat) / 2, crop.frame.xFloat, crop.frame.yFloat);
                 }
                 break;
             case CropType.box:
@@ -207,8 +149,24 @@ export class TransformedImage extends AssetModels.Asset {
                 break;
         }
 
-        if (background.color) {
-            builder.withCustomParam("bg", TransformedImage.getBackgroundColor(background.color));
+        if (background.color && !background.color.isEmpty()) {
+            builder.withCustomParam("bg", background.color.toShortHexString());
+        }
+
+        if (format.format) {
+            builder.withFormat(format.format);
+        }
+
+        if (format.autoWebp) {
+            builder.withAutomaticFormat(format.format);
+        }
+
+        if (format.lossless === ImageCompressionEnum.Lossless) {
+            builder.withCompression(format.lossless);
+        }
+
+        if (format.quality) {
+            builder.withQuality(format.quality);
         }
 
         return builder;
@@ -219,7 +177,7 @@ export class TransformedImage extends AssetModels.Asset {
 
         return builder
             .withWidth(1000)
-            .withHeight(1000);;
+            .withHeight(1000);
     }
 
     getDeliveryModel(): FieldModels.AssetModel {
