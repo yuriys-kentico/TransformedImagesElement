@@ -16,7 +16,8 @@ export enum EditorMode {
 
 export interface IImageEditorProps {
     editedImage: TransformedImage;
-    isPreview: () => boolean;
+    disabled: boolean;
+    isPreview: boolean;
     updateUrl: (url: string) => void;
 }
 
@@ -28,21 +29,23 @@ export interface IImageEditorState {
 export class TransformsEditor extends React.Component<IImageEditorProps, IImageEditorState> {
     state: IImageEditorState = {
         currentEditor: null,
-        mode: this.getMode()
+        mode: this.mode
     }
 
-    getMode(): EditorMode {
-        return this.props.isPreview()
+    get mode(): EditorMode {
+        return this.props.isPreview
             ? this.state
                 ? this.state.mode
                 : EditorMode.hovering
             : EditorMode.noPreview;
     }
 
-    setMode = (mode: EditorMode) => this.setState({ mode: mode });
+    set mode(mode: EditorMode) {
+        this.setState({ mode: mode });
+    }
 
     getImageUrl(): string {
-        switch (this.getMode()) {
+        switch (this.mode) {
             case EditorMode.preview:
                 return this.props.editedImage.buildEditedUrl().getUrl();
             case EditorMode.hovering:
@@ -53,9 +56,11 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
     }
 
     getHoveringClass(): string {
-        switch (this.getMode()) {
+        switch (this.mode) {
             case EditorMode.preview:
-                return "preview";
+                return this.props.disabled
+                    ? "preview"
+                    : "edit preview";
             case EditorMode.hovering:
                 return "scaleToFit";
             case EditorMode.noPreview:
@@ -80,13 +85,17 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
             <div
                 className="editor"
                 style={{
-                    background: `url(${Checkerboard.generate("transparent", "rgba(0,0,0,.08)", 16)}) center left`
+                    background: `url(${Checkerboard.generate("transparent", "rgba(0,0,0,.04)", 16)}) center left`
                 }}
             >
                 <div
                     className={`imageEditorPreview ${this.getHoveringClass()}`}
-                    onMouseEnter={() => this.setMode(EditorMode.hovering)}
-                    onMouseLeave={() => this.setMode(EditorMode.preview)}
+                    onMouseEnter={() => this.props.disabled
+                        ? this.mode = EditorMode.preview
+                        : this.mode = EditorMode.hovering}
+                    onMouseLeave={() => this.props.disabled
+                        ? this.mode = EditorMode.preview
+                        : this.mode = EditorMode.preview}
                 >
                     <span className="imageWrapper">
                         <div
@@ -115,44 +124,48 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                         />
                     </span>
                 </div>
-                <div
-                    className="editorControls"
-                    onClick={e => {
-                        if (this.state.currentEditor) {
-                            this.state.currentEditor.onClickSidebar();
-                        }
+                {
+                    this.props.disabled
+                        ? null
+                        : <div
+                            className="editorControls"
+                            onClick={e => {
+                                if (this.state.currentEditor) {
+                                    this.state.currentEditor.onClickSidebar();
+                                }
 
-                        e.stopPropagation();
-                        e.nativeEvent.stopImmediatePropagation();
-                    }}
-                >
-                    <CropControls
-                        currentEditor={currentEditor as any}
-                        setCurrentEditor={editor => {
-                            this.setState({ currentEditor: editor })
-                        }}
-                        transform={transforms.crop}
-                        setTransform={() => this.update()}
-                        imageWidth={imageWidth ? imageWidth : 0}
-                        imageHeight={imageHeight ? imageHeight : 0}
-                    />
-                    <BackgroundControls
-                        currentEditor={currentEditor as any}
-                        setCurrentEditor={editor => {
-                            this.setState({ currentEditor: editor })
-                        }}
-                        transform={transforms.background}
-                        setTransform={() => this.update()}
-                    />
-                    <FormatControls
-                        currentEditor={currentEditor as any}
-                        setCurrentEditor={editor => {
-                            this.setState({ currentEditor: editor })
-                        }}
-                        transform={transforms.format}
-                        setTransform={() => this.update()}
-                    />
-                </div>
+                                e.stopPropagation();
+                                e.nativeEvent.stopImmediatePropagation();
+                            }}
+                        >
+                            <CropControls
+                                currentEditor={currentEditor as any}
+                                setCurrentEditor={editor => {
+                                    this.setState({ currentEditor: editor })
+                                }}
+                                transform={transforms.crop}
+                                setTransform={() => this.update()}
+                                imageWidth={imageWidth ? imageWidth : 0}
+                                imageHeight={imageHeight ? imageHeight : 0}
+                            />
+                            <BackgroundControls
+                                currentEditor={currentEditor as any}
+                                setCurrentEditor={editor => {
+                                    this.setState({ currentEditor: editor })
+                                }}
+                                transform={transforms.background}
+                                setTransform={() => this.update()}
+                            />
+                            <FormatControls
+                                currentEditor={currentEditor as any}
+                                setCurrentEditor={editor => {
+                                    this.setState({ currentEditor: editor })
+                                }}
+                                transform={transforms.format}
+                                setTransform={() => this.update()}
+                            />
+                        </div>
+                }
             </div >
         );
     }

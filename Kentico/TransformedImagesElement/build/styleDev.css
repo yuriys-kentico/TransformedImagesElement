@@ -160,7 +160,7 @@ body {
       .imageEditor .editor .imageEditorPreview.preview .imageWrapper .imageEditorImage {
         max-width: initial;
         max-height: initial; }
-    .imageEditor .editor .imageEditorPreview.preview::after {
+    .imageEditor .editor .imageEditorPreview.preview.edit::after {
       content: "(Hover to edit)";
       position: absolute;
       color: #757575;

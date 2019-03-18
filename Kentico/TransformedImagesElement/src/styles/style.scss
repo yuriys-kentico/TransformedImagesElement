@@ -252,7 +252,7 @@ body {
                     }
                 }
 
-                &::after {
+                &.edit::after {
                     content: "(Hover to edit)";
                     position: absolute;
                     color: #757575;

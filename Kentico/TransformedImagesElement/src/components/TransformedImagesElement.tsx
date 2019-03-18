@@ -23,6 +23,7 @@ export enum TransformedImagesElementMode {
 
 export interface IElementProps {
     context?: IContext;
+    initialDisabled: boolean;
     initialRawImages: TransformedImage[];
     initialSelectedImages: TransformedImage[];
     initialMode: TransformedImagesElementMode;
@@ -31,6 +32,7 @@ export interface IElementProps {
 }
 
 export interface IElementState {
+    disabled: boolean;
     rawImages: TransformedImage[];
     selectedImages: TransformedImage[];
     previousSelectedImages: TransformedImage[];
@@ -51,6 +53,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
     private editorWrapper: HTMLDivElement | null;
 
     state: IElementState = {
+        disabled: this.props.initialDisabled,
         rawImages: this.props.initialRawImages,
         selectedImages: this.props.initialSelectedImages,
         previousSelectedImages: [],
@@ -168,7 +171,12 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         }
     }
 
-    componentDidMount = this.updateHeight;
+    componentDidMount() {
+        CustomElement.onDisabledChanged(disabled =>
+            this.setState({ disabled: disabled }));
+
+        this.updateHeight;
+    };
 
     componentDidUpdate = this.updateHeight;
 
@@ -206,15 +214,19 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                         className="imageListing"
                         ref={e => this.listingList = e}
                     >
-                        <ListingButtons
-                            onClickPick={() => { this.storeCurrentSelectedImages(); this.setMode(TransformedImagesElementMode.selection) }}
-                        />
+                        {
+                            this.state.disabled
+                                ? null
+                                : <ListingButtons
+                                    onClickPick={() => { this.storeCurrentSelectedImages(); this.setMode(TransformedImagesElementMode.selection) }}
+                                />
+                        }
                         <div className="list">
                             {this.state.selectedImages.map((a, i) => (
                                 <ImageListingTile
                                     image={a}
                                     key={i}
-                                    showActions={true}
+                                    showActions={!this.state.disabled}
                                     isSelected={false}
                                     onRemove={image => this.selectImage(image)}
                                     onSelect={image => {
@@ -275,7 +287,8 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                         >
                             <TransformsEditor
                                 editedImage={this.state.editedImage}
-                                isPreview={() => this.state.editorUsePreview}
+                                disabled={this.state.disabled}
+                                isPreview={this.state.editorUsePreview}
                                 updateUrl={url => this.setState({ editedImageUrl: url })}
                             />
                             <EditorButtons
@@ -292,8 +305,10 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                                         : this.setState({ editorUsePreview: true })
                                 }}
                                 usePreview={this.state.editorUsePreview}
+                                disabled={this.state.disabled}
                                 editedImageUrl={this.state.editedImageUrl}
                             />
+
                         </div>
                     );
                 } else {

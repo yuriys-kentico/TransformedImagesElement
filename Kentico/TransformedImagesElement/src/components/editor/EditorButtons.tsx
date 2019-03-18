@@ -7,6 +7,7 @@ export interface IEditorButtonsProps {
     onClickUpdate(): void;
     onClickPreview(): void;
     usePreview: boolean;
+    disabled: boolean;
     editedImageUrl: string;
 }
 
@@ -45,12 +46,16 @@ export class EditorButtons extends React.PureComponent<IEditorButtonsProps> {
                     >
                         Cancel
                     </button>
-                    <button
-                        className="btn btn--primary"
-                        onClick={() => this.props.onClickUpdate()}
-                    >
-                        Update
-                    </button>
+                    {
+                        this.props.disabled
+                            ? null
+                            : <button
+                                className="btn btn--primary"
+                                onClick={() => this.props.onClickUpdate()}
+                            >
+                                Update
+                            </button>
+                    }
                 </span>
 
             </div>

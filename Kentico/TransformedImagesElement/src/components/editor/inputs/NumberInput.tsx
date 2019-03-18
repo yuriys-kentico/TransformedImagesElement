@@ -26,9 +26,19 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
         isValid: true,
     }
 
-    private getType = () => this.state.type || this.props.type;
+    //private UPKEY = 38;
+    //private DOWNKEY = 40;
 
-    private typeSubject: Subject<NumberInputType> = new BehaviorSubject(this.getType());
+    //private inputKeyCodes = [
+    //    this.UPKEY,
+    //    this.DOWNKEY
+    //];
+
+    private get type() {
+        return this.state.type || this.props.type;
+    }
+
+    private typeSubject: Subject<NumberInputType> = new BehaviorSubject(this.type);
 
     private switchType(type: NumberInputType): void {
         const allowedTypes = this.props.allowedTypes;
@@ -50,6 +60,11 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
                 map(v => v.currentTarget.value)
             );
 
+            //const pressedKey = fromEvent<React.KeyboardEvent<HTMLInputElement>>(this.input, "keydown").pipe(
+            //    map(k => k.keyCode),
+            //    filter(k => this.inputKeyCodes.indexOf(k) > -1)
+            //);
+
             this.typeSubject.pipe(
                 switchMap(t => this.parseRawValue(rawInput, t))
             ).subscribe(
@@ -57,49 +72,8 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
                     this.props.setValue(v);
                     this.setState({ isValid: true });
                 });
-
-            //const onKeydown = fromEvent<React.KeyboardEvent<HTMLInputElement>>(this.input, "keydown");
-
-            // 38 = up, 40 = down
-
-            //this.typeSubject.pipe(
-            //    switchMap(t => {
-            //        switch (t) {
-            //            case NumberInputType.int:
-            //            case NumberInputType.pixel:
-            //                return onKeydown.pipe(
-            //                    map(k => {
-            //                        if (k.keyCode === 38) {
-            //                            return 1;
-            //                        }
-            //                        if (k.keyCode === 40) {
-            //                            return -1;
-            //                        }
-            //                    }))
-            //            case NumberInputType.percent:
-            //            case NumberInputType.float:
-            //                return onKeydown.pipe(
-            //                    map(k => {
-            //                        if (k.keyCode === 38) {
-            //                            return .01;
-            //                        }
-            //                        if (k.keyCode === 40) {
-            //                            return -.01;
-            //                        }
-            //                    }))
-            //        }
-            //        return from([0]);
-            //    })
-            //).subscribe(
-            //    (k: number) => {
-            //        if (this.props.value !== null) {
-            //            this.props.setValue(this.props.value + k);
-            //        }
-            //    }
-            //);
         }
     }
-
     private parseRawValue(rawInput: Observable<string>, type: NumberInputType): Observable<number> {
         const min = this.props.min || 0;
 
@@ -110,7 +84,6 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
                     map(v => NumberUtils.ensureBetween(v, this.props.max, min)),
                     map(this.storeValueInState),
                     map(NumberUtils.toNumber),
-                    map(v => NumberUtils.toBetween(v, this.props.max, min)),
                     map(v => NumberUtils.toRounded(v, 4))
                 )
 
@@ -120,7 +93,6 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
                     map(v => NumberUtils.ensureBetween(v, this.props.max, min)),
                     map(this.storeValueInState),
                     map(NumberUtils.toNumber),
-                    map(v => NumberUtils.toBetween(v, this.props.max, min)),
                     map(v => v / this.props.max),
                     map(v => NumberUtils.toRounded(v, 4))
                 )
@@ -151,20 +123,20 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
     getValue(value: number): string {
         let max = this.props.max;
 
-        switch (this.getType()) {
+        switch (this.type) {
             case NumberInputType.int:
                 return NumberUtils.toRounded(value, 0).toString();
             case NumberInputType.pixel:
                 return NumberUtils.toRounded(value * max, 0).toString();
             case NumberInputType.percent:
-                return (value * 100).toString();
+                return NumberUtils.toRounded(value * 100, 2).toString();
             case NumberInputType.float:
-                return value.toString();
+                return NumberUtils.toRounded(value, 2).toString();
         }
     }
 
     renderLabel(): React.ReactNode {
-        const type = this.getType();
+        const type = this.type;
 
         let title;
         let onClick;

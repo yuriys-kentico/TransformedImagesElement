@@ -29,6 +29,7 @@ export function initElementFromDelivery(element: ICustomElement, context: IConte
 
         const elementProps: IElementProps = {
             context: context,
+            initialDisabled: element.disabled,
             initialRawImages: rawAssets
                 .map(a => new TransformedImage(context.projectId, a)),
             initialSelectedImages: rawAssets
@@ -48,6 +49,7 @@ export function initElementFromDelivery(element: ICustomElement, context: IConte
 
     const showError = (error: any) => {
         renderElementComponent({
+            initialDisabled: false,
             initialRawImages: [],
             initialSelectedImages: [],
             initialMode: TransformedImagesElementMode.configuration,

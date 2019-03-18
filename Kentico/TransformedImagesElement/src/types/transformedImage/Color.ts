@@ -33,7 +33,7 @@ export class Color {
         const bHex = NumberUtils.toHex(b);
         let aHex: string;
 
-        if (a === 0 || a === 255) {
+        if (a === 0) {
             aHex = "";
         } else {
             aHex = NumberUtils.toHex(a);
@@ -89,17 +89,17 @@ export class Color {
     constructor(rgba: { r: number, g: number, b: number, a?: number }) {
         this.rgba = rgba
             ? {
-                a: rgba.a ? NumberUtils.toRounded(rgba.a) : 255,
+                a: rgba.a ? NumberUtils.toRounded(rgba.a) : 0,
                 r: NumberUtils.toRounded(rgba.r) || 0,
                 g: NumberUtils.toRounded(rgba.g) || 0,
                 b: NumberUtils.toRounded(rgba.b) || 0
             }
-            : { a: 255, r: 0, g: 0, b: 0 };
+            : { a: 0, r: 0, g: 0, b: 0 };
     }
 
     isEmpty(): boolean {
         const { a, r, g, b } = this.rgba;
-        return (a === 0 || a === 255)
+        return (a === 0)
             && r === 0
             && g === 0
             && b === 0;
@@ -128,7 +128,7 @@ export class Color {
             const gHex = NumberUtils.toHex(g / 17, 1);
             const bHex = NumberUtils.toHex(b / 17, 1);
 
-            if (a === 0 || a === 255) {
+            if (a === 0) {
                 aHex = "";
             }
 
