@@ -175,7 +175,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         CustomElement.onDisabledChanged(disabled =>
             this.setState({ disabled: disabled }));
 
-        this.updateHeight;
+        this.updateHeight();
     };
 
     componentDidUpdate = this.updateHeight;
