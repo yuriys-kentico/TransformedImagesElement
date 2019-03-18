@@ -1,10 +1,10 @@
 ﻿import * as React from "react";
 
 export interface IBaseControlsProps<TTransform> {
-    getCurrentEditor: BaseControls<this, TTransform>;
+    currentEditor: BaseControls<this, TTransform>;
     setCurrentEditor(editor: BaseControls<this, TTransform>): void;
-    getTransform: TTransform;
-    onSetTransform: (transform: TTransform) => void;
+    transform: TTransform;
+    setTransform: (transform: TTransform) => void;
     visible?: boolean;
 }
 
@@ -16,7 +16,7 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
     constructor(props: IProps) {
         super(props);
 
-        if (props.getCurrentEditor === null) {
+        if (props.currentEditor === null) {
             props.setCurrentEditor(this);
         }
     }
@@ -24,14 +24,14 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
     setTransform<K extends keyof TTransform>(
         transform: (Pick<TTransform, K> | TTransform | null)
     ): void {
-        const prevTransform = this.props.getTransform;
+        const prevTransform = this.props.transform;
 
         Object.assign(
             prevTransform,
             transform
         );
 
-        this.props.onSetTransform(prevTransform);
+        this.props.setTransform(prevTransform);
     }
 
     abstract onClickSidebar(): void;
@@ -49,7 +49,7 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
     render() {
         return this.props.visible === undefined || this.props.visible ? (
             <div
-                className={`control ${this.props.getCurrentEditor === this
+                className={`control ${this.props.currentEditor === this
                     ? "selected"
                     : ""
                     }`}

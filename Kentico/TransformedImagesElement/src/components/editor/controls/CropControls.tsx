@@ -21,17 +21,11 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
     onClickSidebar(): void {
     }
 
-    onMouseDown(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean {
-        return false;
-    }
+    onMouseDown = () => false;
 
-    onMouseMove(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean {
-        return false;
-    }
+    onMouseMove = () => false;
 
-    onMouseUp(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean {
-        return false;
-    }
+    onMouseUp = () => false;
 
     getImageOverlay() {
         return (
@@ -226,7 +220,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
     }
 
     renderControls() {
-        const crop = this.props.getTransform;
+        const crop = this.props.transform;
 
         return (
             <div>

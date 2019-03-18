@@ -17,17 +17,15 @@ interface IHex {
 export class Color {
     internalRgba: IRgba;
 
-    get rgba(): (Pick<IRgba, "r" | "g" | "b" | "a"> | IRgba | null) {
+    get rgba(): IRgba {
         return this.internalRgba;
     }
 
-    set rgba(
-        rgba: (Pick<IRgba, "r" | "g" | "b" | "a"> | IRgba | null)
-    ) {
+    set rgba(rgba: IRgba) {
         this.internalRgba = rgba;
     }
 
-    get hex(): (Pick<IHex, "r" | "g" | "b" | "a"> | IHex | null) {
+    get hex(): IHex {
         const { a, r, g, b } = this.internalRgba;
 
         const rHex = NumberUtils.toHex(r);
@@ -50,7 +48,7 @@ export class Color {
     }
 
     set hex(
-        argbHex: (Pick<IHex, "a" | "r" | "g" | "b"> | IHex | null)
+        argbHex: IHex
     ) {
         this.internalRgba = {
             r: Number(`0x${argbHex.r}`) || 0,
@@ -64,7 +62,7 @@ export class Color {
         const doubleCharacter = (c: string) => c + c;
 
         if (argbHex.length === 3) {
-            argbHex = `0${argbHex}`;
+            argbHex = `${argbHex}0`;
         }
 
         if (argbHex.length === 4) {
@@ -72,13 +70,13 @@ export class Color {
         }
 
         if (argbHex.length === 6) {
-            argbHex = `00${argbHex}`;
+            argbHex = `${argbHex}00`;
         }
 
-        let a = Number(`0x${argbHex.slice(0, 2)}`) || 0;
-        const r = Number(`0x${argbHex.slice(2, 4)}`) || 0;
-        const g = Number(`0x${argbHex.slice(4, 6)}`) || 0;
-        const b = Number(`0x${argbHex.slice(6, 8)}`) || 0;
+        const r = Number(`0x${argbHex.slice(0, 2)}`) || 0;
+        const g = Number(`0x${argbHex.slice(2, 4)}`) || 0;
+        const b = Number(`0x${argbHex.slice(4, 6)}`) || 0;
+        let a = Number(`0x${argbHex.slice(6, 8)}`) || 0;
 
         return new Color({
             r: r,
@@ -91,7 +89,7 @@ export class Color {
     constructor(rgba: { r: number, g: number, b: number, a?: number }) {
         this.rgba = rgba
             ? {
-                a: NumberUtils.toRounded(rgba.a) || 255,
+                a: rgba.a ? NumberUtils.toRounded(rgba.a) : 255,
                 r: NumberUtils.toRounded(rgba.r) || 0,
                 g: NumberUtils.toRounded(rgba.g) || 0,
                 b: NumberUtils.toRounded(rgba.b) || 0
@@ -107,11 +105,13 @@ export class Color {
             && b === 0;
     }
 
-    toHexString(): string {
-        return `${this.hex.a}${this.hex.r}${this.hex.g}${this.hex.b}`;
+    toHexString(fastlyFormat: boolean = false): string {
+        return fastlyFormat
+            ? `${this.hex.a}${this.hex.r}${this.hex.g}${this.hex.b}`
+            : `${this.hex.r}${this.hex.g}${this.hex.b}${this.hex.a}`;
     }
 
-    toShortHexString(): string {
+    toShortHexString(fastlyFormat: boolean = false): string {
         if (this.isEmpty()) {
             return "";
         }
@@ -132,10 +132,12 @@ export class Color {
                 aHex = "";
             }
 
-            return `${aHex}${rHex}${gHex}${bHex}`;
+            return fastlyFormat
+                ? `${aHex}${rHex}${gHex}${bHex}`
+                : `${rHex}${gHex}${bHex}${aHex}`;
         }
 
-        return this.toHexString();
+        return this.toHexString(fastlyFormat);
     }
 
     toCssRgba(): string {

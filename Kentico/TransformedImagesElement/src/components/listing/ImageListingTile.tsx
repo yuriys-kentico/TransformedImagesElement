@@ -10,11 +10,11 @@ export interface IimageListingProps {
     showActions: boolean;
     isSelected: boolean;
     onSelect(image: TransformedImage): void;
-    onRemove?(image: TransformedImage): void;
-    onAddParams?(image: TransformedImage): void;
+    onRemove(image: TransformedImage): void;
+    onAddParams(image: TransformedImage): void;
 }
 
-export class ImageListingTile extends React.Component<IimageListingProps> {
+export class ImageListingTile extends React.PureComponent<IimageListingProps> {
     getImageUrl(item: TransformedImage): string {
         return item.buildEditedUrl()
             .withWidth(400)
@@ -33,7 +33,7 @@ export class ImageListingTile extends React.Component<IimageListingProps> {
     }
 
     render() {
-        let actions: JSX.Element[] = null;
+        let actions: JSX.Element[] = [];
 
         if (this.props.showActions) {
             actions = [

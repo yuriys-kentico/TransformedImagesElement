@@ -10,7 +10,7 @@ export interface IEditorButtonsProps {
     editedImageUrl: string;
 }
 
-export class EditorButtons extends React.Component<IEditorButtonsProps> {
+export class EditorButtons extends React.PureComponent<IEditorButtonsProps> {
     render() {
         return (
             <div className="selectionBar">

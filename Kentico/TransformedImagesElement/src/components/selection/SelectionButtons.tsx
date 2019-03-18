@@ -7,7 +7,7 @@ export interface ISelectionButtonsProps {
     showLoadMore: boolean;
 }
 
-export class SelectionButtons extends React.Component<ISelectionButtonsProps> {
+export class SelectionButtons extends React.PureComponent<ISelectionButtonsProps> {
     render() {
         const loadMoreButton = this.props.showLoadMore ?
             (

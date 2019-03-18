@@ -10,7 +10,7 @@
 
         // If no context can be found, return early
         if (!ctx) {
-            return null
+            return "";
         }
 
         // Draw white everywhere

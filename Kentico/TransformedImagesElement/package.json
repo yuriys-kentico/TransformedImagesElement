@@ -7,7 +7,7 @@
   "scripts": {
     "start": "npx http-server -S -C server.cert -K server.key",
     "buildDev": "webpack  --mode=development",
-    "buildProd": "SET NODE_ENV=production&& webpack --mode=production"
+    "build": "SET NODE_ENV=production&& webpack --mode=production"
   },
   "devDependencies": {
     "@types/node": "11.9.4",

@@ -36,7 +36,6 @@ body {
   display: flex;
   flex-wrap: wrap;
   max-height: calc(600px + 3em);
-  overflow-y: scroll;
   overflow-x: hidden; }
   .imageSelection .list .imageListingWrapper, .imageListing .list .imageListingWrapper {
     width: calc(100%/3 - 1em);
@@ -96,29 +95,34 @@ body {
         border-bottom-left-radius: .1em;
         transition: all 0.15s cubic-bezier(0.23, 1, 0.32, 1) 0ms;
         padding: .5em; }
-        .imageSelection .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTitle, .imageListing .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTitle {
-          display: block;
-          width: 100%;
-          margin-bottom: .25em;
-          font-size: 0.9em;
-          line-height: 1.25;
-          word-wrap: break-word;
-          white-space: nowrap; }
-          .imageSelection .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTitle .assetDetailsName, .imageListing .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTitle .assetDetailsName {
-            overflow: hidden;
-            text-overflow: ellipsis; }
-            .imageSelection .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTitle .assetDetailsName .assetDetailsFileName, .imageListing .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTitle .assetDetailsName .assetDetailsFileName {
-              color: #424242; }
-        .imageSelection .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTechDetails, .imageListing .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTechDetails {
-          display: block;
-          font-size: 0.8em;
-          line-height: 1.1;
-          opacity: 1; }
-          .imageSelection .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTechDetails .assetDetailsTechDetail:after, .imageListing .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTechDetails .assetDetailsTechDetail:after {
-            color: #424242;
-            content: "\A0\B7\A0"; }
-          .imageSelection .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTechDetails .assetDetailsTechDetail:last-of-type:after, .imageListing .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTechDetails .assetDetailsTechDetail:last-of-type:after {
-            content: ""; }
+        .imageSelection .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary, .imageListing .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary {
+          min-width: 0; }
+          .imageSelection .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTitle, .imageListing .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTitle {
+            display: block;
+            width: 100%;
+            margin-bottom: .25em;
+            font-size: 0.9em;
+            line-height: 1.25;
+            word-wrap: break-word;
+            white-space: nowrap; }
+            .imageSelection .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTitle .assetDetailsName, .imageListing .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTitle .assetDetailsName {
+              overflow: hidden;
+              text-overflow: ellipsis; }
+              .imageSelection .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTitle .assetDetailsName:hover, .imageListing .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTitle .assetDetailsName:hover {
+                overflow: visible;
+                white-space: normal; }
+              .imageSelection .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTitle .assetDetailsName .assetDetailsFileName, .imageListing .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTitle .assetDetailsName .assetDetailsFileName {
+                color: #424242; }
+          .imageSelection .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTechDetails, .imageListing .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTechDetails {
+            display: block;
+            font-size: 0.8em;
+            line-height: 1.1;
+            opacity: 1; }
+            .imageSelection .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTechDetails .assetDetailsTechDetail:after, .imageListing .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTechDetails .assetDetailsTechDetail:after {
+              color: #424242;
+              content: "\A0\B7\A0"; }
+            .imageSelection .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTechDetails .assetDetailsTechDetail:last-of-type:after, .imageListing .list .imageListingWrapper .imageListing .imageListingBottom .assetDetailsSummary .assetDetailsTechDetails .assetDetailsTechDetail:last-of-type:after {
+              content: ""; }
 
 .imageEditor .editor {
   display: flex;
@@ -222,7 +226,7 @@ body {
           .imageEditor .editor .editorControls .control .fields .input > input {
             width: 3.5em;
             text-align: right;
-            min-width: initial;
+            min-width: 3.5em;
             flex: 1; }
             .imageEditor .editor .editorControls .control .fields .input > input + span {
               padding: .375em .25em 0 .25em;
@@ -230,13 +234,13 @@ body {
               .imageEditor .editor .editorControls .control .fields .input > input + span[title] {
                 color: #2196f3;
                 cursor: pointer; }
-          .imageEditor .editor .editorControls .control .fields .input > span {
+          .imageEditor .editor .editorControls .control .fields .input > .label {
             padding: .375em .25em 0 .25em;
             margin: 0em; }
-            .imageEditor .editor .editorControls .control .fields .input > span + input {
+            .imageEditor .editor .editorControls .control .fields .input > .label + input {
               width: 3.5em;
               text-align: right;
-              min-width: initial;
+              min-width: 3.5em;
               flex: 1; }
           .imageEditor .editor .editorControls .control .fields .input:last-of-type input + span {
             /*padding: 0.2em 0;*/ }
@@ -312,3 +316,8 @@ body {
 
 .invalidUsage {
   margin: 1em; }
+
+.errorBoundary {
+  margin: 1em; }
+  .errorBoundary span {
+    white-space: pre; }

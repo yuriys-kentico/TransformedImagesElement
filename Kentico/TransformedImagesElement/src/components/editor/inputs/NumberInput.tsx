@@ -1,5 +1,5 @@
 ﻿import * as React from 'react';
-import { fromEvent, Observable, Subscriber } from "rxjs";
+import { fromEvent, Observable, Subject, BehaviorSubject } from "rxjs";
 import { map, filter, switchMap } from 'rxjs/operators';
 
 import { NumberUtils } from '../../../types/NumberUtils';
@@ -20,15 +20,15 @@ export interface INumberInputProps<TType, TValue> extends IInputProps<TType, TVa
 }
 
 export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, number>, IInputState<NumberInputType>, NumberInputType, number> {
-    private typeSubject: Subscriber<NumberInputType> = new Subscriber();
-
     state: IInputState<NumberInputType> = {
         type: null,
-        rawValue: null,
+        rawValue: "",
         isValid: true,
     }
 
     private getType = () => this.state.type || this.props.type;
+
+    private typeSubject: Subject<NumberInputType> = new BehaviorSubject(this.getType());
 
     private switchType(type: NumberInputType): void {
         const allowedTypes = this.props.allowedTypes;
@@ -40,7 +40,7 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
         this.typeSubject.next(newType);
         this.setState({
             type: newType,
-            rawValue: null
+            rawValue: ""
         });
     }
 
@@ -50,10 +50,7 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
                 map(v => v.currentTarget.value)
             );
 
-            new Observable<NumberInputType>(o => {
-                this.typeSubject = o;
-                this.typeSubject.next(this.getType());
-            }).pipe(
+            this.typeSubject.pipe(
                 switchMap(t => this.parseRawValue(rawInput, t))
             ).subscribe(
                 v => {
@@ -63,8 +60,42 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
 
             //const onKeydown = fromEvent<React.KeyboardEvent<HTMLInputElement>>(this.input, "keydown");
 
-            //onKeydown.subscribe(
-            //    k => console.log(k.which)
+            // 38 = up, 40 = down
+
+            //this.typeSubject.pipe(
+            //    switchMap(t => {
+            //        switch (t) {
+            //            case NumberInputType.int:
+            //            case NumberInputType.pixel:
+            //                return onKeydown.pipe(
+            //                    map(k => {
+            //                        if (k.keyCode === 38) {
+            //                            return 1;
+            //                        }
+            //                        if (k.keyCode === 40) {
+            //                            return -1;
+            //                        }
+            //                    }))
+            //            case NumberInputType.percent:
+            //            case NumberInputType.float:
+            //                return onKeydown.pipe(
+            //                    map(k => {
+            //                        if (k.keyCode === 38) {
+            //                            return .01;
+            //                        }
+            //                        if (k.keyCode === 40) {
+            //                            return -.01;
+            //                        }
+            //                    }))
+            //        }
+            //        return from([0]);
+            //    })
+            //).subscribe(
+            //    (k: number) => {
+            //        if (this.props.value !== null) {
+            //            this.props.setValue(this.props.value + k);
+            //        }
+            //    }
             //);
         }
     }
@@ -147,6 +178,7 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
 
         return (
             <span
+                className="label"
                 title={title}
                 onClick={onClick}
             >

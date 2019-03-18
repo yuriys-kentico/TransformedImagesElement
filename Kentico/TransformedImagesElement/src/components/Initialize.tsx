@@ -1,23 +1,25 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { Observable } from "rxjs";
+import { Observable, empty } from "rxjs";
 import { ContentManagementClient, AssetModels, AssetResponses } from "kentico-cloud-content-management";
 
 import { ICustomElement } from "./../types/customElement/ICustomElement";
 import { IContext } from "./../types/customElement/IContext";
 import { TransformedImageModel } from "./../types/transformedImage/TransformedImageModel";
 import { TransformedImage } from "./../types/transformedImage/TransformedImage";
-import { InvalidUsage } from "./InvalidUsage";
-
-import { TransformedImagesElement, IElementProps, TransformedImagesElementMode } from "./TransformedImagesElement";
 import { OPTIONAL_CONFIG } from "../types/customElement/IElementConfig";
+
+import { InvalidUsage } from "./InvalidUsage";
+import { TransformedImagesElement, IElementProps, TransformedImagesElementMode } from "./TransformedImagesElement";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 export function initElementFromDelivery(element: ICustomElement, context: IContext): void {
     const loadAssetsFromDelivery = (
         context: IContext,
         selectedImageModels: TransformedImageModel[],
         items: AssetModels.Asset[],
-        moreAssetsObservable: Observable<AssetResponses.AssetsListResponse>) => {
+        moreAssetsObservable: Observable<AssetResponses.AssetsListResponse>
+    ) => {
         const rawAssets = items
             .filter(i =>
                 TransformedImage.assetIsImage(i)
@@ -26,6 +28,7 @@ export function initElementFromDelivery(element: ICustomElement, context: IConte
         const selectedIds = selectedImageModels ? selectedImageModels.map(i => i.id) : [];
 
         const elementProps: IElementProps = {
+            context: context,
             initialRawImages: rawAssets
                 .map(a => new TransformedImage(context.projectId, a)),
             initialSelectedImages: rawAssets
@@ -45,16 +48,28 @@ export function initElementFromDelivery(element: ICustomElement, context: IConte
 
     const showError = (error: any) => {
         renderElementComponent({
+            initialRawImages: [],
+            initialSelectedImages: [],
             initialMode: TransformedImagesElementMode.configuration,
+            moreAssetsObservable: empty(),
             configurationError: error,
         });
     }
 
     const renderElementComponent = (elementProps: IElementProps) => {
-        ReactDOM.render(<TransformedImagesElement {...elementProps} />, document.getElementById('root'));
+        ReactDOM.render(
+            <ErrorBoundary>
+                <TransformedImagesElement {...elementProps} />
+            </ErrorBoundary>
+            , document.getElementById('root')
+        );
     }
 
     try {
+        if (element.config === null) {
+            throw Error("The configuration is missing!");
+        }
+
         const client = new ContentManagementClient({
             projectId: context.projectId,
             apiKey: element.config.contentManagementAPIKey
@@ -65,18 +80,24 @@ export function initElementFromDelivery(element: ICustomElement, context: IConte
             .subscribe(
                 response => loadAssetsFromDelivery(
                     context,
-                    JSON.parse(element.value) as TransformedImageModel[],
+                    element.value
+                        ? JSON.parse(element.value) as TransformedImageModel[]
+                        : [],
                     response.data.items,
                     response.data.pagination.continuationToken !== null
                         ? client.listAssets()
                             .withCustomParameter("continuationToken", response.data.pagination.continuationToken)
                             .toObservable()
-                        : null),
+                        : empty()),
                 error => showError(error)
             );
 
         if (element.config.editorDefaultToPreview) {
             OPTIONAL_CONFIG.editorDefaultToPreview = element.config.editorDefaultToPreview;
+        }
+
+        if (element.config.editorDefaultCropType) {
+            OPTIONAL_CONFIG.editorDefaultCropType = element.config.editorDefaultCropType;
         }
 
         if (element.config.inputsDefaultToPercent) {

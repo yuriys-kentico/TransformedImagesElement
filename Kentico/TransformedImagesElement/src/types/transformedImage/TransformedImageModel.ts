@@ -10,7 +10,7 @@ export class TransformedImageModel extends FieldModels.AssetModel {
         name: string,
         type: string,
         size: number,
-        description: string,
+        description: string | null,
         url: string,
         id: string,
         transforms: ITransforms
@@ -19,7 +19,7 @@ export class TransformedImageModel extends FieldModels.AssetModel {
             name,
             type,
             size,
-            description,
+            description ? description : "",
             url,
         );
 

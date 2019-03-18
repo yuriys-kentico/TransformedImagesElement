@@ -10,4 +10,3 @@ export interface ICustomElement {
     setHeight: (value: number) => void;
     onDisabledChanged: (callback: (disabled: boolean) => void) => void;
 };
-

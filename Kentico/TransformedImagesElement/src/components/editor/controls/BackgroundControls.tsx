@@ -27,17 +27,11 @@ export class BackgroundControls extends BaseControls<IBackgroundControlsProps, I
         }
     }
 
-    onMouseDown(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean {
-        return false;
-    }
+    onMouseDown = () => false;
 
-    onMouseMove(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean {
-        return false;
-    }
+    onMouseMove = () => false;
 
-    onMouseUp(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean {
-        return false;
-    }
+    onMouseUp = () => false;
 
     getImageOverlay() {
         return (
@@ -47,7 +41,7 @@ export class BackgroundControls extends BaseControls<IBackgroundControlsProps, I
     }
 
     renderControls() {
-        const background = this.props.getTransform;
+        const background = this.props.transform;
 
         return (
             <div>

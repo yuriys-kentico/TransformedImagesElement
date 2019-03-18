@@ -1,7 +1,7 @@
 ﻿import * as React from "react";
-import { ImageCompressionEnum, ImageFormatEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
+import { ImageCompressionEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
 
-import { IFormatTransform } from "../../../types/transformedImage/Transforms";
+import { IFormatTransform, Format } from "../../../types/transformedImage/Transforms";
 
 import { BaseControls, IBaseControlsProps } from "./BaseControls";
 import { SwitchInput } from "../inputs/SwitchInput";
@@ -18,17 +18,14 @@ export class FormatControls extends BaseControls<IFormatControlsProps, IFormatTr
     onClickSidebar(): void {
     }
 
-    onMouseDown(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean {
-        return false;
-    }
+    //onMouseDown(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean {
+    //    return false;
+    //}
+    onMouseDown = () => false;
 
-    onMouseMove(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean {
-        return false;
-    }
+    onMouseMove = () => false;
 
-    onMouseUp(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean {
-        return false;
-    }
+    onMouseUp = () => false;
 
     getImageOverlay() {
         return (
@@ -38,64 +35,74 @@ export class FormatControls extends BaseControls<IFormatControlsProps, IFormatTr
     }
 
     renderControls() {
-        const format = this.props.getTransform;
+        const format = this.props.transform;
 
         return (
             <div>
                 <div className="fields vertical">
                     <div className="fieldsBlock">
-                        <SwitchInput
-                            checked={format.autoWebp}
-                            onClick={() => this.setTransform({ autoWebp: !format.autoWebp })}
-                            label="Auto Webp"
-                        />
                         <DropdownInput
-                            selected={format.format}
+                            selected={format.format || Format.Original}
                             setSelected={s => {
                                 this.setTransform({ format: s }
                                 )
                             }}
                             options={[
-                                "Format...",
-                                ImageFormatEnum.Gif,
-                                ImageFormatEnum.Png,
-                                ImageFormatEnum.Png8,
-                                ImageFormatEnum.Jpg,
-                                ImageFormatEnum.Pjpg,
-                                ImageFormatEnum.Webp
+                                Format.Original,
+                                Format.Gif,
+                                Format.Png,
+                                Format.Png8,
+                                Format.Jpg,
+                                Format.Pjpg,
+                                Format.Webp
                             ]}
                             tooltip="Format"
                         />
+                        <SwitchInput
+                            checked={format.autoWebp}
+                            onClick={() => this.setTransform({ autoWebp: !format.autoWebp })}
+                            label="Auto Webp"
+                        />
                     </div>
                     <div className="fieldsBlock">
-                        <SwitchInput
-                            checked={format.lossless === ImageCompressionEnum.Lossless}
-                            onClick={() => {
-                                if (format.lossless !== null) {
-                                    switch (format.lossless) {
-                                        case ImageCompressionEnum.Lossless:
-                                            this.setTransform({ lossless: ImageCompressionEnum.Lossy })
-                                            break;
-                                        case ImageCompressionEnum.Lossy:
+                        {
+                            format.format === Format.Jpg
+                                || format.format === Format.Pjpg
+                                || format.format === Format.Webp
+                                ? <NumberInput
+                                    type={NumberInputType.int}
+                                    allowedTypes={[NumberInputType.int]}
+                                    value={format.quality || null}
+                                    max={100}
+                                    tooltip="Quality"
+                                    setValue={value => {
+                                        this.setTransform({ quality: value })
+                                    }}
+                                />
+                                : null
+                        }
+                        {
+                            format.format === Format.Webp
+                                ? <SwitchInput
+                                    checked={format.lossless === ImageCompressionEnum.Lossless}
+                                    onClick={() => {
+                                        if (format.lossless !== null) {
+                                            switch (format.lossless) {
+                                                case ImageCompressionEnum.Lossless:
+                                                    this.setTransform({ lossless: ImageCompressionEnum.Lossy })
+                                                    break;
+                                                case ImageCompressionEnum.Lossy:
+                                                    this.setTransform({ lossless: ImageCompressionEnum.Lossless })
+                                                    break;
+                                            }
+                                        } else {
                                             this.setTransform({ lossless: ImageCompressionEnum.Lossless })
-                                            break;
-                                    }
-                                } else {
-                                    this.setTransform({ lossless: ImageCompressionEnum.Lossless })
-                                }
-                            }}
-                            label="Lossless"
-                        />
-                        <NumberInput
-                            type={NumberInputType.int}
-                            allowedTypes={[NumberInputType.int]}
-                            value={format.quality || null}
-                            max={100}
-                            tooltip="Quality"
-                            setValue={value => {
-                                this.setTransform({ quality: value })
-                            }}
-                        />
+                                        }
+                                    }}
+                                    label="Lossless"
+                                />
+                                : null
+                        }
                     </div>
                 </div>
             </div>

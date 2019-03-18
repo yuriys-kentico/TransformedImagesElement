@@ -2,7 +2,7 @@
 
 export interface IInputProps<TType, TValue> {
     type: TType;
-    value: (() => TValue) | TValue;
+    value: TValue | null;
     setValue(value: TValue): void;
     tooltip: string;
     disabled?: boolean;
@@ -10,27 +10,29 @@ export interface IInputProps<TType, TValue> {
 }
 
 export interface IInputState<TType> {
-    type?: TType;
+    type?: TType | null;
     rawValue: string;
     isValid: boolean;
 }
 
 export abstract class BaseInput<TProps extends IInputProps<TType, TValue>, TState extends IInputState<TType>, TType, TValue> extends React.PureComponent<TProps, TState> {
-    protected input: HTMLInputElement;
+    protected input: HTMLInputElement | null;
 
-    protected isAllowedCharacters = (value: string, characters: string, min: number = 0, max: number = null) => new RegExp(`^[${characters}]{${min},${max || ""}}$`).test(value);
+    protected isAllowedCharacters = (value: string, characters: string, min: number = 0, max: number | null = null) => new RegExp(`^[${characters}]{${min},${max || ""}}$`).test(value);
 
     protected storeValueInState = (value: string) => { this.setState({ rawValue: value, isValid: false }); return value; };
 
-    abstract getValue(value: (() => TValue) | TValue): string;
+    abstract getValue(value: (() => TValue) | TValue | null): string;
 
     private parseValue(): string {
-        if (this.state.rawValue !== null) {
+        if (this.state.rawValue !== "") {
             return this.state.rawValue;
         }
         else if (this.props.value !== null) {
             return this.getValue(this.props.value);
         }
+
+        return "";
     }
 
     renderInput(): React.ReactNode {

@@ -4,8 +4,9 @@ import { FieldModels } from "kentico-cloud-delivery/_commonjs/fields/field-model
 import { ImageFitModeEnum, ImageCompressionEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
 
 import { TransformedImageModel } from "./TransformedImageModel";
-import { ITransforms, CropType, Transforms } from "./Transforms";
+import { ITransforms, CropType, Transforms, Format } from "./Transforms";
 import { Color } from "./Color";
+import { OPTIONAL_CONFIG } from "../customElement/IElementConfig";
 
 export class TransformedImage extends AssetModels.Asset {
     private imageEndpoint: string = "https://assets-us-01.kc-usercontent.com";
@@ -15,8 +16,8 @@ export class TransformedImage extends AssetModels.Asset {
 
     constructor(
         projectId: string,
-        image?: AssetModels.Asset,
-        model?: TransformedImageModel
+        image: AssetModels.Asset,
+        model: TransformedImageModel | null = null
     ) {
         super(image);
 
@@ -25,9 +26,9 @@ export class TransformedImage extends AssetModels.Asset {
         if (model && model.transforms) {
             this.transforms = new Transforms(model.transforms);
         } else {
-            this.transforms = new Transforms({
+            this.transforms = {
                 crop: {
-                    type: CropType.scale,
+                    type: OPTIONAL_CONFIG.editorDefaultCropType,
                     scale: { xFloat: 0, yFloat: 0 },
                     fit: { xFloat: 0, yFloat: 0 },
                     frame: { xFloat: 0, yFloat: 0 },
@@ -40,12 +41,12 @@ export class TransformedImage extends AssetModels.Asset {
                     color: new Color({ r: 0, g: 0, b: 0 })
                 },
                 format: {
-                    format: null,
+                    format: Format.Original,
                     autoWebp: false,
                     lossless: null,
                     quality: 0
                 }
-            });
+            };
         }
     }
 
@@ -150,15 +151,15 @@ export class TransformedImage extends AssetModels.Asset {
         }
 
         if (background.color && !background.color.isEmpty()) {
-            builder.withCustomParam("bg", background.color.toShortHexString());
+            builder.withCustomParam("bg", background.color.toShortHexString(true));
         }
 
-        if (format.format) {
-            builder.withFormat(format.format);
+        if (format.format && format.format !== Format.Original) {
+            builder.withCustomParam("fm", format.format.toString());
         }
 
         if (format.autoWebp) {
-            builder.withAutomaticFormat(format.format);
+            builder.withCustomParam("auto", Format.Webp);
         }
 
         if (format.lossless === ImageCompressionEnum.Lossless) {

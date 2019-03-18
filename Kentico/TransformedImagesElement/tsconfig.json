@@ -1,6 +1,13 @@
 {
   "compilerOptions": {
     "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noEmitOnError": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "pretty": true,
+    "noFallthroughCasesInSwitch": true,
+    "keyofStringsOnly": true,
     "jsx": "react",
     "module": "commonjs",
     "target": "es6"

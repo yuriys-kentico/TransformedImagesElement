@@ -14,7 +14,7 @@ export enum ColorInputType {
 export class ColorInput extends BaseInput<IInputProps<ColorInputType, Color>, IInputState<ColorInputType>, ColorInputType, Color> {
     state: IInputState<ColorInputType> = {
         type: null,
-        rawValue: null,
+        rawValue: "",
         isValid: true
     }
 
@@ -49,7 +49,7 @@ export class ColorInput extends BaseInput<IInputProps<ColorInputType, Color>, II
 
     renderLabel(): React.ReactNode {
         return (
-            <span>
+            <span className="label">
                 {this.props.type}
             </span>
         );

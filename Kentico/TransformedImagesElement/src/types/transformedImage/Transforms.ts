@@ -1,4 +1,4 @@
-import { ImageFormatEnum, ImageCompressionEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
+import { ImageCompressionEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
 import { Color } from './Color';
 
 export interface ITransforms {
@@ -44,10 +44,20 @@ export interface IBackgroundTransform {
     color: Color;
 }
 
+export enum Format {
+    Original = "Original",
+    Gif = "GIF",
+    Png = "PNG",
+    Png8 = "PNG8",
+    Jpg = "JPG",
+    Pjpg = "PJPG",
+    Webp = "WEBP"
+}
+
 export interface IFormatTransform {
-    format: ImageFormatEnum;
+    format: Format;
     autoWebp: boolean;
-    lossless: ImageCompressionEnum;
+    lossless: ImageCompressionEnum | null;
     quality: number;
 }
 
