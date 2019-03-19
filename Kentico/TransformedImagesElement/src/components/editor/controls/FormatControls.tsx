@@ -11,9 +11,6 @@ import { DropdownInput } from "../inputs/DropdownInput";
 export interface IFormatControlsProps extends IBaseControlsProps<IFormatTransform> {
 }
 
-export interface IFormatControlsState {
-}
-
 export class FormatControls extends BaseControls<IFormatControlsProps, IFormatTransform, IFormatTransform> {
     onClickSidebar(): void {
     }

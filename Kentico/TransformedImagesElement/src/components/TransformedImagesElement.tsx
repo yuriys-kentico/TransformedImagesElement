@@ -4,7 +4,7 @@ import { Observable, empty } from "rxjs";
 
 import { IContext } from "../types/customElement/IContext";
 import { ICustomElement } from "../types/customElement/ICustomElement";
-import { IElementConfig, IRequiredConfig, OPTIONAL_CONFIG } from "../types/customElement/IElementConfig";
+import { OPTIONAL_CONFIG } from "../types/customElement/IElementConfig";
 import { TransformedImage } from "../types/transformedImage/TransformedImage";
 import { Transforms, ITransforms } from "../types/transformedImage/Transforms";
 
@@ -13,6 +13,9 @@ import { ListingButtons } from "./listing/ListingButtons";
 import { SelectionButtons } from "./selection/SelectionButtons";
 import { TransformsEditor } from "./editor/TransformsEditor";
 import { EditorButtons } from "./editor/EditorButtons";
+
+// Expose access to Kentico custom element API
+declare const CustomElement: ICustomElement;
 
 export enum TransformedImagesElementMode {
     configuration,
@@ -28,7 +31,6 @@ export interface IElementProps {
     initialSelectedImages: TransformedImage[];
     initialMode: TransformedImagesElementMode;
     moreAssetsObservable: Observable<AssetResponses.AssetsListResponse>;
-    configurationError?: Error;
 }
 
 export interface IElementState {
@@ -43,11 +45,7 @@ export interface IElementState {
     editedImageUrl: string;
 }
 
-// Expose access to Kentico custom element API
-declare const CustomElement: ICustomElement;
-
 export class TransformedImagesElement extends React.Component<IElementProps, IElementState> {
-    private configuration: HTMLDivElement | null;
     private selectionList: HTMLDivElement | null;
     private listingList: HTMLDivElement | null;
     private editorWrapper: HTMLDivElement | null;
@@ -126,9 +124,9 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
 
     selectImage(image: TransformedImage): any {
         // Deselect image
-        if (!!this.state.selectedImages.find(s => s.id === image.id)) {
+        if (!!this.state.selectedImages.find(i => i.equals(image))) {
             this.setState((state) => ({
-                selectedImages: state.selectedImages.filter(a => a.id !== image.id)
+                selectedImages: state.selectedImages.filter(i => !i.equals(image))
             }))
         }
         // Select image
@@ -152,9 +150,6 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         let renderedHeight = 0;
 
         switch (this.state.mode) {
-            case TransformedImagesElementMode.configuration:
-                renderedHeight = this.configuration ? this.configuration.scrollHeight : 0;
-                break;
             case TransformedImagesElementMode.listing:
                 renderedHeight = this.listingList ? this.listingList.scrollHeight : 0;
                 break;
@@ -182,32 +177,6 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
 
     render() {
         switch (this.state.mode) {
-            case TransformedImagesElementMode.configuration:
-                const sampleParameters: IRequiredConfig = {
-                    contentManagementAPIKey: "<Key value from Project settings > API Keys > Content Management API>",
-                    [nameof<IElementConfig>(i => i.editorDefaultToPreview)]: "<Optional: 'true' or 'false' (without quotes) to preview transformations in the editor by default>",
-                    [nameof<IElementConfig>(i => i.editorDefaultCropType)]: "<Optional: One of the following default crop modes: 'scale', 'fit', 'frame', 'box', 'zoom'>",
-                    [nameof<IElementConfig>(i => i.colorPickerDefaultColors)]: "<Optional: Array of default colors like ['#RRGGBBAA', '#4caf50', ...]>"
-                }
-
-                return (
-                    <div
-                        className="configuration"
-                        ref={e => this.configuration = e}
-                    >
-                        <div className="details">
-                            <strong>Error: </strong>
-                            {this.props.configurationError ? this.props.configurationError.message : ""}
-                        </div>
-                        <div>
-                            <span className="notice">In other words, please make sure the parameters look like this:</span>
-                            <pre className="json text-field__input">
-                                {JSON.stringify(sampleParameters, null, 4)}
-                            </pre>
-                        </div>
-                    </div>
-                );
-
             case TransformedImagesElementMode.listing:
                 return (
                     <div
@@ -218,7 +187,10 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                             this.state.disabled
                                 ? null
                                 : <ListingButtons
-                                    onClickPick={() => { this.storeCurrentSelectedImages(); this.setMode(TransformedImagesElementMode.selection) }}
+                                    onClickPick={() => {
+                                        this.storeCurrentSelectedImages();
+                                        this.setMode(TransformedImagesElementMode.selection)
+                                    }}
                                 />
                         }
                         <div className="list">
@@ -257,7 +229,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                                         image={a}
                                         key={i}
                                         showActions={false}
-                                        isSelected={!!this.state.selectedImages.find(s => s.id === a.id)}
+                                        isSelected={!!this.state.selectedImages.find(i => i.equals(a))}
                                         onSelect={image => this.selectImage(image)}
                                         onAddParams={() => { }}
                                         onRemove={() => { }}

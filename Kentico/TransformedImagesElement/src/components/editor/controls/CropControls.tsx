@@ -1,36 +1,152 @@
 ﻿import * as React from "react";
 
-import { BaseControls, IBaseControlsProps } from "./BaseControls";
 import { ICropTransform, CropType } from "../../../types/transformedImage/Transforms";
-
-import { NumberInput, NumberInputType } from "../inputs/NumberInput";
 import { OPTIONAL_CONFIG } from "../../../types/customElement/IElementConfig";
+
+import { BaseControls, IBaseControlsProps } from "./BaseControls";
+import { NumberInput, NumberInputType } from "../inputs/NumberInput";
+import { NumberUtils } from "../../../types/NumberUtils";
 
 export interface ICropControlsProps extends IBaseControlsProps<ICropTransform> {
     imageWidth: number;
     imageHeight: number;
 }
 
-export class CropControls extends BaseControls<ICropControlsProps, ICropTransform> {
+export interface ICropControlsState {
+}
+
+export class CropControls extends BaseControls<ICropControlsProps, ICropTransform, ICropControlsState> {
     private defaultNumberType = OPTIONAL_CONFIG.inputsDefaultToPercent
         ? NumberInputType.percent
         : NumberInputType.pixel;
 
-    private allowedTypes = [NumberInputType.pixel, NumberInputType.percent];
+    private allowedNumberTypes = [NumberInputType.pixel, NumberInputType.percent];
+
+    selecting = false;
+
+    startXFloat = 0;
+    startYFloat = 0;
+    endXFloat = 0;
+    endYFloat = 0;
 
     onClickSidebar(): void {
     }
 
-    onMouseDown = () => false;
+    onMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        const mouseXY = this.getMouseXY(event);
 
-    onMouseMove = () => false;
+        this.startXFloat = mouseXY.x;
+        this.endXFloat = mouseXY.x;
+        this.startYFloat = mouseXY.y;
+        this.endYFloat = mouseXY.y;
 
-    onMouseUp = () => false;
+        this.selecting = true;
+
+        return true;
+    };
+
+    onMouseMove = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        if (this.selecting) {
+            const mouseXY = this.getMouseXY(event);
+
+            this.endXFloat = mouseXY.x;
+            this.endYFloat = mouseXY.y;
+
+            return true;
+        }
+
+        return false;
+    };
+
+    onMouseUp = () => {
+        if (this.selecting) {
+            const { type, scale, fit, frame, box, zoom } = this.props.transform;
+
+            switch (type) {
+                case CropType.scale:
+                case CropType.fit:
+                case CropType.frame:
+                    break;
+                case CropType.box:
+                    const XFloat = this.startXFloat > this.endXFloat
+                        ? this.endXFloat
+                        : this.startXFloat;
+
+                    const YFloat = this.startYFloat > this.endYFloat
+                        ? this.endYFloat
+                        : this.startYFloat;
+
+                    const WFloat = NumberUtils.toRounded(Math.abs(this.endXFloat - this.startXFloat), 2);
+                    const HFloat = NumberUtils.toRounded(Math.abs(this.endYFloat - this.startYFloat), 2);
+
+                    box.xFloat = XFloat;
+                    box.yFloat = YFloat;
+                    box.wFloat = WFloat;
+                    box.hFloat = HFloat;
+
+                    this.setTransform({ box: box });
+                    break;
+                case CropType.zoom:
+                    break;
+            }
+        }
+        this.selecting = false;
+
+        return true;
+    };
 
     getImageOverlay() {
+        const { type, scale, fit, frame, box, zoom } = this.props.transform;
+
+        let selectionRect: JSX.Element = <rect />;
+
+        switch (type) {
+            case CropType.scale:
+            case CropType.fit:
+            case CropType.frame:
+                break;
+            case CropType.box:
+                const XFloat = this.startXFloat > this.endXFloat
+                    ? this.endXFloat
+                    : this.startXFloat;
+
+                const YFloat = this.startYFloat > this.endYFloat
+                    ? this.endYFloat
+                    : this.startYFloat;
+
+                const WFloat = NumberUtils.toRounded(Math.abs(this.endXFloat - this.startXFloat), 2);
+                const HFloat = NumberUtils.toRounded(Math.abs(this.endYFloat - this.startYFloat), 2);
+
+                selectionRect = this.selecting
+                    ? <rect
+                        x={`${XFloat * 100}%`}
+                        y={`${YFloat * 100}%`}
+                        width={`${WFloat * 100}%`}
+                        height={`${HFloat * 100}%`}
+                        fill="black"
+                    />
+                    : <rect
+                        x={`${box.xFloat * 100}%`}
+                        y={`${box.yFloat * 100}%`}
+                        width={`${box.wFloat * 100}%`}
+                        height={`${box.hFloat * 100}%`}
+                        fill="black"
+                    />;
+                break;
+            case CropType.zoom:
+                break;
+        }
+
         return (
-            <div>
-            </div>
+            <svg>
+                <defs>
+                    <mask id="boxMask">
+                        <rect width="100%" height="100%" fill="white" />
+                        {selectionRect}
+                    </mask>
+                </defs>
+                <rect width="100%" height="100%" fill="#000a" mask="url(#boxMask)" />
+            </svg>
         );
     }
 
@@ -43,7 +159,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     <div className="fields" key={CropType.scale}>
                         <NumberInput
                             type={this.defaultNumberType}
-                            allowedTypes={this.allowedTypes}
+                            allowedTypes={this.allowedNumberTypes}
                             value={scale.xFloat || null}
                             max={this.props.imageWidth}
                             tooltip="Width"
@@ -55,7 +171,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                         />
                         <NumberInput
                             type={this.defaultNumberType}
-                            allowedTypes={this.allowedTypes}
+                            allowedTypes={this.allowedNumberTypes}
                             value={scale.yFloat || null}
                             max={this.props.imageHeight}
                             tooltip="Height"
@@ -71,7 +187,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     <div className="fields" key={CropType.fit}>
                         <NumberInput
                             type={this.defaultNumberType}
-                            allowedTypes={this.allowedTypes}
+                            allowedTypes={this.allowedNumberTypes}
                             value={fit.xFloat || null}
                             max={this.props.imageWidth}
                             tooltip="Width"
@@ -82,7 +198,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                         />
                         <NumberInput
                             type={this.defaultNumberType}
-                            allowedTypes={this.allowedTypes}
+                            allowedTypes={this.allowedNumberTypes}
                             value={fit.yFloat || null}
                             max={this.props.imageHeight}
                             tooltip="Height"
@@ -98,7 +214,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     <div className="fields" key={CropType.frame}>
                         <NumberInput
                             type={this.defaultNumberType}
-                            allowedTypes={this.allowedTypes}
+                            allowedTypes={this.allowedNumberTypes}
                             value={frame.xFloat || null}
                             max={this.props.imageWidth}
                             tooltip="Width"
@@ -109,7 +225,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                         />
                         <NumberInput
                             type={this.defaultNumberType}
-                            allowedTypes={this.allowedTypes}
+                            allowedTypes={this.allowedNumberTypes}
                             value={frame.yFloat || null}
                             max={this.props.imageHeight}
                             tooltip="Height"
@@ -126,7 +242,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                         <div className="fieldsBlock">
                             <NumberInput
                                 type={this.defaultNumberType}
-                                allowedTypes={this.allowedTypes}
+                                allowedTypes={this.allowedNumberTypes}
                                 value={box.xFloat || null}
                                 max={this.props.imageWidth}
                                 tooltip="Start X"
@@ -137,7 +253,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             />
                             <NumberInput
                                 type={this.defaultNumberType}
-                                allowedTypes={this.allowedTypes}
+                                allowedTypes={this.allowedNumberTypes}
                                 value={box.yFloat || null}
                                 max={this.props.imageWidth}
                                 tooltip="Start Y"
@@ -150,7 +266,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                         <div className="fieldsBlock">
                             <NumberInput
                                 type={this.defaultNumberType}
-                                allowedTypes={this.allowedTypes}
+                                allowedTypes={this.allowedNumberTypes}
                                 value={box.wFloat || null}
                                 max={this.props.imageWidth}
                                 tooltip="Width"
@@ -161,7 +277,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             />
                             <NumberInput
                                 type={this.defaultNumberType}
-                                allowedTypes={this.allowedTypes}
+                                allowedTypes={this.allowedNumberTypes}
                                 value={box.hFloat || null}
                                 max={this.props.imageWidth}
                                 tooltip="Height"
@@ -179,7 +295,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                         <div className="fieldsBlock">
                             <NumberInput
                                 type={this.defaultNumberType}
-                                allowedTypes={this.allowedTypes}
+                                allowedTypes={this.allowedNumberTypes}
                                 value={zoom.xFloat || null}
                                 max={this.props.imageWidth}
                                 tooltip="Center X"
@@ -190,7 +306,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             />
                             <NumberInput
                                 type={this.defaultNumberType}
-                                allowedTypes={this.allowedTypes}
+                                allowedTypes={this.allowedNumberTypes}
                                 value={zoom.yFloat || null}
                                 max={this.props.imageWidth}
                                 tooltip="Center Y"

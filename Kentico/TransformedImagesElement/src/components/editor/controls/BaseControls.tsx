@@ -1,5 +1,7 @@
 ﻿import * as React from "react";
 
+import { NumberUtils } from "../../../types/NumberUtils";
+
 export interface IBaseControlsProps<TTransform> {
     currentEditor: BaseControls<this, TTransform>;
     setCurrentEditor(editor: BaseControls<this, TTransform>): void;
@@ -16,9 +18,9 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
     constructor(props: IProps) {
         super(props);
 
-        if (props.currentEditor === null) {
-            props.setCurrentEditor(this);
-        }
+        //if (props.currentEditor === null) {
+        //    props.setCurrentEditor(this);
+        //}
     }
 
     setTransform<K extends keyof TTransform>(
@@ -32,6 +34,20 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
         );
 
         this.props.setTransform(prevTransform);
+    }
+
+    getMouseXY(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+        const { left, top, width, height } = event.currentTarget.getBoundingClientRect();
+        const mouseX = event.clientX;
+        const mouseY = event.clientY;
+
+        const mouseXFloat = NumberUtils.toRounded((mouseX - left) / width, 2);
+        const mouseYFloat = NumberUtils.toRounded((mouseY - top) / height, 2);
+
+        return {
+            x: mouseXFloat,
+            y: mouseYFloat
+        }
     }
 
     abstract onClickSidebar(): void;

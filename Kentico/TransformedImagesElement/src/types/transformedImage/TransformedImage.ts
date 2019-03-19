@@ -7,6 +7,7 @@ import { TransformedImageModel } from "./TransformedImageModel";
 import { ITransforms, CropType, Transforms, Format } from "./Transforms";
 import { Color } from "./Color";
 import { OPTIONAL_CONFIG } from "../customElement/IElementConfig";
+import { NumberUtils } from "../NumberUtils";
 
 export class TransformedImage extends AssetModels.Asset {
     private imageEndpoint: string = "https://assets-us-01.kc-usercontent.com";
@@ -48,6 +49,10 @@ export class TransformedImage extends AssetModels.Asset {
                 }
             };
         }
+    }
+
+    equals(image: TransformedImage): boolean {
+        return this.id === image.id;
     }
 
     static assetIsImage(asset: AssetModels.Asset): boolean {
@@ -94,7 +99,10 @@ export class TransformedImage extends AssetModels.Asset {
                     && crop.frame.yFloat > 0) {
                     // Fit=crop does not work with floats
                     builder
-                        .withRectangleCrop((1 - crop.frame.xFloat) / 2, (1 - crop.frame.yFloat) / 2, crop.frame.xFloat, crop.frame.yFloat);
+                        .withRectangleCrop(
+                            NumberUtils.toRounded((1 - crop.frame.xFloat) / 2, 2),
+                            NumberUtils.toRounded((1 - crop.frame.yFloat) / 2, 2),
+                            crop.frame.xFloat, crop.frame.yFloat);
                 }
                 break;
             case CropType.box:
@@ -155,7 +163,7 @@ export class TransformedImage extends AssetModels.Asset {
         }
 
         if (format.format && format.format !== Format.Original) {
-            builder.withCustomParam("fm", format.format.toString());
+            builder.withCustomParam("fm", format.format.toLowerCase());
         }
 
         if (format.autoWebp) {

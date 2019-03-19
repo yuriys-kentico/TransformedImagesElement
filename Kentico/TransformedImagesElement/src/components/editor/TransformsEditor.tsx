@@ -32,11 +32,13 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
         mode: this.mode
     }
 
+    editorIsSet = false;
+
     get mode(): EditorMode {
         return this.props.isPreview
             ? this.state
                 ? this.state.mode
-                : EditorMode.hovering
+                : EditorMode.preview
             : EditorMode.noPreview;
     }
 
@@ -62,9 +64,8 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                     ? "preview"
                     : "edit preview";
             case EditorMode.hovering:
-                return "scaleToFit";
             case EditorMode.noPreview:
-                return "";
+                return "scaleToFit";
         }
     }
 
@@ -90,7 +91,7 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
             >
                 <div
                     className={`imageEditorPreview ${this.getHoveringClass()}`}
-                    onMouseEnter={() => this.props.disabled
+                    onMouseMove={() => this.props.disabled
                         ? this.mode = EditorMode.preview
                         : this.mode = EditorMode.hovering}
                     onMouseLeave={() => this.props.disabled
@@ -101,27 +102,32 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                         <div
                             className="imageMask"
                             onMouseDown={e => {
-                                if (this.state.currentEditor && this.state.currentEditor.onMouseDown(e))
+                                if (currentEditor && currentEditor.onMouseDown(e))
                                     this.update()
                             }}
                             onMouseMove={e => {
-                                if (this.state.currentEditor && this.state.currentEditor.onMouseMove(e))
+                                if (currentEditor && currentEditor.onMouseMove(e))
                                     this.update()
                             }}
                             onMouseUp={e => {
-                                if (this.state.currentEditor && this.state.currentEditor.onMouseUp(e))
+                                if (currentEditor && currentEditor.onMouseUp(e))
+                                    this.update()
+                            }}
+                            onMouseOut={e => {
+                                if (currentEditor && currentEditor.onMouseUp(e))
                                     this.update()
                             }}
                         >
-                            {this.state.currentEditor
-                                ? this.state.currentEditor.getImageOverlay()
+                            {currentEditor
+                                && this.mode !== EditorMode.preview
+                                ? currentEditor.getImageOverlay()
                                 : null
                             }
+                            <img
+                                className="imageEditorImage"
+                                src={this.getImageUrl()}
+                            />
                         </div>
-                        <img
-                            className="imageEditorImage"
-                            src={this.getImageUrl()}
-                        />
                     </span>
                 </div>
                 {
@@ -130,8 +136,8 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                         : <div
                             className="editorControls"
                             onClick={e => {
-                                if (this.state.currentEditor) {
-                                    this.state.currentEditor.onClickSidebar();
+                                if (currentEditor) {
+                                    currentEditor.onClickSidebar();
                                 }
 
                                 e.stopPropagation();

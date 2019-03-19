@@ -12,6 +12,7 @@ import { OPTIONAL_CONFIG } from "../types/customElement/IElementConfig";
 import { InvalidUsage } from "./InvalidUsage";
 import { TransformedImagesElement, IElementProps, TransformedImagesElementMode } from "./TransformedImagesElement";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { InitializationError, IErrorProps } from "./InitializationError";
 
 export function initElementFromDelivery(element: ICustomElement, context: IContext): void {
     const loadAssetsFromDelivery = (
@@ -32,6 +33,7 @@ export function initElementFromDelivery(element: ICustomElement, context: IConte
             initialDisabled: element.disabled,
             initialRawImages: rawAssets
                 .map(a => new TransformedImage(context.projectId, a)),
+
             initialSelectedImages: rawAssets
                 .filter(rawImage => selectedIds.indexOf(rawImage.id) > -1)
                 .map(rawImage => new TransformedImage(
@@ -40,7 +42,9 @@ export function initElementFromDelivery(element: ICustomElement, context: IConte
                     selectedImageModels.find(foundImage => foundImage.id === rawImage.id)
                 ))
                 .sort((a, b) => selectedIds.indexOf(a.id) - selectedIds.indexOf(b.id)),
+
             initialMode: TransformedImagesElementMode.listing,
+
             moreAssetsObservable: moreAssetsObservable
         };
 
@@ -48,14 +52,16 @@ export function initElementFromDelivery(element: ICustomElement, context: IConte
     }
 
     const showError = (error: any) => {
-        renderElementComponent({
-            initialDisabled: false,
-            initialRawImages: [],
-            initialSelectedImages: [],
-            initialMode: TransformedImagesElementMode.configuration,
-            moreAssetsObservable: empty(),
+        const errorProps: IErrorProps = {
             configurationError: error,
-        });
+        };
+
+        ReactDOM.render(
+            <ErrorBoundary>
+                <InitializationError {...errorProps} />
+            </ErrorBoundary>
+            , document.getElementById('root')
+        );
     }
 
     const renderElementComponent = (elementProps: IElementProps) => {

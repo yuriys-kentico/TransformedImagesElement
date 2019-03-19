@@ -58,6 +58,7 @@
     <TypeScriptCompile Include="src\components\editor\EditorButtons.tsx" />
     <TypeScriptCompile Include="src\components\InvalidUsage.tsx" />
     <TypeScriptCompile Include="src\components\ErrorBoundary.tsx" />
+    <TypeScriptCompile Include="src\components\InitializationError.tsx" />
     <TypeScriptCompile Include="src\types\editor\Checkerboard.ts" />
     <TypeScriptCompile Include="src\components\Initialize.tsx" />
     <TypeScriptCompile Include="src\types\NumberUtils.ts" />
