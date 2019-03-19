@@ -32,13 +32,15 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
         mode: this.mode
     }
 
-    editorIsSet = false;
+    private firstEditor: CropControls | null;
 
     get mode(): EditorMode {
+        if (this.state && this.state.mode === EditorMode.hovering) {
+            return EditorMode.hovering;
+        }
+
         return this.props.isPreview
-            ? this.state
-                ? this.state.mode
-                : EditorMode.preview
+            ? EditorMode.preview
             : EditorMode.noPreview;
     }
 
@@ -46,15 +48,31 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
         this.setState({ mode: mode });
     }
 
-    getImageUrl(): string {
+    isPreviewImageHidden(): boolean {
+        switch (this.mode) {
+            case EditorMode.hovering:
+            case EditorMode.noPreview:
+                return true;
+        }
+        return false;
+    }
+
+    isEditImageHidden(): boolean {
         switch (this.mode) {
             case EditorMode.preview:
-                return this.props.editedImage.buildEditedUrl().getUrl();
-            case EditorMode.hovering:
-                return this.props.editedImage.buildHoverUrl().getUrl();
             case EditorMode.noPreview:
-                return this.props.editedImage.buildUrl().getUrl();
+                return true;
         }
+        return false;
+    }
+
+    isOriginalImageHidden(): boolean {
+        switch (this.mode) {
+            case EditorMode.preview:
+            case EditorMode.hovering:
+                return true;
+        }
+        return false;
     }
 
     getHoveringClass(): string {
@@ -76,6 +94,10 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
 
     componentDidMount() {
         this.props.updateUrl(this.props.editedImage.buildEditedUrl().getUrl());
+
+        this.setState({
+            currentEditor: this.firstEditor
+        });
     }
 
     render() {
@@ -125,7 +147,18 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                             }
                             <img
                                 className="imageEditorImage"
-                                src={this.getImageUrl()}
+                                hidden={this.isEditImageHidden()}
+                                src={this.props.editedImage.buildHoverUrl().getUrl()}
+                            />
+                            <img
+                                className="imageEditorImage"
+                                hidden={this.isPreviewImageHidden()}
+                                src={this.props.editedImage.buildEditedUrl().getUrl()}
+                            />
+                            <img
+                                className="imageEditorImage"
+                                hidden={this.isOriginalImageHidden()}
+                                src={this.props.editedImage.buildUrl().getUrl()}
                             />
                         </div>
                     </span>
@@ -145,7 +178,8 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                             }}
                         >
                             <CropControls
-                                currentEditor={currentEditor as any}
+                                ref={e => this.firstEditor = e}
+                                isCurrentEditor={editor => editor === currentEditor}
                                 setCurrentEditor={editor => {
                                     this.setState({ currentEditor: editor })
                                 }}
@@ -155,7 +189,7 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                                 imageHeight={imageHeight ? imageHeight : 0}
                             />
                             <BackgroundControls
-                                currentEditor={currentEditor as any}
+                                isCurrentEditor={editor => editor === currentEditor}
                                 setCurrentEditor={editor => {
                                     this.setState({ currentEditor: editor })
                                 }}
@@ -163,7 +197,7 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                                 setTransform={() => this.update()}
                             />
                             <FormatControls
-                                currentEditor={currentEditor as any}
+                                isCurrentEditor={editor => editor === currentEditor}
                                 setCurrentEditor={editor => {
                                     this.setState({ currentEditor: editor })
                                 }}

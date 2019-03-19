@@ -3,11 +3,10 @@
 import { NumberUtils } from "../../../types/NumberUtils";
 
 export interface IBaseControlsProps<TTransform> {
-    currentEditor: BaseControls<this, TTransform>;
+    isCurrentEditor(editor: BaseControls<this, TTransform>): boolean;
     setCurrentEditor(editor: BaseControls<this, TTransform>): void;
     transform: TTransform;
     setTransform: (transform: TTransform) => void;
-    visible?: boolean;
 }
 
 export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform> = IBaseControlsProps<any>, TTransform = {}, IState = {}> extends React.Component<IProps, IState> {
@@ -41,8 +40,8 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
         const mouseX = event.clientX;
         const mouseY = event.clientY;
 
-        const mouseXFloat = NumberUtils.toRounded((mouseX - left) / width, 2);
-        const mouseYFloat = NumberUtils.toRounded((mouseY - top) / height, 2);
+        const mouseXFloat = NumberUtils.toRounded((mouseX - left) / width, 4);
+        const mouseYFloat = NumberUtils.toRounded((mouseY - top) / height, 4);
 
         return {
             x: mouseXFloat,
@@ -63,9 +62,9 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
     protected abstract renderControls(): React.ReactNode;
 
     render() {
-        return this.props.visible === undefined || this.props.visible ? (
+        return (
             <div
-                className={`control ${this.props.currentEditor === this
+                className={`control ${this.props.isCurrentEditor(this)
                     ? "selected"
                     : ""
                     }`}
@@ -73,6 +72,6 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
             >
                 {this.renderControls()}
             </div>
-        ) : null;
+        );
     }
 }

@@ -15,6 +15,13 @@ export interface ICropControlsProps extends IBaseControlsProps<ICropTransform> {
 export interface ICropControlsState {
 }
 
+export interface RectProps {
+    x: string;
+    y: string;
+    width: string;
+    height: string;
+}
+
 export class CropControls extends BaseControls<ICropControlsProps, ICropTransform, ICropControlsState> {
     private defaultNumberType = OPTIONAL_CONFIG.inputsDefaultToPercent
         ? NumberInputType.percent
@@ -22,12 +29,12 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
 
     private allowedNumberTypes = [NumberInputType.pixel, NumberInputType.percent];
 
-    selecting = false;
+    private selecting = false;
 
-    startXFloat = 0;
-    startYFloat = 0;
-    endXFloat = 0;
-    endYFloat = 0;
+    private startXFloat = 0;
+    private startYFloat = 0;
+    private endXFloat = 0;
+    private endYFloat = 0;
 
     onClickSidebar(): void {
     }
@@ -62,22 +69,29 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
         if (this.selecting) {
             const { type, scale, fit, frame, box, zoom } = this.props.transform;
 
+            let XFloat = 0;
+            let YFloat = 0;
+            let WFloat = 0;
+            let HFloat = 0;
+
             switch (type) {
                 case CropType.scale:
                 case CropType.fit:
                 case CropType.frame:
                     break;
                 case CropType.box:
-                    const XFloat = this.startXFloat > this.endXFloat
-                        ? this.endXFloat
-                        : this.startXFloat;
+                    WFloat = NumberUtils.toRounded(Math.abs(this.endXFloat - this.startXFloat), 4);
+                    HFloat = NumberUtils.toRounded(Math.abs(this.endYFloat - this.startYFloat), 4);
 
-                    const YFloat = this.startYFloat > this.endYFloat
-                        ? this.endYFloat
-                        : this.startYFloat;
+                    if (WFloat !== 0 && HFloat !== 0) {
+                        XFloat = this.startXFloat > this.endXFloat
+                            ? this.endXFloat
+                            : this.startXFloat;
 
-                    const WFloat = NumberUtils.toRounded(Math.abs(this.endXFloat - this.startXFloat), 2);
-                    const HFloat = NumberUtils.toRounded(Math.abs(this.endYFloat - this.startYFloat), 2);
+                        YFloat = this.startYFloat > this.endYFloat
+                            ? this.endYFloat
+                            : this.startYFloat;
+                    }
 
                     box.xFloat = XFloat;
                     box.yFloat = YFloat;
@@ -87,6 +101,21 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     this.setTransform({ box: box });
                     break;
                 case CropType.zoom:
+                    const mouseXTranslation = this.endXFloat - this.startXFloat;
+                    const mouseYTranslation = this.endYFloat - this.startYFloat;
+
+                    const sideFloat = Math.sqrt(2 * (mouseXTranslation * mouseXTranslation + mouseYTranslation * mouseYTranslation));
+
+                    XFloat = NumberUtils.toRounded(this.startXFloat, 4);
+                    YFloat = NumberUtils.toRounded(this.startYFloat, 4);
+
+                    const ZFloat = NumberUtils.toRounded(1 / sideFloat, 4);
+
+                    zoom.xFloat = XFloat;
+                    zoom.yFloat = YFloat;
+                    zoom.zFloat = ZFloat;
+
+                    this.setTransform({ box: box });
                     break;
             }
         }
@@ -98,43 +127,82 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
     getImageOverlay() {
         const { type, scale, fit, frame, box, zoom } = this.props.transform;
 
-        let selectionRect: JSX.Element = <rect />;
+        let rectProps: RectProps | null = null;
 
-        switch (type) {
-            case CropType.scale:
-            case CropType.fit:
-            case CropType.frame:
-                break;
-            case CropType.box:
-                const XFloat = this.startXFloat > this.endXFloat
-                    ? this.endXFloat
-                    : this.startXFloat;
+        let XFloat = 0;
+        let YFloat = 0;
+        let WFloat = 0;
+        let HFloat = 0;
 
-                const YFloat = this.startYFloat > this.endYFloat
-                    ? this.endYFloat
-                    : this.startYFloat;
+        if (this.selecting) {
+            switch (type) {
+                case CropType.scale:
+                case CropType.fit:
+                case CropType.frame:
+                    return <span className="notSupported"> Not supported! </span>;
+                    break;
+                case CropType.box:
+                    XFloat = this.startXFloat > this.endXFloat
+                        ? this.endXFloat
+                        : this.startXFloat;
 
-                const WFloat = NumberUtils.toRounded(Math.abs(this.endXFloat - this.startXFloat), 2);
-                const HFloat = NumberUtils.toRounded(Math.abs(this.endYFloat - this.startYFloat), 2);
+                    YFloat = this.startYFloat > this.endYFloat
+                        ? this.endYFloat
+                        : this.startYFloat;
 
-                selectionRect = this.selecting
-                    ? <rect
-                        x={`${XFloat * 100}%`}
-                        y={`${YFloat * 100}%`}
-                        width={`${WFloat * 100}%`}
-                        height={`${HFloat * 100}%`}
-                        fill="black"
-                    />
-                    : <rect
-                        x={`${box.xFloat * 100}%`}
-                        y={`${box.yFloat * 100}%`}
-                        width={`${box.wFloat * 100}%`}
-                        height={`${box.hFloat * 100}%`}
-                        fill="black"
-                    />;
-                break;
-            case CropType.zoom:
-                break;
+                    WFloat = NumberUtils.toRounded(Math.abs(this.endXFloat - this.startXFloat), 4);
+                    HFloat = NumberUtils.toRounded(Math.abs(this.endYFloat - this.startYFloat), 4);
+
+                    rectProps = {
+                        x: `${XFloat * 100}%`,
+                        y: `${YFloat * 100}%`,
+                        width: `${WFloat * 100}%`,
+                        height: `${HFloat * 100}%`
+                    };
+                    break;
+                case CropType.zoom:
+                    const mouseXTranslation = this.endXFloat - this.startXFloat;
+                    const mouseYTranslation = this.endYFloat - this.startYFloat;
+
+                    const sideFloat = Math.sqrt(2 * (mouseXTranslation * mouseXTranslation + mouseYTranslation * mouseYTranslation));
+
+                    WFloat = NumberUtils.toRounded(sideFloat, 4);
+                    HFloat = NumberUtils.toRounded(sideFloat, 4);
+
+                    XFloat = NumberUtils.toRounded(this.startXFloat - sideFloat / 2, 4);
+                    YFloat = NumberUtils.toRounded(this.startYFloat - sideFloat / 2, 4);
+
+                    rectProps = {
+                        x: `${XFloat * 100}%`,
+                        y: `${YFloat * 100}%`,
+                        width: `${WFloat * 100}%`,
+                        height: `${HFloat * 100}%`
+                    };
+            }
+        } else {
+            switch (type) {
+                case CropType.scale:
+                case CropType.fit:
+                case CropType.frame:
+                    return <span className="notSupported">Mouse editing not supported yet.</span>;
+                    break;
+                case CropType.box:
+                    rectProps = {
+                        x: `${box.xFloat * 100}%`,
+                        y: `${box.yFloat * 100}%`,
+                        width: `${box.wFloat * 100}%`,
+                        height: `${box.hFloat * 100}%`
+                    };
+                    break;
+                case CropType.zoom:
+                    rectProps = {
+                        x: `${(zoom.xFloat - 1 / (2 * zoom.zFloat)) * 100}%`,
+                        y: `${(zoom.yFloat - 1 / (2 * zoom.zFloat)) * 100}%`,
+                        width: `${1 / zoom.zFloat * 100}%`,
+                        height: `${1 / zoom.zFloat * 100}%`
+                    };
+                    break;
+            }
         }
 
         return (
@@ -142,10 +210,20 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                 <defs>
                     <mask id="boxMask">
                         <rect width="100%" height="100%" fill="white" />
-                        {selectionRect}
+                        <rect
+                            {...rectProps}
+                            className="maskRect"
+                        />
                     </mask>
                 </defs>
-                <rect width="100%" height="100%" fill="#000a" mask="url(#boxMask)" />
+                <rect
+                    {...rectProps}
+                    className="selectRect"
+                />
+                <rect
+                    className="outsideRect"
+                    mask="url(#boxMask)"
+                />
             </svg>
         );
     }

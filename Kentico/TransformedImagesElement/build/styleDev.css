@@ -146,6 +146,14 @@ body {
       .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask {
         position: relative;
         user-select: none; }
+        .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask .notSupported {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          background: rgba(255, 255, 255, 0.667);
+          transform: translate(-50%, -50%);
+          text-align: center;
+          padding: 1em; }
         .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg {
           position: absolute;
           width: 100%;
@@ -153,6 +161,13 @@ body {
           cursor: crosshair; }
           .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg mask {
             position: absolute; }
+          .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .selectRect {
+            stroke: #2196f3;
+            fill: transparent; }
+          .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .outsideRect {
+            width: 100%;
+            height: 100%;
+            fill: rgba(255, 255, 255, 0.667); }
       .imageEditor .editor .imageEditorPreview .imageWrapper .imageEditorImage {
         box-shadow: 0 1px 8px 2px rgba(0, 0, 0, 0.2);
         pointer-events: none;
