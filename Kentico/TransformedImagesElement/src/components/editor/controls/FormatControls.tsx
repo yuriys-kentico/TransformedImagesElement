@@ -72,6 +72,7 @@ export class FormatControls extends BaseControls<IFormatControlsProps, IFormatTr
                                     value={format.quality || null}
                                     max={100}
                                     tooltip="Quality"
+                                    disabled={format.lossless === ImageCompressionEnum.Lossless}
                                     setValue={value => {
                                         this.setTransform({ quality: value })
                                     }}

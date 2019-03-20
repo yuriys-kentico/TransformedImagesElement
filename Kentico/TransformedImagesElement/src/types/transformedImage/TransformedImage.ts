@@ -5,9 +5,9 @@ import { ImageFitModeEnum, ImageCompressionEnum } from "kentico-cloud-delivery/_
 
 import { TransformedImageModel } from "./TransformedImageModel";
 import { ITransforms, CropType, Transforms, Format } from "./Transforms";
-import { Color } from "./Color";
-import { OPTIONAL_CONFIG } from "../customElement/IElementConfig";
 import { NumberUtils } from "../NumberUtils";
+import { OPTIONAL_CONFIG } from "../customElement/IElementConfig";
+import { Color } from "./Color";
 
 export class TransformedImage extends AssetModels.Asset {
     private imageEndpoint: string = "https://assets-us-01.kc-usercontent.com";
@@ -32,7 +32,7 @@ export class TransformedImage extends AssetModels.Asset {
                     type: OPTIONAL_CONFIG.editorDefaultCropType,
                     scale: { xFloat: 0, yFloat: 0 },
                     fit: { xFloat: 0, yFloat: 0 },
-                    frame: { xFloat: 0, yFloat: 0 },
+                    frame: { wFloat: 0, hFloat: 0 },
                     box: { xFloat: 0, yFloat: 0, wFloat: 0, hFloat: 0 },
                     zoom: { xFloat: 0, yFloat: 0, zFloat: 0 },
                     resize: { xFloat: 0, yFloat: 0 },
@@ -51,10 +51,6 @@ export class TransformedImage extends AssetModels.Asset {
         }
     }
 
-    equals(image: TransformedImage): boolean {
-        return this.id === image.id;
-    }
-
     static assetIsImage(asset: AssetModels.Asset): boolean {
         const allowedImageTypes = [
             "image/jpeg",
@@ -65,6 +61,28 @@ export class TransformedImage extends AssetModels.Asset {
 
         return asset.imageWidth !== null
             && allowedImageTypes.indexOf(asset.type) > -1;
+    }
+
+    canBeTransparent(): boolean {
+        if (this.transforms.format) {
+            switch (this.transforms.format.format) {
+                case Format.Jpg:
+                case Format.Pjpg:
+                    return false;
+            }
+        }
+
+        const transparentImageTypes = [
+            "image/png",
+            "image/gif",
+            "image/webp"
+        ];
+
+        return transparentImageTypes.indexOf(this.type) > -1;
+    }
+
+    equals(image: TransformedImage): boolean {
+        return this.id === image.id;
     }
 
     buildUrl(): ImageUrlBuilder {
@@ -95,14 +113,14 @@ export class TransformedImage extends AssetModels.Asset {
                 }
                 break;
             case CropType.frame:
-                if (crop.frame.xFloat > 0
-                    && crop.frame.yFloat > 0) {
+                if (crop.frame.wFloat > 0
+                    && crop.frame.hFloat > 0) {
                     // Fit=crop does not work with floats
                     builder
                         .withRectangleCrop(
-                            NumberUtils.toRounded((1 - crop.frame.xFloat) / 2, 2),
-                            NumberUtils.toRounded((1 - crop.frame.yFloat) / 2, 2),
-                            crop.frame.xFloat, crop.frame.yFloat);
+                            NumberUtils.toRounded((1 - crop.frame.wFloat) / 2, 2),
+                            NumberUtils.toRounded((1 - crop.frame.hFloat) / 2, 2),
+                            crop.frame.wFloat, crop.frame.hFloat);
                 }
                 break;
             case CropType.box:
@@ -167,7 +185,7 @@ export class TransformedImage extends AssetModels.Asset {
         }
 
         if (format.autoWebp) {
-            builder.withCustomParam("auto", Format.Webp);
+            builder.withCustomParam("auto", Format.Webp.toLowerCase());
         }
 
         if (format.lossless === ImageCompressionEnum.Lossless) {

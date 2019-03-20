@@ -1,4 +1,5 @@
 import { ImageCompressionEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
+
 import { Color } from './Color';
 
 export interface ITransforms {
@@ -33,7 +34,7 @@ export interface ICropTransform {
     type: CropType;
     scale: XYTransform,
     fit: XYTransform,
-    frame: XYTransform,
+    frame: WHTransform,
     box: XYTransform & WHTransform,
     zoom: XYTransform & ZTransform,
     resize: XYTransform,

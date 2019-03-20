@@ -255,8 +255,6 @@ body {
                         }
 
                         .outsideRect {
-                            width: 100%;
-                            height: 100%;
                             fill: rgba(255, 255, 255, 0.667)
                         }
                     }
@@ -392,6 +390,15 @@ body {
                             text-align: right;
                             min-width: 3.5em;
                             flex: 1;
+
+                            &:disabled {
+                                -webkit-text-fill-color: #9e9e9e;
+                                color: #9e9e9e;
+
+                                + span {
+                                    color: #9e9e9e;
+                                }
+                            }
 
                             + span {
                                 padding: .375em .25em 0 .25em;

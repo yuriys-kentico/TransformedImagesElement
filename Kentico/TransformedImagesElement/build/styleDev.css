@@ -165,8 +165,6 @@ body {
             stroke: #2196f3;
             fill: transparent; }
           .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .outsideRect {
-            width: 100%;
-            height: 100%;
             fill: rgba(255, 255, 255, 0.667); }
       .imageEditor .editor .imageEditorPreview .imageWrapper .imageEditorImage {
         box-shadow: 0 1px 8px 2px rgba(0, 0, 0, 0.2);
@@ -252,6 +250,11 @@ body {
             text-align: right;
             min-width: 3.5em;
             flex: 1; }
+            .imageEditor .editor .editorControls .control .fields .input > input:disabled {
+              -webkit-text-fill-color: #9e9e9e;
+              color: #9e9e9e; }
+              .imageEditor .editor .editorControls .control .fields .input > input:disabled + span {
+                color: #9e9e9e; }
             .imageEditor .editor .editorControls .control .fields .input > input + span {
               padding: .375em .25em 0 .25em;
               margin: 0em; }

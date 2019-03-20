@@ -76,8 +76,27 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
 
             switch (type) {
                 case CropType.scale:
+                    this.setTransform({ scale: scale });
+                    break;
                 case CropType.fit:
+                    this.setTransform({ fit: fit });
+                    break;
                 case CropType.frame:
+                    const frameMouseXTranslation = Math.abs(this.endXFloat - .5);
+                    const frameMouseYTranslation = Math.abs(this.endYFloat - .5);
+
+                    if (this.endXFloat - this.startXFloat !== 0) {
+                        WFloat = NumberUtils.toRounded(2 * frameMouseXTranslation, 4);
+                        HFloat = NumberUtils.toRounded(2 * frameMouseYTranslation, 4);
+
+                        XFloat = NumberUtils.toRounded(.5 - WFloat / 2, 4);
+                        YFloat = NumberUtils.toRounded(.5 - HFloat / 2, 4);
+                    }
+
+                    frame.wFloat = WFloat;
+                    frame.hFloat = HFloat;
+
+                    this.setTransform({ frame: frame });
                     break;
                 case CropType.box:
                     WFloat = NumberUtils.toRounded(Math.abs(this.endXFloat - this.startXFloat), 4);
@@ -106,10 +125,13 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
 
                     const sideFloat = Math.sqrt(2 * (mouseXTranslation * mouseXTranslation + mouseYTranslation * mouseYTranslation));
 
-                    XFloat = NumberUtils.toRounded(this.startXFloat, 4);
-                    YFloat = NumberUtils.toRounded(this.startYFloat, 4);
+                    let ZFloat = 0;
 
-                    const ZFloat = NumberUtils.toRounded(1 / sideFloat, 4);
+                    if (sideFloat !== 0) {
+                        XFloat = NumberUtils.toRounded(this.startXFloat, 4);
+                        YFloat = NumberUtils.toRounded(this.startYFloat, 4);
+                        ZFloat = NumberUtils.toRounded(1 / sideFloat, 4);
+                    }
 
                     zoom.xFloat = XFloat;
                     zoom.yFloat = YFloat;
@@ -134,12 +156,28 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
         let WFloat = 0;
         let HFloat = 0;
 
-        if (this.selecting) {
+        if (this.selecting && (Math.abs(this.endXFloat - this.startXFloat) > 0 || Math.abs(this.endYFloat - this.startYFloat) > 0)) {
             switch (type) {
                 case CropType.scale:
                 case CropType.fit:
+                    return <span className="notSupported">Mouse editing not supported yet.</span>;
+                    break;
                 case CropType.frame:
-                    return <span className="notSupported"> Not supported! </span>;
+                    const frameMouseXTranslation = Math.abs(this.endXFloat - .5);
+                    const frameMouseYTranslation = Math.abs(this.endYFloat - .5);
+
+                    WFloat = NumberUtils.toRounded(2 * frameMouseXTranslation, 4);
+                    HFloat = NumberUtils.toRounded(2 * frameMouseYTranslation, 4);
+
+                    XFloat = NumberUtils.toRounded(.5 - WFloat / 2, 4);
+                    YFloat = NumberUtils.toRounded(.5 - HFloat / 2, 4);
+
+                    rectProps = {
+                        x: `${XFloat * 100}%`,
+                        y: `${YFloat * 100}%`,
+                        width: `${WFloat * 100}%`,
+                        height: `${HFloat * 100}%`
+                    };
                     break;
                 case CropType.box:
                     XFloat = this.startXFloat > this.endXFloat
@@ -183,8 +221,15 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
             switch (type) {
                 case CropType.scale:
                 case CropType.fit:
-                case CropType.frame:
                     return <span className="notSupported">Mouse editing not supported yet.</span>;
+                    break;
+                case CropType.frame:
+                    rectProps = {
+                        x: `${(.5 - frame.wFloat / 2) * 100}%`,
+                        y: `${(.5 - frame.hFloat / 2) * 100}%`,
+                        width: `${frame.wFloat * 100}%`,
+                        height: `${frame.hFloat * 100}%`
+                    };
                     break;
                 case CropType.box:
                     rectProps = {
@@ -195,12 +240,14 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     };
                     break;
                 case CropType.zoom:
-                    rectProps = {
-                        x: `${(zoom.xFloat - 1 / (2 * zoom.zFloat)) * 100}%`,
-                        y: `${(zoom.yFloat - 1 / (2 * zoom.zFloat)) * 100}%`,
-                        width: `${1 / zoom.zFloat * 100}%`,
-                        height: `${1 / zoom.zFloat * 100}%`
-                    };
+                    if (zoom.zFloat > 0) {
+                        rectProps = {
+                            x: `${(zoom.xFloat - 1 / (2 * zoom.zFloat)) * 100}%`,
+                            y: `${(zoom.yFloat - 1 / (2 * zoom.zFloat)) * 100}%`,
+                            width: `${1 / zoom.zFloat * 100}%`,
+                            height: `${1 / zoom.zFloat * 100}%`
+                        };
+                    }
                     break;
             }
         }
@@ -209,7 +256,11 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
             <svg>
                 <defs>
                     <mask id="boxMask">
-                        <rect width="100%" height="100%" fill="white" />
+                        <rect
+                            width="100%"
+                            height="100%"
+                            fill="white"
+                        />
                         <rect
                             {...rectProps}
                             className="maskRect"
@@ -221,8 +272,10 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     className="selectRect"
                 />
                 <rect
-                    className="outsideRect"
+                    width="100%"
+                    height="100%"
                     mask="url(#boxMask)"
+                    className="outsideRect"
                 />
             </svg>
         );
@@ -293,22 +346,22 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                         <NumberInput
                             type={this.defaultNumberType}
                             allowedTypes={this.allowedNumberTypes}
-                            value={frame.xFloat || null}
+                            value={frame.wFloat || null}
                             max={this.props.imageWidth}
                             tooltip="Width"
                             setValue={value => {
-                                crop.frame.xFloat = value;
+                                crop.frame.wFloat = value;
                                 this.setTransform({ frame: crop.frame })
                             }}
                         />
                         <NumberInput
                             type={this.defaultNumberType}
                             allowedTypes={this.allowedNumberTypes}
-                            value={frame.yFloat || null}
+                            value={frame.hFloat || null}
                             max={this.props.imageHeight}
                             tooltip="Height"
                             setValue={value => {
-                                crop.frame.yFloat = value;
+                                crop.frame.hFloat = value;
                                 this.setTransform({ frame: crop.frame })
                             }}
                         />
@@ -420,10 +473,23 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
             <div>
                 <div className="modes">
                     <button
-                        className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.scale)}`}
-                        onClick={() => this.setTransform({ type: CropType.scale })}
+                        className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.box)}`}
+                        onClick={() => this.setTransform({ type: CropType.box })}
                     >
-                        Scale
+                        Box
+                    </button>
+                    <button
+                        className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.frame)}`}
+                        onClick={() => this.setTransform({ type: CropType.frame })}
+                    >
+                        Frame
+                    </button>
+
+                    <button
+                        className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.zoom)}`}
+                        onClick={() => this.setTransform({ type: CropType.zoom })}
+                    >
+                        Zoom
                     </button>
                     <button
                         className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.fit)}`}
@@ -432,22 +498,10 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                         Fit
                     </button>
                     <button
-                        className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.frame)}`}
-                        onClick={() => this.setTransform({ type: CropType.frame })}
+                        className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.scale)}`}
+                        onClick={() => this.setTransform({ type: CropType.scale })}
                     >
-                        Frame
-                    </button>
-                    <button
-                        className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.box)}`}
-                        onClick={() => this.setTransform({ type: CropType.box })}
-                    >
-                        Box
-                    </button>
-                    <button
-                        className={`btn mode ${this.buttonIsSelectedClass(crop.type === CropType.zoom)}`}
-                        onClick={() => this.setTransform({ type: CropType.zoom })}
-                    >
-                        Zoom
+                        Scale
                     </button>
                 </div>
                 {this.renderInputs(crop)}

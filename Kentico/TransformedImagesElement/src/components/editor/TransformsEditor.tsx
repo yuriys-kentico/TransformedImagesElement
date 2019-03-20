@@ -164,9 +164,8 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                     </span>
                 </div>
                 {
-                    this.props.disabled
-                        ? null
-                        : <div
+                    !this.props.disabled
+                        ? <div
                             className="editorControls"
                             onClick={e => {
                                 if (currentEditor) {
@@ -188,14 +187,18 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                                 imageWidth={imageWidth ? imageWidth : 0}
                                 imageHeight={imageHeight ? imageHeight : 0}
                             />
-                            <BackgroundControls
-                                isCurrentEditor={editor => editor === currentEditor}
-                                setCurrentEditor={editor => {
-                                    this.setState({ currentEditor: editor })
-                                }}
-                                transform={transforms.background}
-                                setTransform={() => this.update()}
-                            />
+                            {
+                                this.props.editedImage.canBeTransparent()
+                                    ? <BackgroundControls
+                                        isCurrentEditor={editor => editor === currentEditor}
+                                        setCurrentEditor={editor => {
+                                            this.setState({ currentEditor: editor })
+                                        }}
+                                        transform={transforms.background}
+                                        setTransform={() => this.update()}
+                                    />
+                                    : null
+                            }
                             <FormatControls
                                 isCurrentEditor={editor => editor === currentEditor}
                                 setCurrentEditor={editor => {
@@ -205,6 +208,7 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                                 setTransform={() => this.update()}
                             />
                         </div>
+                        : null
                 }
             </div >
         );

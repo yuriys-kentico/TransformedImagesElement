@@ -200,14 +200,17 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                                     key={i}
                                     showActions={!this.state.disabled}
                                     isSelected={false}
-                                    onRemove={image => this.selectImage(image)}
+                                    onRemove={image => {
+                                        this.updateValue();
+                                        this.selectImage(image);
+                                    }}
                                     onSelect={image => {
                                         this.storeEditedImage(image);
-                                        this.setMode(TransformedImagesElementMode.editor)
+                                        this.setMode(TransformedImagesElementMode.editor);
                                     }}
                                     onAddParams={image => {
                                         this.storeEditedImage(image);
-                                        this.setMode(TransformedImagesElementMode.editor)
+                                        this.setMode(TransformedImagesElementMode.editor);
                                     }}
                                 />
                             )
