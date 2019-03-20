@@ -14,14 +14,6 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
         return comparison ? "btn--primary" : "btn--secondary";
     }
 
-    constructor(props: IProps) {
-        super(props);
-
-        //if (props.currentEditor === null) {
-        //    props.setCurrentEditor(this);
-        //}
-    }
-
     setTransform<K extends keyof TTransform>(
         transform: (Pick<TTransform, K> | TTransform | null)
     ): void {

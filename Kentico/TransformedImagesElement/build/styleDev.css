@@ -158,12 +158,20 @@ body {
           position: absolute;
           width: 100%;
           height: 100%;
-          cursor: crosshair; }
+          cursor: crosshair;
+          overflow: initial; }
           .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg mask {
             position: absolute; }
           .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .selectRect {
             stroke: #2196f3;
             fill: transparent; }
+          .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle {
+            stroke: #2196f3;
+            fill: white; }
+            .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle#top, .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle#bottom {
+              cursor: ns-resize; }
+            .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle#left, .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle#right {
+              cursor: ew-resize; }
           .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .outsideRect {
             fill: rgba(255, 255, 255, 0.667); }
       .imageEditor .editor .imageEditorPreview .imageWrapper .imageEditorImage {

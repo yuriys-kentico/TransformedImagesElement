@@ -16,10 +16,19 @@ export interface ICropControlsState {
 }
 
 export interface RectProps {
-    x: string;
-    y: string;
-    width: string;
-    height: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+enum MouseEditMode {
+    none,
+    selecting,
+    grabTop,
+    grabBottom,
+    grabLeft,
+    grabRight
 }
 
 export class CropControls extends BaseControls<ICropControlsProps, ICropTransform, ICropControlsState> {
@@ -29,7 +38,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
 
     private allowedNumberTypes = [NumberInputType.pixel, NumberInputType.percent];
 
-    private selecting = false;
+    private mouseEditMode: MouseEditMode = MouseEditMode.none;
 
     private startXFloat = 0;
     private startYFloat = 0;
@@ -47,13 +56,25 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
         this.startYFloat = mouseXY.y;
         this.endYFloat = mouseXY.y;
 
-        this.selecting = true;
+        this.mouseEditMode = MouseEditMode.selecting;
+
+        if (event.target instanceof SVGCircleElement) {
+            if (event.target.id === "top") {
+                this.mouseEditMode = MouseEditMode.grabTop;
+            } else if (event.target.id === "bottom") {
+                this.mouseEditMode = MouseEditMode.grabBottom;
+            } else if (event.target.id === "left") {
+                this.mouseEditMode = MouseEditMode.grabLeft;
+            } else if (event.target.id === "right") {
+                this.mouseEditMode = MouseEditMode.grabRight;
+            }
+        }
 
         return true;
     };
 
     onMouseMove = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        if (this.selecting) {
+        if (this.mouseEditMode !== MouseEditMode.none) {
             const mouseXY = this.getMouseXY(event);
 
             this.endXFloat = mouseXY.x;
@@ -66,7 +87,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
     };
 
     onMouseUp = () => {
-        if (this.selecting) {
+        if (this.mouseEditMode !== MouseEditMode.none) {
             const { type, scale, fit, frame, box, zoom } = this.props.transform;
 
             let XFloat = 0;
@@ -76,9 +97,49 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
 
             switch (type) {
                 case CropType.scale:
+                    switch (this.mouseEditMode) {
+                        case MouseEditMode.grabTop:
+                        case MouseEditMode.grabBottom:
+                            const scaleMouseYTranslation = Math.abs(this.endYFloat - .5);
+
+                            WFloat = scale.xFloat !== 0 ? scale.xFloat : 1;
+                            HFloat = NumberUtils.toRounded(2 * scaleMouseYTranslation, 4);
+                            break;
+                        case MouseEditMode.grabLeft:
+                        case MouseEditMode.grabRight:
+                            const scaleMouseXTranslation = Math.abs(this.endXFloat - .5);
+
+                            WFloat = NumberUtils.toRounded(2 * scaleMouseXTranslation, 4);
+                            HFloat = scale.yFloat !== 0 ? scale.yFloat : 1;
+                            break;
+                    }
+
+                    scale.xFloat = WFloat;
+                    scale.yFloat = HFloat;
+
                     this.setTransform({ scale: scale });
                     break;
                 case CropType.fit:
+                    switch (this.mouseEditMode) {
+                        case MouseEditMode.grabTop:
+                        case MouseEditMode.grabBottom:
+                            const fitMouseYTranslation = Math.abs(this.endYFloat - .5);
+
+                            WFloat = fit.xFloat !== 0 ? fit.xFloat : 1;
+                            HFloat = NumberUtils.toRounded(2 * fitMouseYTranslation, 4);
+                            break;
+                        case MouseEditMode.grabLeft:
+                        case MouseEditMode.grabRight:
+                            const fitMouseXTranslation = Math.abs(this.endXFloat - .5);
+
+                            WFloat = NumberUtils.toRounded(2 * fitMouseXTranslation, 4);
+                            HFloat = fit.yFloat !== 0 ? fit.yFloat : 1;
+                            break;
+                    }
+
+                    fit.xFloat = WFloat;
+                    fit.yFloat = HFloat;
+
                     this.setTransform({ fit: fit });
                     break;
                 case CropType.frame:
@@ -141,7 +202,8 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     break;
             }
         }
-        this.selecting = false;
+
+        this.mouseEditMode = MouseEditMode.none;
 
         return true;
     };
@@ -149,18 +211,75 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
     getImageOverlay() {
         const { type, scale, fit, frame, box, zoom } = this.props.transform;
 
-        let rectProps: RectProps | null = null;
+        let rectProps: RectProps = {
+            x: 0,
+            y: 0,
+            width: 0,
+            height: 0
+        };
 
         let XFloat = 0;
         let YFloat = 0;
         let WFloat = 0;
         let HFloat = 0;
 
-        if (this.selecting && (Math.abs(this.endXFloat - this.startXFloat) > 0 || Math.abs(this.endYFloat - this.startYFloat) > 0)) {
+        if (this.mouseEditMode !== MouseEditMode.none && (Math.abs(this.endXFloat - this.startXFloat) > 0 || Math.abs(this.endYFloat - this.startYFloat) > 0)) {
             switch (type) {
                 case CropType.scale:
+                    switch (this.mouseEditMode) {
+                        case MouseEditMode.grabTop:
+                        case MouseEditMode.grabBottom:
+                            const scaleMouseYTranslation = Math.abs(this.endYFloat - .5);
+
+                            WFloat = scale.xFloat !== 0 ? scale.xFloat : 1;
+                            HFloat = NumberUtils.toRounded(2 * scaleMouseYTranslation, 4);
+                            break;
+                        case MouseEditMode.grabLeft:
+                        case MouseEditMode.grabRight:
+                            const scaleMouseXTranslation = Math.abs(this.endXFloat - .5);
+
+                            WFloat = NumberUtils.toRounded(2 * scaleMouseXTranslation, 4);
+                            HFloat = scale.yFloat !== 0 ? scale.yFloat : 1;
+                            break;
+                    }
+
+                    XFloat = NumberUtils.toRounded(.5 - WFloat / 2, 4);
+                    YFloat = NumberUtils.toRounded(.5 - HFloat / 2, 4);
+
+                    rectProps = {
+                        x: XFloat * 100,
+                        y: YFloat * 100,
+                        width: WFloat * 100,
+                        height: HFloat * 100
+                    };
+                    break;
                 case CropType.fit:
-                    return <span className="notSupported">Mouse editing not supported yet.</span>;
+                    switch (this.mouseEditMode) {
+                        case MouseEditMode.grabTop:
+                        case MouseEditMode.grabBottom:
+                            const fitMouseYTranslation = Math.abs(this.endYFloat - .5);
+
+                            WFloat = fit.xFloat !== 0 ? fit.xFloat : 1;
+                            HFloat = NumberUtils.toRounded(2 * fitMouseYTranslation, 4);
+                            break;
+                        case MouseEditMode.grabLeft:
+                        case MouseEditMode.grabRight:
+                            const fitMouseXTranslation = Math.abs(this.endXFloat - .5);
+
+                            WFloat = NumberUtils.toRounded(2 * fitMouseXTranslation, 4);
+                            HFloat = fit.yFloat !== 0 ? fit.yFloat : 1;
+                            break;
+                    }
+
+                    XFloat = NumberUtils.toRounded(.5 - WFloat / 2, 4);
+                    YFloat = NumberUtils.toRounded(.5 - HFloat / 2, 4);
+
+                    rectProps = {
+                        x: XFloat * 100,
+                        y: YFloat * 100,
+                        width: WFloat * 100,
+                        height: HFloat * 100
+                    };
                     break;
                 case CropType.frame:
                     const frameMouseXTranslation = Math.abs(this.endXFloat - .5);
@@ -173,10 +292,10 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     YFloat = NumberUtils.toRounded(.5 - HFloat / 2, 4);
 
                     rectProps = {
-                        x: `${XFloat * 100}%`,
-                        y: `${YFloat * 100}%`,
-                        width: `${WFloat * 100}%`,
-                        height: `${HFloat * 100}%`
+                        x: XFloat * 100,
+                        y: YFloat * 100,
+                        width: WFloat * 100,
+                        height: HFloat * 100
                     };
                     break;
                 case CropType.box:
@@ -192,10 +311,10 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     HFloat = NumberUtils.toRounded(Math.abs(this.endYFloat - this.startYFloat), 4);
 
                     rectProps = {
-                        x: `${XFloat * 100}%`,
-                        y: `${YFloat * 100}%`,
-                        width: `${WFloat * 100}%`,
-                        height: `${HFloat * 100}%`
+                        x: XFloat * 100,
+                        y: YFloat * 100,
+                        width: WFloat * 100,
+                        height: HFloat * 100
                     };
                     break;
                 case CropType.zoom:
@@ -211,45 +330,111 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     YFloat = NumberUtils.toRounded(this.startYFloat - sideFloat / 2, 4);
 
                     rectProps = {
-                        x: `${XFloat * 100}%`,
-                        y: `${YFloat * 100}%`,
-                        width: `${WFloat * 100}%`,
-                        height: `${HFloat * 100}%`
+                        x: XFloat * 100,
+                        y: YFloat * 100,
+                        width: WFloat * 100,
+                        height: HFloat * 100
                     };
             }
         } else {
             switch (type) {
                 case CropType.scale:
+                    if (scale.yFloat > 0 && scale.xFloat > 0) {
+                        rectProps = {
+                            x: (.5 - scale.xFloat / 2) * 100,
+                            y: (.5 - scale.yFloat / 2) * 100,
+                            width: scale.xFloat * 100,
+                            height: scale.yFloat * 100
+                        };
+                    } else {
+                        rectProps = {
+                            x: 0,
+                            y: 0,
+                            width: 100,
+                            height: 100
+                        };
+                    }
+                    break;
                 case CropType.fit:
-                    return <span className="notSupported">Mouse editing not supported yet.</span>;
+                    if (fit.yFloat > 0 && fit.xFloat > 0) {
+                        rectProps = {
+                            x: (.5 - fit.xFloat / 2) * 100,
+                            y: (.5 - fit.yFloat / 2) * 100,
+                            width: fit.xFloat * 100,
+                            height: fit.yFloat * 100
+                        };
+                    } else {
+                        rectProps = {
+                            x: 0,
+                            y: 0,
+                            width: 100,
+                            height: 100
+                        };
+                    }
                     break;
                 case CropType.frame:
                     rectProps = {
-                        x: `${(.5 - frame.wFloat / 2) * 100}%`,
-                        y: `${(.5 - frame.hFloat / 2) * 100}%`,
-                        width: `${frame.wFloat * 100}%`,
-                        height: `${frame.hFloat * 100}%`
+                        x: (.5 - frame.wFloat / 2) * 100,
+                        y: (.5 - frame.hFloat / 2) * 100,
+                        width: frame.wFloat * 100,
+                        height: frame.hFloat * 100
                     };
                     break;
                 case CropType.box:
                     rectProps = {
-                        x: `${box.xFloat * 100}%`,
-                        y: `${box.yFloat * 100}%`,
-                        width: `${box.wFloat * 100}%`,
-                        height: `${box.hFloat * 100}%`
+                        x: box.xFloat * 100,
+                        y: box.yFloat * 100,
+                        width: box.wFloat * 100,
+                        height: box.hFloat * 100
                     };
                     break;
                 case CropType.zoom:
                     if (zoom.zFloat > 0) {
                         rectProps = {
-                            x: `${(zoom.xFloat - 1 / (2 * zoom.zFloat)) * 100}%`,
-                            y: `${(zoom.yFloat - 1 / (2 * zoom.zFloat)) * 100}%`,
-                            width: `${1 / zoom.zFloat * 100}%`,
-                            height: `${1 / zoom.zFloat * 100}%`
+                            x: (zoom.xFloat - 1 / (2 * zoom.zFloat)) * 100,
+                            y: (zoom.yFloat - 1 / (2 * zoom.zFloat)) * 100,
+                            width: 1 / zoom.zFloat * 100,
+                            height: 1 / zoom.zFloat * 100
                         };
                     }
                     break;
             }
+        }
+
+        const rectPropsPercent = {
+            x: `${rectProps.x}%`,
+            y: `${rectProps.y}%`,
+            width: `${rectProps.width}%`,
+            height: `${rectProps.height}%`
+        }
+
+        let grabGroup: JSX.Element = <g />;
+
+        if (this.mouseEditMode !== MouseEditMode.selecting && rectProps.width > 0 && rectProps.height > 0
+            && (type === CropType.scale || type === CropType.fit)
+        ) {
+            const circle = (id: string, radius: number, cx: string, cy: string) => {
+                return <circle
+                    onMouseOut={e => {
+                        e.stopPropagation();
+                        e.nativeEvent.stopImmediatePropagation();
+                    }}
+                    cx={cx}
+                    cy={cy}
+                    r={radius}
+                    id={id}
+                    className="grabCircle"
+                />
+            }
+
+            grabGroup = (
+                <g>
+                    {circle("top", 15, `${rectProps.x + rectProps.width / 2}%`, rectPropsPercent.y)}
+                    {circle("bottom", 15, `${rectProps.x + rectProps.width / 2}%`, `${rectProps.y + rectProps.height}%`)}
+                    {circle("left", 15, rectPropsPercent.x, `${rectProps.y + rectProps.height / 2}%`)}
+                    {circle("right", 15, `${rectProps.x + rectProps.width}%`, `${rectProps.y + rectProps.height / 2}%`)}
+                </g>
+            );
         }
 
         return (
@@ -262,13 +447,13 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             fill="white"
                         />
                         <rect
-                            {...rectProps}
+                            {...rectPropsPercent}
                             className="maskRect"
                         />
                     </mask>
                 </defs>
                 <rect
-                    {...rectProps}
+                    {...rectPropsPercent}
                     className="selectRect"
                 />
                 <rect
@@ -277,6 +462,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     mask="url(#boxMask)"
                     className="outsideRect"
                 />
+                {grabGroup}
             </svg>
         );
     }
