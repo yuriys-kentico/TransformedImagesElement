@@ -32,15 +32,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
         };
 
         if (event.target instanceof SVGCircleElement) {
-            if (event.target.id === "top") {
-                this.actionParams.action = EditAction.grabTop;
-            } else if (event.target.id === "bottom") {
-                this.actionParams.action = EditAction.grabBottom;
-            } else if (event.target.id === "left") {
-                this.actionParams.action = EditAction.grabLeft;
-            } else if (event.target.id === "right") {
-                this.actionParams.action = EditAction.grabRight;
-            }
+            this.actionParams.action = event.target.id;
         }
 
         return true;

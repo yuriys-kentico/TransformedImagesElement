@@ -16,17 +16,23 @@ export interface ActionParams {
     startYFloat: number;
     endXFloat: number;
     endYFloat: number;
-    action: EditAction
+    action: EditAction | string
 }
 
 export enum EditAction {
-    none,
-    selecting,
-    grabTop,
-    grabBottom,
-    grabLeft,
-    grabRight
+    none = "none",
+    selecting = "selecting",
+    dragging = "dragging",
+    top = "top",
+    topRight = "topRight",
+    right = "right",
+    bottomRight = "bottomRight",
+    bottom = "bottom",
+    bottomLeft = "bottomleft",
+    left = "left",
+    topLeft = "topLeft"
 }
+
 
 export interface IBaseControlsProps<TTransform> {
     isCurrentEditor(editor: BaseControls<this, TTransform>): boolean;

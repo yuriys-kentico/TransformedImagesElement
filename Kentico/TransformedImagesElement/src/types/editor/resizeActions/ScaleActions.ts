@@ -10,15 +10,15 @@ export class ScaleActions extends BaseActions<WHTransform> {
         let HFloat = 0;
 
         switch (this.action) {
-            case EditAction.grabTop:
-            case EditAction.grabBottom:
+            case EditAction.top:
+            case EditAction.bottom:
                 const scaleMouseYTranslation = Math.abs(this.endYFloat - .5);
 
                 WFloat = oldScale.wFloat !== 0 ? oldScale.wFloat : 1;
                 HFloat = NumberUtils.toRounded(2 * scaleMouseYTranslation, 4);
                 break;
-            case EditAction.grabLeft:
-            case EditAction.grabRight:
+            case EditAction.left:
+            case EditAction.right:
                 const scaleMouseXTranslation = Math.abs(this.endXFloat - .5);
 
                 WFloat = NumberUtils.toRounded(2 * scaleMouseXTranslation, 4);
@@ -37,15 +37,15 @@ export class ScaleActions extends BaseActions<WHTransform> {
         let HFloat = 0;
 
         switch (this.action) {
-            case EditAction.grabTop:
-            case EditAction.grabBottom:
+            case EditAction.top:
+            case EditAction.bottom:
                 const scaleMouseYTranslation = Math.abs(this.endYFloat - .5);
 
                 WFloat = oldScale.wFloat !== 0 ? oldScale.wFloat : 1;
                 HFloat = NumberUtils.toRounded(2 * scaleMouseYTranslation, 4);
                 break;
-            case EditAction.grabLeft:
-            case EditAction.grabRight:
+            case EditAction.left:
+            case EditAction.right:
                 const scaleMouseXTranslation = Math.abs(this.endXFloat - .5);
 
                 WFloat = NumberUtils.toRounded(2 * scaleMouseXTranslation, 4);

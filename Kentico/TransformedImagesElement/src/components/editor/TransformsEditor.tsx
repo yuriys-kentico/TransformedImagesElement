@@ -9,10 +9,17 @@ import { CropControls } from "./controls/CropControls";
 import { FormatControls } from "./controls/FormatControls";
 import { ResizeControls } from "./controls/ResizeControls";
 
-export enum EditorMode {
+enum EditorMode {
     preview,
     hovering,
     noPreview
+}
+
+enum MouseAction {
+    up,
+    down,
+    move,
+    leave
 }
 
 export interface IImageEditorProps {
@@ -33,7 +40,9 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
         mode: this.mode
     }
 
-    private firstEditor: CropControls | null;
+    private firstEditor: BaseControls | null;
+
+    mouseIsDown: boolean;
 
     get mode(): EditorMode {
         if (this.state && this.state.mode === EditorMode.hovering) {
@@ -88,6 +97,39 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
         }
     }
 
+    updateMouseAction(event: React.MouseEvent<HTMLDivElement, MouseEvent>, action: MouseAction, currentEditor: BaseControls | null) {
+        if (currentEditor) {
+            switch (action) {
+                case MouseAction.down:
+                    if(event.button !== 2 && !this.mouseIsDown && currentEditor.onMouseDown(event)) {
+                        this.mouseIsDown = true;
+                        this.update();
+                    }
+                break;
+                case MouseAction.move:
+                    if(this.mouseIsDown && currentEditor.onMouseMove(event)) {
+                        this.update();
+                    }
+                break;
+                case MouseAction.leave:
+                    if(this.mouseIsDown && currentEditor.onMouseUp(event)) {
+                        this.mouseIsDown = false;
+                        this.update();
+                    }
+                    this.props.disabled
+                    ? this.mode = EditorMode.hovering
+                    : this.mode = EditorMode.preview;
+                break;
+                case MouseAction.up:
+                    if(event.button !== 2 && this.mouseIsDown && currentEditor.onMouseUp(event)) {
+                        this.mouseIsDown = false;
+                        this.update();
+                    }
+                break;
+            }
+        }
+    }
+
     update(): void {
         this.props.updateUrl(this.props.editedImage.buildEditedUrl().getUrl());
         this.forceUpdate();
@@ -114,32 +156,15 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
             >
                 <div
                     className={`imageEditorPreview ${this.getHoveringClass()}`}
-                    onMouseMove={() => this.props.disabled
-                        ? this.mode = EditorMode.preview
-                        : this.mode = EditorMode.hovering}
-                    onMouseLeave={() => this.props.disabled
-                        ? this.mode = EditorMode.preview
-                        : this.mode = EditorMode.preview}
+                    onMouseLeave={e => this.updateMouseAction(e, MouseAction.leave, currentEditor)}
+                    onMouseMove={() => this.mode = EditorMode.hovering}
                 >
                     <span className="imageWrapper">
                         <div
                             className="imageMask"
-                            onMouseDown={e => {
-                                if (currentEditor && currentEditor.onMouseDown(e))
-                                    this.update()
-                            }}
-                            onMouseMove={e => {
-                                if (currentEditor && currentEditor.onMouseMove(e))
-                                    this.update()
-                            }}
-                            onMouseUp={e => {
-                                if (currentEditor && currentEditor.onMouseUp(e))
-                                    this.update()
-                            }}
-                            onMouseOut={e => {
-                                if (currentEditor && currentEditor.onMouseUp(e))
-                                    this.update()
-                            }}
+                            onMouseDown={e => this.updateMouseAction(e, MouseAction.down, currentEditor)}
+                            onMouseUp={e => this.updateMouseAction(e, MouseAction.up, currentEditor)}
+                            onMouseMove={e => this.updateMouseAction(e, MouseAction.move, currentEditor)}
                         >
                             {currentEditor
                                 && this.mode !== EditorMode.preview

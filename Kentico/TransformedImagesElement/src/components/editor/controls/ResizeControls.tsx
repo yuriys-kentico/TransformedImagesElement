@@ -31,15 +31,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
         };
 
         if (event.target instanceof SVGCircleElement) {
-            if (event.target.id === "top") {
-                this.actionParams.action = EditAction.grabTop;
-            } else if (event.target.id === "bottom") {
-                this.actionParams.action = EditAction.grabBottom;
-            } else if (event.target.id === "left") {
-                this.actionParams.action = EditAction.grabLeft;
-            } else if (event.target.id === "right") {
-                this.actionParams.action = EditAction.grabRight;
-            }
+            this.actionParams.action = event.target.id;
         }
 
         return true;
@@ -140,10 +132,6 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
         ) {
             const circle = (id: string, radius: number, cx: string, cy: string) => {
                 return <circle
-                    onMouseOut={e => {
-                        e.stopPropagation();
-                        e.nativeEvent.stopImmediatePropagation();
-                    }}
                     cx={cx}
                     cy={cy}
                     r={radius}
@@ -154,10 +142,14 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
 
             grabGroup = (
                 <g>
-                    {circle("top", 15, `${rectProps.x + rectProps.width / 2}%`, rectPropsPercent.y)}
-                    {circle("bottom", 15, `${rectProps.x + rectProps.width / 2}%`, `${rectProps.y + rectProps.height}%`)}
-                    {circle("left", 15, rectPropsPercent.x, `${rectProps.y + rectProps.height / 2}%`)}
-                    {circle("right", 15, `${rectProps.x + rectProps.width}%`, `${rectProps.y + rectProps.height / 2}%`)}
+                    {circle(EditAction.top, 10, `${rectProps.x + rectProps.width / 2}%`, rectPropsPercent.y)}
+                    {circle(EditAction.topRight, 7, `${rectProps.x + rectProps.width}%`, rectPropsPercent.y)}
+                    {circle(EditAction.right, 10, `${rectProps.x + rectProps.width}%`, `${rectProps.y + rectProps.height / 2}%`)}
+                    {circle(EditAction.bottomRight, 7, `${rectProps.x + rectProps.width}%`, `${rectProps.y + rectProps.height}%`)}
+                    {circle(EditAction.bottom, 10, `${rectProps.x + rectProps.width / 2}%`, `${rectProps.y + rectProps.height}%`)}
+                    {circle(EditAction.bottomLeft, 7, rectPropsPercent.x, `${rectProps.y + rectProps.height}%`)}
+                    {circle(EditAction.left, 10, rectPropsPercent.x, `${rectProps.y + rectProps.height / 2}%`)}
+                    {circle(EditAction.topLeft, 7, rectPropsPercent.x, rectPropsPercent.y)}
                 </g>
             );
         }

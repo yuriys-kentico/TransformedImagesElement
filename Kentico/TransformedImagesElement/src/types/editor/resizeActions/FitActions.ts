@@ -10,15 +10,15 @@ export class FitActions extends BaseActions<WHTransform> {
         let HFloat = 0;
 
         switch (this.action) {
-            case EditAction.grabTop:
-            case EditAction.grabBottom:
+            case EditAction.top:
+            case EditAction.bottom:
                 const fitMouseYTranslation = Math.abs(this.endYFloat - .5);
 
                 WFloat = oldFit.wFloat !== 0 ? oldFit.wFloat : 1;
                 HFloat = NumberUtils.toRounded(2 * fitMouseYTranslation, 4);
                 break;
-            case EditAction.grabLeft:
-            case EditAction.grabRight:
+            case EditAction.left:
+            case EditAction.right:
                 const fitMouseXTranslation = Math.abs(this.endXFloat - .5);
 
                 WFloat = NumberUtils.toRounded(2 * fitMouseXTranslation, 4);
@@ -37,15 +37,15 @@ export class FitActions extends BaseActions<WHTransform> {
         let HFloat = 0;
 
         switch (this.action) {
-            case EditAction.grabTop:
-            case EditAction.grabBottom:
+            case EditAction.top:
+            case EditAction.bottom:
                 const fitMouseYTranslation = Math.abs(this.endYFloat - .5);
 
                 WFloat = oldFit.wFloat !== 0 ? oldFit.wFloat : 1;
                 HFloat = NumberUtils.toRounded(2 * fitMouseYTranslation, 4);
                 break;
-            case EditAction.grabLeft:
-            case EditAction.grabRight:
+            case EditAction.left:
+            case EditAction.right:
                 const fitMouseXTranslation = Math.abs(this.endXFloat - .5);
 
                 WFloat = NumberUtils.toRounded(2 * fitMouseXTranslation, 4);

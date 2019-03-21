@@ -5,7 +5,7 @@ export abstract class BaseActions<TTransform> {
     protected startYFloat: number;
     protected endXFloat: number;
     protected endYFloat: number;
-    protected action: EditAction;
+    protected action: EditAction | string;
 
     constructor(actionParams: ActionParams) {
         this.startXFloat = actionParams.startXFloat;
