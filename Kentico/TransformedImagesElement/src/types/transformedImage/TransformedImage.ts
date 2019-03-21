@@ -8,7 +8,6 @@ import { ITransforms, CropType, Transforms, Format, ResizeType } from "./Transfo
 import { NumberUtils } from "../NumberUtils";
 import { OPTIONAL_CONFIG } from "../customElement/IElementConfig";
 import { Color } from "./Color";
-import { try } from "q";
 
 export class TransformedImage extends AssetModels.Asset {
     private imageEndpoint: string = "https://assets-us-01.kc-usercontent.com";

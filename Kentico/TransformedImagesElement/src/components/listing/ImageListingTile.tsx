@@ -3,7 +3,6 @@
 import { TransformedImage } from "../../types/transformedImage/TransformedImage";
 
 import { AssetDetails } from "./AssetDetails";
-import { Checkerboard } from "../../types/editor/Checkerboard";
 
 export interface IimageListingProps {
     image: TransformedImage;
