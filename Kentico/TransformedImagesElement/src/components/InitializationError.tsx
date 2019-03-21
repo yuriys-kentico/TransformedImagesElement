@@ -7,7 +7,7 @@ import { IElementConfig, IRequiredConfig } from "../types/customElement/IElement
 declare const CustomElement: ICustomElement;
 
 export interface IErrorProps {
-    configurationError: Error;
+    error: Error;
 }
 
 export class InitializationError extends React.Component<IErrorProps> {
@@ -29,7 +29,8 @@ export class InitializationError extends React.Component<IErrorProps> {
         const sampleParameters: IRequiredConfig = {
             contentManagementAPIKey: "<Key value from Project settings > API Keys > Content Management API>",
             [nameof<IElementConfig>(i => i.editorDefaultToPreview)]: "<Optional: 'true' or 'false' (without quotes) to preview transformations in the editor by default>",
-            [nameof<IElementConfig>(i => i.editorDefaultCropType)]: "<Optional: One of the following default crop modes: 'scale', 'fit', 'frame', 'box', 'zoom'>",
+            [nameof<IElementConfig>(i => i.editorDefaultCropType)]: "<Optional: One of the following default crop modes: 'box', 'zoom', 'frame'>",
+            [nameof<IElementConfig>(i => i.editorDefaultResizeType)]: "<Optional: One of the following default resize modes: 'scale', 'fit'>",
             [nameof<IElementConfig>(i => i.colorPickerDefaultColors)]: "<Optional: Array of default colors like ['#RRGGBBAA', '#4caf50', ...]>"
         }
 
@@ -40,7 +41,7 @@ export class InitializationError extends React.Component<IErrorProps> {
             >
                 <div className="details">
                     <strong>Error: </strong>
-                    {this.props.configurationError ? this.props.configurationError.message : ""}
+                    {this.props.error ? this.props.error.message : ""}
                 </div>
                 <div>
                     <span className="notice">In other words, please make sure the parameters look like this:</span>

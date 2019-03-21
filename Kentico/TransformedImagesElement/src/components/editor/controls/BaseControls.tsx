@@ -1,6 +1,32 @@
 ﻿import * as React from "react";
 
 import { NumberUtils } from "../../../types/NumberUtils";
+import { NumberInputType } from "../inputs/NumberInput";
+import { OPTIONAL_CONFIG } from "../../../types/customElement/IElementConfig";
+
+export interface RectProps {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
+export interface ActionParams {
+    startXFloat: number;
+    startYFloat: number;
+    endXFloat: number;
+    endYFloat: number;
+    action: EditAction
+}
+
+export enum EditAction {
+    none,
+    selecting,
+    grabTop,
+    grabBottom,
+    grabLeft,
+    grabRight
+}
 
 export interface IBaseControlsProps<TTransform> {
     isCurrentEditor(editor: BaseControls<this, TTransform>): boolean;
@@ -14,7 +40,26 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
         return comparison ? "btn--primary" : "btn--secondary";
     }
 
-    setTransform<K extends keyof TTransform>(
+    protected defaultNumberType = OPTIONAL_CONFIG.inputsDefaultToPercent
+        ? NumberInputType.percent
+        : NumberInputType.pixel;
+
+    protected allowedNumberTypes = [NumberInputType.pixel, NumberInputType.percent];
+
+    protected hasMovedMouse(): boolean {
+        return Math.abs(this.actionParams.endXFloat - this.actionParams.startXFloat) > 0
+            || Math.abs(this.actionParams.endYFloat - this.actionParams.startYFloat) > 0
+    }
+
+    protected actionParams: ActionParams = {
+        startXFloat: 0,
+        startYFloat: 0,
+        endXFloat: 0,
+        endYFloat: 0,
+        action: EditAction.none,
+    };
+
+    protected setTransform<K extends keyof TTransform>(
         transform: (Pick<TTransform, K> | TTransform | null)
     ): void {
         const prevTransform = this.props.transform;
@@ -27,7 +72,7 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
         this.props.setTransform(prevTransform);
     }
 
-    getMouseXY(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    protected getMouseXY(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         const { left, top, width, height } = event.currentTarget.getBoundingClientRect();
         const mouseX = event.clientX;
         const mouseY = event.clientY;

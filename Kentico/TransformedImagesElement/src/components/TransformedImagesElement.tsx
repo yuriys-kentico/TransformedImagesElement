@@ -1,6 +1,6 @@
 ﻿import * as React from "react";
 import { AssetResponses } from "kentico-cloud-content-management";
-import { Observable, empty } from "rxjs";
+import { Observable } from "rxjs";
 
 import { IContext } from "../types/customElement/IContext";
 import { ICustomElement } from "../types/customElement/ICustomElement";
@@ -25,17 +25,19 @@ export enum TransformedImagesElementMode {
 }
 
 export interface IElementProps {
-    context?: IContext;
+    context: IContext;
     initialDisabled: boolean;
     initialRawImages: TransformedImage[];
     initialSelectedImages: TransformedImage[];
     initialMode: TransformedImagesElementMode;
-    moreAssetsObservable: Observable<AssetResponses.AssetsListResponse>;
+    continuationToken: string | null;
+    moreAssets: (continuationToken: string) => Observable<AssetResponses.AssetsListResponse>;
 }
 
 export interface IElementState {
     disabled: boolean;
     rawImages: TransformedImage[];
+    continuationToken: string | null;
     selectedImages: TransformedImage[];
     previousSelectedImages: TransformedImage[];
     editedImage: TransformedImage | null;
@@ -53,6 +55,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
     state: IElementState = {
         disabled: this.props.initialDisabled,
         rawImages: this.props.initialRawImages,
+        continuationToken: this.props.continuationToken,
         selectedImages: this.props.initialSelectedImages,
         previousSelectedImages: [],
         editedImage: null,
@@ -71,27 +74,21 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
     }
 
     loadMoreAssets(): void {
-        if (this.props.context) {
-            const context = this.props.context;
+        if (this.state.continuationToken) {
+            const projectId = this.props.context.projectId;
 
-            this.props.moreAssetsObservable
+            this.props.moreAssets(this.state.continuationToken)
                 .subscribe(response =>
-                    this.setState(state =>
-                        ({
-                            rawImages: [
-                                ...state.rawImages,
-                                ...response.data.items
-                                    .filter(i =>
-                                        TransformedImage.assetIsImage(i)
-                                    )
-                                    .map(a =>
-                                        new TransformedImage(context.projectId, a)
-                                    )
-                            ]
-                        })
-                    ))
-        } else {
-            throw Error("Context is not available to load more assets.");
+                    this.setState(state => ({
+                        rawImages: [
+                            ...state.rawImages,
+                            ...response.data.items
+                                .filter(i => TransformedImage.assetIsImage(i))
+                                .map(a => new TransformedImage(projectId, a))
+                        ],
+                        continuationToken: response.data.pagination.continuationToken
+                    }))
+                );
         }
     }
 
@@ -127,7 +124,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         if (!!this.state.selectedImages.find(i => i.equals(image))) {
             this.setState((state) => ({
                 selectedImages: state.selectedImages.filter(i => !i.equals(image))
-            }))
+            }), this.updateValue)
         }
         // Select image
         else {
@@ -201,7 +198,6 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                                     showActions={!this.state.disabled}
                                     isSelected={false}
                                     onRemove={image => {
-                                        this.updateValue();
                                         this.selectImage(image);
                                     }}
                                     onSelect={image => {
@@ -245,9 +241,9 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                                 this.revertSelectedImages();
                                 this.setMode(TransformedImagesElementMode.listing)
                             }}
-                            onClickUpdate={() => { this.setMode(TransformedImagesElementMode.listing) }}
-                            onClickLoadMore={() => { this.loadMoreAssets() }}
-                            showLoadMore={this.props.moreAssetsObservable !== empty()}
+                            onClickUpdate={() => this.setMode(TransformedImagesElementMode.listing)}
+                            onClickLoadMore={() => this.loadMoreAssets()}
+                            showLoadMore={this.props.continuationToken !== null}
                         />
                     </div>
                 );

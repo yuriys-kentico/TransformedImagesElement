@@ -1,8 +1,9 @@
-import { CropType } from "../transformedImage/Transforms";
+import { CropType, ResizeType } from "../transformedImage/Transforms";
 
 export interface IOptionalConfig {
     editorDefaultToPreview: boolean;
     editorDefaultCropType: CropType;
+    editorDefaultResizeType: ResizeType;
     inputsDefaultToPercent: boolean;
     colorPickerDefaultColors: string[]
 }
@@ -15,7 +16,8 @@ export interface IElementConfig extends IOptionalConfig, IRequiredConfig {
 
 export const OPTIONAL_CONFIG: IOptionalConfig = {
     editorDefaultToPreview: false,
-    editorDefaultCropType: CropType.scale,
+    editorDefaultCropType: CropType.box,
+    editorDefaultResizeType: ResizeType.fit,
     inputsDefaultToPercent: false,
     colorPickerDefaultColors: [
         "#4caf50",

@@ -7,6 +7,7 @@ import { BaseControls } from "./controls/BaseControls";
 import { BackgroundControls } from "./controls/BackgroundControls";
 import { CropControls } from "./controls/CropControls";
 import { FormatControls } from "./controls/FormatControls";
+import { ResizeControls } from "./controls/ResizeControls";
 
 export enum EditorMode {
     preview,
@@ -183,6 +184,16 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                                     this.setState({ currentEditor: editor })
                                 }}
                                 transform={transforms.crop}
+                                setTransform={() => this.update()}
+                                imageWidth={imageWidth ? imageWidth : 0}
+                                imageHeight={imageHeight ? imageHeight : 0}
+                            />
+                            <ResizeControls
+                                isCurrentEditor={editor => editor === currentEditor}
+                                setCurrentEditor={editor => {
+                                    this.setState({ currentEditor: editor })
+                                }}
+                                transform={transforms.resize}
                                 setTransform={() => this.update()}
                                 imageWidth={imageWidth ? imageWidth : 0}
                                 imageHeight={imageHeight ? imageHeight : 0}

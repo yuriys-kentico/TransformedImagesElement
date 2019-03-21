@@ -42,9 +42,11 @@
     <Content Include="build\style.css" />
     <Content Include="src\styles\style.scss" />
     <Content Include="src\templates\index.html" />
+    <Content Include="src\types\editor\cropActions\BoxActions.ts" />
     <Content Include="tsconfig.json" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <TypeScriptCompile Include="src\components\editor\controls\ResizeControls.tsx" />
     <TypeScriptCompile Include="src\components\editor\controls\FormatControls.tsx" />
     <TypeScriptCompile Include="src\components\editor\controls\BackgroundControls.tsx" />
     <TypeScriptCompile Include="src\components\editor\controls\BaseControls.tsx" />
@@ -61,6 +63,11 @@
     <TypeScriptCompile Include="src\components\InitializationError.tsx" />
     <TypeScriptCompile Include="src\types\editor\Checkerboard.ts" />
     <TypeScriptCompile Include="src\components\Initialize.tsx" />
+    <TypeScriptCompile Include="src\types\editor\BaseActions.ts" />
+    <TypeScriptCompile Include="src\types\editor\cropActions\FrameActions.ts" />
+    <TypeScriptCompile Include="src\types\editor\cropActions\ZoomActions.ts" />
+    <TypeScriptCompile Include="src\types\editor\resizeActions\ScaleActions.ts" />
+    <TypeScriptCompile Include="src\types\editor\resizeActions\FitActions.ts" />
     <TypeScriptCompile Include="src\types\NumberUtils.ts" />
     <TypeScriptCompile Include="src\types\react-html-id.d.ts" />
     <TypeScriptCompile Include="src\types\transformedImage\Color.ts" />
@@ -85,6 +92,7 @@
     <Folder Include="src\" />
     <Folder Include="src\components\" />
     <Folder Include="src\components\editor\controls\" />
+    <Folder Include="src\types\editor\cropActions\" />
     <Folder Include="src\components\editor\inputs\" />
     <Folder Include="src\types\customElement\" />
     <Folder Include="src\components\listing\" />
@@ -94,6 +102,7 @@
     <Folder Include="src\styles\" />
     <Folder Include="src\templates\" />
     <Folder Include="src\types\editor\" />
+    <Folder Include="src\types\editor\resizeActions\" />
     <Folder Include="src\types\transformedImage\" />
   </ItemGroup>
   <ItemGroup>

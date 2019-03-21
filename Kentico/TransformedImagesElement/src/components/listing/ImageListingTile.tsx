@@ -77,9 +77,6 @@ export class ImageListingTile extends React.PureComponent<IimageListingProps> {
                     </div>
                     <div
                         className="imageListingPreview"
-                        style={{
-                            background: `url(${Checkerboard.generate("transparent", "rgba(0,0,0,.02)", 16)}) center left`
-                        }}
                         onClick={() => this.onSelect()}
                     >
                         <img

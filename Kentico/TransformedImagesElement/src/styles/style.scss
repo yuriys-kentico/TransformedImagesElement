@@ -243,13 +243,6 @@ body {
                         cursor: crosshair;
                         overflow: initial;
 
-                        mask {
-                            position: absolute;
-                        }
-
-                        .maskRect {
-                        }
-
                         .selectRect {
                             stroke: #2196f3;
                             fill: transparent;
@@ -325,9 +318,30 @@ body {
                 border: transparent solid 0.1em;
                 border-left: #9e9e9e solid 0.3em;
 
+                .btn--primary {
+                    background-color: #424242;
+                }
+
                 &.selected {
                     border-left: #2196f3 solid 0.3em;
                     border-radius: 0 0.2em 0.2em 0;
+
+                    .btn--primary {
+                        background-color: #2196f3;
+                        transition: none;
+                    }
+
+                    .fields {
+                        .input {
+                            > input {
+                                + span {
+                                    &[title] {
+                                        color: #2196f3;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 .modes {
@@ -341,6 +355,7 @@ body {
                         margin: 0;
                         min-width: 3em;
                         border: none;
+                        flex: 1;
 
                         + .mode {
                             border-left: 1px solid #757575;
@@ -391,6 +406,7 @@ body {
                             position: absolute;
                             right: calc(100% + .5em);
                             z-index: 1000;
+                            transform: translate(0, -50%);
 
                             .sketch-picker {
                                 > div:nth-of-type(3) {
@@ -419,7 +435,6 @@ body {
                                 margin: 0em;
 
                                 &[title] {
-                                    color: #2196f3;
                                     cursor: pointer;
                                 }
                             }
@@ -434,14 +449,6 @@ body {
                                 text-align: right;
                                 min-width: 3.5em;
                                 flex: 1;
-                            }
-                        }
-
-                        &:last-of-type {
-                            input {
-                                + span {
-                                    /*padding: 0.2em 0;*/
-                                }
                             }
                         }
                     }

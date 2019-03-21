@@ -4,16 +4,20 @@ import { Color } from './Color';
 
 export interface ITransforms {
     crop: ICropTransform;
+    resize: IResizeTransform;
     background: IBackgroundTransform;
     format: IFormatTransform;
 }
 
 export enum CropType {
-    scale = "scale",
-    fit = "fit",
-    frame = "frame",
     box = "box",
-    zoom = "zoom"
+    zoom = "zoom",
+    frame = "frame"
+}
+
+export enum ResizeType {
+    scale = "scale",
+    fit = "fit"
 }
 
 export interface XYTransform {
@@ -32,12 +36,15 @@ export interface ZTransform {
 
 export interface ICropTransform {
     type: CropType;
-    scale: XYTransform,
-    fit: XYTransform,
-    frame: WHTransform,
     box: XYTransform & WHTransform,
     zoom: XYTransform & ZTransform,
-    resize: XYTransform,
+    frame: WHTransform
+}
+
+export interface IResizeTransform {
+    type: ResizeType;
+    scale: WHTransform,
+    fit: WHTransform,
     devicePixelRatio: number;
 }
 
@@ -64,21 +71,24 @@ export interface IFormatTransform {
 
 export class Transforms implements ITransforms {
     crop: ICropTransform;
+    resize: IResizeTransform;
     background: IBackgroundTransform;
     format: IFormatTransform;
 
     constructor(transforms: ITransforms) {
-        const { crop, background, format } = transforms;
+        const { crop, resize, background, format } = transforms;
 
         this.crop = {
             type: crop.type,
-            [CropType.scale]: { ...crop.scale },
-            [CropType.fit]: { ...crop.fit },
             [CropType.frame]: { ...crop.frame },
             [CropType.box]: { ...crop.box },
-            [CropType.zoom]: { ...crop.zoom },
-            resize: { ...crop.resize },
-            devicePixelRatio: crop.devicePixelRatio
+            [CropType.zoom]: { ...crop.zoom }
+        };
+        this.resize = {
+            type: resize.type,
+            [ResizeType.scale]: { ...resize.scale },
+            [ResizeType.fit]: { ...resize.fit },
+            devicePixelRatio: resize.devicePixelRatio
         };
         this.background = {
             color: background.color
@@ -89,18 +99,20 @@ export class Transforms implements ITransforms {
     }
 
     static clone(transforms: ITransforms): ITransforms {
-        const { crop, background, format } = transforms;
+        const { crop, resize, background, format } = transforms;
 
         return {
             crop: {
                 type: crop.type,
-                [CropType.scale]: { ...crop.scale },
-                [CropType.fit]: { ...crop.fit },
                 [CropType.frame]: { ...crop.frame },
                 [CropType.box]: { ...crop.box },
-                [CropType.zoom]: { ...crop.zoom },
-                resize: { ...crop.resize },
-                devicePixelRatio: crop.devicePixelRatio
+                [CropType.zoom]: { ...crop.zoom }
+            },
+            resize: {
+                type: resize.type,
+                [ResizeType.scale]: { ...resize.scale },
+                [ResizeType.fit]: { ...resize.fit },
+                devicePixelRatio: resize.devicePixelRatio
             },
             background: { ...background },
             format: { ...format }
