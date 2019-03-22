@@ -11,6 +11,13 @@ export interface RectProps {
     height: number;
 }
 
+export interface RectPropsPercent {
+    x: string;
+    y: string;
+    width: string;
+    height: string;
+}
+
 export interface ActionParams {
     startXFloat: number;
     startYFloat: number;
@@ -33,7 +40,6 @@ export enum EditAction {
     topLeft = "topLeft"
 }
 
-
 export interface IBaseControlsProps<TTransform> {
     isCurrentEditor(editor: BaseControls<this, TTransform>): boolean;
     setCurrentEditor(editor: BaseControls<this, TTransform>): void;
@@ -52,11 +58,6 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
 
     protected allowedNumberTypes = [NumberInputType.pixel, NumberInputType.percent];
 
-    protected hasMovedMouse(): boolean {
-        return Math.abs(this.actionParams.endXFloat - this.actionParams.startXFloat) > 0
-            || Math.abs(this.actionParams.endYFloat - this.actionParams.startYFloat) > 0
-    }
-
     protected actionParams: ActionParams = {
         startXFloat: 0,
         startYFloat: 0,
@@ -65,9 +66,7 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
         action: EditAction.none,
     };
 
-    protected setTransform<K extends keyof TTransform>(
-        transform: (Pick<TTransform, K> | TTransform | null)
-    ): void {
+    protected setTransform<K extends keyof TTransform>(transform: Pick<TTransform, K> | TTransform | null): void {
         const prevTransform = this.props.transform;
 
         Object.assign(
@@ -94,13 +93,68 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
 
     abstract onClickSidebar(): void;
 
-    abstract onMouseDown(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean;
+    onMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        const mouseXY = this.getMouseXY(event);
 
-    abstract onMouseMove(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean;
+        this.actionParams = {
+            startXFloat: mouseXY.x,
+            startYFloat: mouseXY.y,
+            endXFloat: mouseXY.x,
+            endYFloat: mouseXY.y,
+            action: EditAction.selecting,
+        };
 
-    abstract onMouseUp(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean;
+        if (event.target instanceof SVGCircleElement) {
+            this.actionParams.action = event.target.id;
+        }
+
+        return true;
+    };
+
+    onMouseMove = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        if (this.actionParams.action !== EditAction.none) {
+            const mouseXY = this.getMouseXY(event);
+
+            this.actionParams.endXFloat = mouseXY.x;
+            this.actionParams.endYFloat = mouseXY.y;
+
+            return true;
+        }
+
+        return false;
+    };
+
+    protected hasMovedMouse(): boolean {
+        return Math.abs(this.actionParams.endXFloat - this.actionParams.startXFloat) > 0
+            || Math.abs(this.actionParams.endYFloat - this.actionParams.startYFloat) > 0
+    }
+
+    abstract updateTransform(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean;
 
     abstract getImageOverlay(): React.ReactNode;
+
+    protected getGrabCirclesGroup(rectProps: RectProps, rectPropsPercent: RectPropsPercent): JSX.Element {
+        const circle = (id: string, radius: number, cx: string, cy: string) => {
+            return <circle
+                cx={cx}
+                cy={cy}
+                r={radius}
+                id={id}
+                className="grabCircle"
+            />
+        }
+
+        return (<g>
+            {circle(EditAction.top, 10, `${rectProps.x + rectProps.width / 2}%`, rectPropsPercent.y)}
+            {circle(EditAction.topRight, 7, `${rectProps.x + rectProps.width}%`, rectPropsPercent.y)}
+            {circle(EditAction.right, 10, `${rectProps.x + rectProps.width}%`, `${rectProps.y + rectProps.height / 2}%`)}
+            {circle(EditAction.bottomRight, 7, `${rectProps.x + rectProps.width}%`, `${rectProps.y + rectProps.height}%`)}
+            {circle(EditAction.bottom, 10, `${rectProps.x + rectProps.width / 2}%`, `${rectProps.y + rectProps.height}%`)}
+            {circle(EditAction.bottomLeft, 7, rectPropsPercent.x, `${rectProps.y + rectProps.height}%`)}
+            {circle(EditAction.left, 10, rectPropsPercent.x, `${rectProps.y + rectProps.height / 2}%`)}
+            {circle(EditAction.topLeft, 7, rectPropsPercent.x, rectPropsPercent.y)}
+        </g>);
+    }
 
     protected abstract renderControls(): React.ReactNode;
 

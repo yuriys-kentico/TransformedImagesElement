@@ -4,6 +4,7 @@ import { CustomPicker, SketchPicker, ColorChangeHandler } from "react-color";
 import { Checkerboard } from "../../../types/editor/Checkerboard";
 import { OPTIONAL_CONFIG } from "../../../types/customElement/IElementConfig";
 import { Color } from "../../../types/transformedImage/Color";
+import { If } from "../../If";
 
 export interface IColorInputProps {
     tooltip: string;
@@ -18,20 +19,6 @@ export interface IColorPickerProps extends IColorInputProps {
 
 class ColorPicker extends React.Component<IColorPickerProps> {
     render() {
-        const sketchPicker = this.props.isPickerOpen
-            ? (
-                <div className="picker">
-                    <SketchPicker
-                        color={this.props.value.rgba.a === 0
-                            ? this.props.value.toRgb()
-                            : this.props.value.toPickerFormat()}
-                        onChange={this.props.setValue}
-                        presetColors={OPTIONAL_CONFIG.colorPickerDefaultColors}
-                    />
-                </div>
-            )
-            : null;
-
         return (
             <span
                 className="input"
@@ -39,7 +26,17 @@ class ColorPicker extends React.Component<IColorPickerProps> {
                 data-balloon-pos="down"
                 onClick={e => this.props.isPickerOpen ? e.stopPropagation() : null}
             >
-                {sketchPicker}
+                <If shouldRender={this.props.isPickerOpen}>
+                    <div className="picker">
+                        <SketchPicker
+                            color={this.props.value.rgba.a === 0
+                                ? this.props.value.toRgb()
+                                : this.props.value.toPickerFormat()}
+                            onChange={this.props.setValue}
+                            presetColors={OPTIONAL_CONFIG.colorPickerDefaultColors}
+                        />
+                    </div>
+                </If>
                 <button
                     className="btn colorBox"
                     onClick={this.props.togglePicker}

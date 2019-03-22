@@ -27,11 +27,7 @@ export class BackgroundControls extends BaseControls<IBackgroundControlsProps, I
         }
     }
 
-    onMouseDown = () => false;
-
-    onMouseMove = () => false;
-
-    onMouseUp = () => false;
+    updateTransform = () => false;
 
     getImageOverlay() {
         return (

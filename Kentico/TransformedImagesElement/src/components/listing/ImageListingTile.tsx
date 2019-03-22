@@ -3,6 +3,7 @@
 import { TransformedImage } from "../../types/transformedImage/TransformedImage";
 
 import { AssetDetails } from "./AssetDetails";
+import { If } from "../If";
 
 export interface IimageListingProps {
     image: TransformedImage;
@@ -32,47 +33,38 @@ export class ImageListingTile extends React.PureComponent<IimageListingProps> {
     }
 
     render() {
-        let actions: JSX.Element[] = [];
-
-        if (this.props.showActions) {
-            actions = [
-                <div
-                    className="imageListingAction imageListingActionAddParams"
-                    onClick={() => this.props.onAddParams(this.props.image)}
-                    key="addParams"
-                    data-balloon="Edit transformations"
-                    data-balloon-pos="down"
-                >
-                    <i aria-hidden="true" className="icon-add-params" />
-                </div>,
-                <a
-                    className="imageListingAction imageListingActionDownload"
-                    target="_blank"
-                    href={this.getImageUrl(this.props.image)}
-                    hidden={true}
-                    key="download"
-                    data-balloon="Download"
-                    data-balloon-pos="down"
-                >
-                    <i aria-hidden="true" className="icon-download" />
-                </a>,
-                <div
-                    className="imageListingAction imageListingActionRemove"
-                    onClick={() => this.props.onRemove(this.props.image)}
-                    key="remove"
-                    data-balloon="Remove"
-                    data-balloon-pos="down"
-                >
-                    <i aria-hidden="true" className="icon-remove" />
-                </div>
-            ];
-        }
-
         return (
             <div className="imageListingWrapper">
                 <div className={`imageListing ${this.IsSelected() ? "selected" : ""}`}>
                     <div className="imageListingActionsPane">
-                        {actions}
+                        <If shouldRender={this.props.showActions}>
+                            <div
+                                className="imageListingAction imageListingActionAddParams"
+                                onClick={() => this.props.onAddParams(this.props.image)}
+                                data-balloon="Edit transformations"
+                                data-balloon-pos="down"
+                            >
+                                <i aria-hidden="true" className="icon-add-params" />
+                            </div>,
+                            <a
+                                className="imageListingAction imageListingActionDownload"
+                                target="_blank"
+                                href={this.getImageUrl(this.props.image)}
+                                hidden={true}
+                                data-balloon="Download"
+                                data-balloon-pos="down"
+                            >
+                                <i aria-hidden="true" className="icon-download" />
+                            </a>,
+                            <div
+                                className="imageListingAction imageListingActionRemove"
+                                onClick={() => this.props.onRemove(this.props.image)}
+                                data-balloon="Remove"
+                                data-balloon-pos="down"
+                            >
+                                <i aria-hidden="true" className="icon-remove" />
+                            </div>
+                        </If>
                     </div>
                     <div
                         className="imageListingPreview"

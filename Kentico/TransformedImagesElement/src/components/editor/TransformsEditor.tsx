@@ -8,6 +8,7 @@ import { BackgroundControls } from "./controls/BackgroundControls";
 import { CropControls } from "./controls/CropControls";
 import { FormatControls } from "./controls/FormatControls";
 import { ResizeControls } from "./controls/ResizeControls";
+import { If } from "../If";
 
 enum EditorMode {
     preview,
@@ -58,6 +59,14 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
         this.setState({ mode: mode });
     }
 
+    private editorIsCurrent = (editor: BaseControls): boolean => {
+        return editor === this.state.currentEditor;
+    }
+
+    private setCurrentEditor = (editor: BaseControls) => {
+        this.setState({ currentEditor: editor });
+    }
+
     isPreviewImageHidden(): boolean {
         switch (this.mode) {
             case EditorMode.hovering:
@@ -101,36 +110,36 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
         if (currentEditor) {
             switch (action) {
                 case MouseAction.down:
-                    if(event.button !== 2 && !this.mouseIsDown && currentEditor.onMouseDown(event)) {
+                    if (event.button !== 2 && !this.mouseIsDown && currentEditor.onMouseDown(event)) {
                         this.mouseIsDown = true;
                         this.update();
                     }
-                break;
+                    break;
                 case MouseAction.move:
-                    if(this.mouseIsDown && currentEditor.onMouseMove(event)) {
+                    if (this.mouseIsDown && currentEditor.onMouseMove(event)) {
                         this.update();
                     }
-                break;
+                    break;
                 case MouseAction.leave:
-                    if(this.mouseIsDown && currentEditor.onMouseUp(event)) {
+                    if (this.mouseIsDown && currentEditor.updateTransform(event)) {
                         this.mouseIsDown = false;
                         this.update();
                     }
                     this.props.disabled
-                    ? this.mode = EditorMode.hovering
-                    : this.mode = EditorMode.preview;
-                break;
+                        ? this.mode = EditorMode.hovering
+                        : this.mode = EditorMode.preview;
+                    break;
                 case MouseAction.up:
-                    if(event.button !== 2 && this.mouseIsDown && currentEditor.onMouseUp(event)) {
+                    if (event.button !== 2 && this.mouseIsDown && currentEditor.updateTransform(event)) {
                         this.mouseIsDown = false;
                         this.update();
                     }
-                break;
+                    break;
             }
         }
     }
 
-    update(): void {
+    update = (): void => {
         this.props.updateUrl(this.props.editedImage.buildEditedUrl().getUrl());
         this.forceUpdate();
     }
@@ -138,9 +147,11 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
     componentDidMount() {
         this.props.updateUrl(this.props.editedImage.buildEditedUrl().getUrl());
 
-        this.setState({
-            currentEditor: this.firstEditor
-        });
+        if (this.firstEditor) {
+            this.setState({
+                currentEditor: this.firstEditor
+            });
+        }
     }
 
     render() {
@@ -166,11 +177,9 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                             onMouseUp={e => this.updateMouseAction(e, MouseAction.up, currentEditor)}
                             onMouseMove={e => this.updateMouseAction(e, MouseAction.move, currentEditor)}
                         >
-                            {currentEditor
-                                && this.mode !== EditorMode.preview
-                                ? currentEditor.getImageOverlay()
-                                : null
-                            }
+                            <If shouldRender={this.mode !== EditorMode.preview}>
+                                {currentEditor ? currentEditor.getImageOverlay() : null}
+                            </If>
                             <img
                                 className="imageEditorImage"
                                 hidden={this.isEditImageHidden()}
@@ -189,63 +198,48 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                         </div>
                     </span>
                 </div>
-                {
-                    !this.props.disabled
-                        ? <div
-                            className="editorControls"
-                            onClick={e => {
-                                if (currentEditor) {
-                                    currentEditor.onClickSidebar();
-                                }
-
-                                e.stopPropagation();
-                                e.nativeEvent.stopImmediatePropagation();
-                            }}
-                        >
-                            <CropControls
-                                ref={e => this.firstEditor = e}
-                                isCurrentEditor={editor => editor === currentEditor}
-                                setCurrentEditor={editor => {
-                                    this.setState({ currentEditor: editor })
-                                }}
-                                transform={transforms.crop}
-                                setTransform={() => this.update()}
-                                imageWidth={imageWidth ? imageWidth : 0}
-                                imageHeight={imageHeight ? imageHeight : 0}
-                            />
-                            <ResizeControls
-                                isCurrentEditor={editor => editor === currentEditor}
-                                setCurrentEditor={editor => {
-                                    this.setState({ currentEditor: editor })
-                                }}
-                                transform={transforms.resize}
-                                setTransform={() => this.update()}
-                                imageWidth={imageWidth ? imageWidth : 0}
-                                imageHeight={imageHeight ? imageHeight : 0}
-                            />
-                            {
-                                this.props.editedImage.canBeTransparent()
-                                    ? <BackgroundControls
-                                        isCurrentEditor={editor => editor === currentEditor}
-                                        setCurrentEditor={editor => {
-                                            this.setState({ currentEditor: editor })
-                                        }}
-                                        transform={transforms.background}
-                                        setTransform={() => this.update()}
-                                    />
-                                    : null
+                <If shouldRender={!this.props.disabled}>
+                    <div
+                        className="editorControls"
+                        onClick={() => {
+                            if (currentEditor) {
+                                currentEditor.onClickSidebar();
                             }
-                            <FormatControls
-                                isCurrentEditor={editor => editor === currentEditor}
-                                setCurrentEditor={editor => {
-                                    this.setState({ currentEditor: editor })
-                                }}
-                                transform={transforms.format}
-                                setTransform={() => this.update()}
+                        }}
+                    >
+                        <CropControls
+                            ref={e => this.firstEditor = e}
+                            isCurrentEditor={this.editorIsCurrent}
+                            setCurrentEditor={this.setCurrentEditor}
+                            transform={transforms.crop}
+                            setTransform={this.update}
+                            imageWidth={imageWidth ? imageWidth : 0}
+                            imageHeight={imageHeight ? imageHeight : 0}
+                        />
+                        <ResizeControls
+                            isCurrentEditor={this.editorIsCurrent}
+                            setCurrentEditor={this.setCurrentEditor}
+                            transform={transforms.resize}
+                            setTransform={this.update}
+                            imageWidth={imageWidth ? imageWidth : 0}
+                            imageHeight={imageHeight ? imageHeight : 0}
+                        />
+                        <If shouldRender={this.props.editedImage.canBeTransparent()}>
+                            <BackgroundControls
+                                isCurrentEditor={this.editorIsCurrent}
+                                setCurrentEditor={this.setCurrentEditor}
+                                transform={transforms.background}
+                                setTransform={this.update}
                             />
-                        </div>
-                        : null
-                }
+                        </If>
+                        <FormatControls
+                            isCurrentEditor={this.editorIsCurrent}
+                            setCurrentEditor={this.setCurrentEditor}
+                            transform={transforms.format}
+                            setTransform={this.update}
+                        />
+                    </div>
+                </If>
             </div >
         );
     }

@@ -13,6 +13,7 @@ import { ListingButtons } from "./listing/ListingButtons";
 import { SelectionButtons } from "./selection/SelectionButtons";
 import { TransformsEditor } from "./editor/TransformsEditor";
 import { EditorButtons } from "./editor/EditorButtons";
+import { If } from "./If";
 
 // Expose access to Kentico custom element API
 declare const CustomElement: ICustomElement;
@@ -180,16 +181,14 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                         className="imageListing"
                         ref={e => this.listingList = e}
                     >
-                        {
-                            this.state.disabled
-                                ? null
-                                : <ListingButtons
-                                    onClickPick={() => {
-                                        this.storeCurrentSelectedImages();
-                                        this.setMode(TransformedImagesElementMode.selection)
-                                    }}
-                                />
-                        }
+                        <If shouldRender={this.state.disabled}>
+                            <ListingButtons
+                                onClickPick={() => {
+                                    this.storeCurrentSelectedImages();
+                                    this.setMode(TransformedImagesElementMode.selection)
+                                }}
+                            />
+                        </If>
                         <div className="list">
                             {this.state.selectedImages.map((a, i) => (
                                 <ImageListingTile

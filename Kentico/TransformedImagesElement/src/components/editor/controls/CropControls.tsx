@@ -5,8 +5,9 @@ import { BoxActions } from "../../../types/editor/cropActions/boxActions";
 import { ZoomActions } from "../../../types/editor/cropActions/ZoomActions";
 import { FrameActions } from "../../../types/editor/cropActions/FrameActions";
 
-import { BaseControls, IBaseControlsProps, EditAction, RectProps } from "./BaseControls";
+import { BaseControls, IBaseControlsProps, EditAction, RectProps, RectPropsPercent } from "./BaseControls";
 import { NumberInput, NumberInputType } from "../inputs/NumberInput";
+import { If } from "../../If";
 
 export interface ICropControlsProps extends IBaseControlsProps<ICropTransform> {
     imageWidth: number;
@@ -20,38 +21,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
     onClickSidebar(): void {
     }
 
-    onMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        const mouseXY = this.getMouseXY(event);
-
-        this.actionParams = {
-            startXFloat: mouseXY.x,
-            startYFloat: mouseXY.y,
-            endXFloat: mouseXY.x,
-            endYFloat: mouseXY.y,
-            action: EditAction.selecting,
-        };
-
-        if (event.target instanceof SVGCircleElement) {
-            this.actionParams.action = event.target.id;
-        }
-
-        return true;
-    };
-
-    onMouseMove = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        if (this.actionParams.action !== EditAction.none) {
-            const mouseXY = this.getMouseXY(event);
-
-            this.actionParams.endXFloat = mouseXY.x;
-            this.actionParams.endYFloat = mouseXY.y;
-
-            return true;
-        }
-
-        return false;
-    };
-
-    onMouseUp = () => {
+    updateTransform = () => {
         if (this.actionParams.action !== EditAction.none) {
             const { type } = this.props.transform;
 
@@ -110,14 +80,12 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
             }
         }
 
-        const rectPropsPercent = {
+        const rectPropsPercent: RectPropsPercent = {
             x: `${rectProps.x}%`,
             y: `${rectProps.y}%`,
             width: `${rectProps.width}%`,
             height: `${rectProps.height}%`
         }
-
-        let grabGroup: JSX.Element = <g />;
 
         return (
             <svg>
@@ -143,7 +111,10 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     mask="url(#boxMask)"
                     className="outsideRect"
                 />
-                {grabGroup}
+                <If shouldRender={this.actionParams.action !== EditAction.selecting
+                    && rectProps.width > 0 && rectProps.height > 0}>
+                    {this.getGrabCirclesGroup(rectProps, rectPropsPercent)}
+                </If>
             </svg>
         );
     }

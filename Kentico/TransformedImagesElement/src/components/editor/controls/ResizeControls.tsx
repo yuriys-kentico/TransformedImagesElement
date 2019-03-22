@@ -4,8 +4,9 @@ import { ResizeType, IResizeTransform } from "../../../types/transformedImage/Tr
 import { FitActions } from "../../../types/editor/resizeActions/FitActions";
 import { ScaleActions } from "../../../types/editor/resizeActions/ScaleActions";
 
-import { BaseControls, IBaseControlsProps, EditAction, RectProps } from "./BaseControls";
+import { BaseControls, IBaseControlsProps, EditAction, RectProps, RectPropsPercent } from "./BaseControls";
 import { NumberInput } from "../inputs/NumberInput";
+import { If } from "../../If";
 
 export interface IResizeControlsProps extends IBaseControlsProps<IResizeTransform> {
     imageWidth: number;
@@ -19,38 +20,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
     onClickSidebar(): void {
     }
 
-    onMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        const mouseXY = this.getMouseXY(event);
-
-        this.actionParams = {
-            startXFloat: mouseXY.x,
-            startYFloat: mouseXY.y,
-            endXFloat: mouseXY.x,
-            endYFloat: mouseXY.y,
-            action: EditAction.selecting,
-        };
-
-        if (event.target instanceof SVGCircleElement) {
-            this.actionParams.action = event.target.id;
-        }
-
-        return true;
-    };
-
-    onMouseMove = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        if (this.actionParams.action !== EditAction.none) {
-            const mouseXY = this.getMouseXY(event);
-
-            this.actionParams.endXFloat = mouseXY.x;
-            this.actionParams.endYFloat = mouseXY.y;
-
-            return true;
-        }
-
-        return false;
-    };
-
-    onMouseUp = () => {
+    updateTransform = () => {
         if (this.actionParams.action !== EditAction.none) {
             const { type, scale, fit } = this.props.transform;
 
@@ -59,7 +29,6 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                     this.setTransform({ scale: new ScaleActions(this.actionParams).getTransform(scale) });
                     break;
                 case ResizeType.fit:
-
                     this.setTransform({ fit: new FitActions(this.actionParams).getTransform(fit) });
                     break;
             }
@@ -118,40 +87,11 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
             }
         }
 
-        const rectPropsPercent = {
+        const rectPropsPercent: RectPropsPercent = {
             x: `${rectProps.x}%`,
             y: `${rectProps.y}%`,
             width: `${rectProps.width}%`,
             height: `${rectProps.height}%`
-        }
-
-        let grabGroup: JSX.Element = <g />;
-
-        if (this.actionParams.action !== EditAction.selecting
-            && rectProps.width > 0 && rectProps.height > 0
-        ) {
-            const circle = (id: string, radius: number, cx: string, cy: string) => {
-                return <circle
-                    cx={cx}
-                    cy={cy}
-                    r={radius}
-                    id={id}
-                    className="grabCircle"
-                />
-            }
-
-            grabGroup = (
-                <g>
-                    {circle(EditAction.top, 10, `${rectProps.x + rectProps.width / 2}%`, rectPropsPercent.y)}
-                    {circle(EditAction.topRight, 7, `${rectProps.x + rectProps.width}%`, rectPropsPercent.y)}
-                    {circle(EditAction.right, 10, `${rectProps.x + rectProps.width}%`, `${rectProps.y + rectProps.height / 2}%`)}
-                    {circle(EditAction.bottomRight, 7, `${rectProps.x + rectProps.width}%`, `${rectProps.y + rectProps.height}%`)}
-                    {circle(EditAction.bottom, 10, `${rectProps.x + rectProps.width / 2}%`, `${rectProps.y + rectProps.height}%`)}
-                    {circle(EditAction.bottomLeft, 7, rectPropsPercent.x, `${rectProps.y + rectProps.height}%`)}
-                    {circle(EditAction.left, 10, rectPropsPercent.x, `${rectProps.y + rectProps.height / 2}%`)}
-                    {circle(EditAction.topLeft, 7, rectPropsPercent.x, rectPropsPercent.y)}
-                </g>
-            );
         }
 
         return (
@@ -179,7 +119,10 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                     mask="url(#boxMask)"
                     className="outsideRect"
                 />
-                {grabGroup}
+                <If shouldRender={this.actionParams.action !== EditAction.selecting
+                    && rectProps.width > 0 && rectProps.height > 0}>
+                    {this.getGrabCirclesGroup(rectProps, rectPropsPercent)}
+                </If>
             </svg>
         );
     }

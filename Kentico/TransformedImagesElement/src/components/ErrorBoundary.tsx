@@ -20,7 +20,6 @@ export class ErrorBoundary extends React.PureComponent<{}, IErrorBoundaryState> 
 
     render() {
         if (this.state.hasError) {
-            // You can render any custom fallback UI
             return (
                 <div className="errorBoundary">
                     <h3>Oops! Better fix this:</h3>

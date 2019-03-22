@@ -1,6 +1,7 @@
 ﻿import * as React from "react";
 
 import { SwitchInput } from "./inputs/SwitchInput";
+import { If } from "../If";
 
 export interface IEditorButtonsProps {
     onClickCancel(): void;
@@ -46,16 +47,14 @@ export class EditorButtons extends React.PureComponent<IEditorButtonsProps> {
                     >
                         Cancel
                     </button>
-                    {
-                        this.props.disabled
-                            ? null
-                            : <button
-                                className="btn btn--primary"
-                                onClick={() => this.props.onClickUpdate()}
-                            >
-                                Update
-                            </button>
-                    }
+                    <If shouldRender={!this.props.disabled}>
+                        <button
+                            className="btn btn--primary"
+                            onClick={() => this.props.onClickUpdate()}
+                        >
+                            Update
+                        </button>
+                    </If>
                 </span>
 
             </div>

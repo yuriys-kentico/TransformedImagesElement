@@ -58,6 +58,7 @@
     <TypeScriptCompile Include="src\components\editor\inputs\SwitchInput.tsx" />
     <TypeScriptCompile Include="src\components\editor\inputs\NumberInput.tsx" />
     <TypeScriptCompile Include="src\components\editor\EditorButtons.tsx" />
+    <TypeScriptCompile Include="src\components\If.tsx" />
     <TypeScriptCompile Include="src\components\InvalidUsage.tsx" />
     <TypeScriptCompile Include="src\components\ErrorBoundary.tsx" />
     <TypeScriptCompile Include="src\components\InitializationError.tsx" />

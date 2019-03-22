@@ -17,14 +17,12 @@ export class DropdownInput<TEnum extends string> extends React.PureComponent<IDr
             >
                 <select
                     className="form__dropdown"
-                    value={this.props.selected
-                        ? this.props.selected.toString()
-                        : ""}
+                    value={this.props.selected}
                     onChange={s => this.props.setSelected(s.target.value as TEnum)}
                 >
-                    {this.props.options.map((o, i) => {
-                        return <option key={i}>{o}</option>;
-                    })}
+                    {this.props.options.map((o, i) =>
+                        <option key={i}>{o}</option>
+                    )}
                 </select>
             </span>
 

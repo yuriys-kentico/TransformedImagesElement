@@ -1,4 +1,5 @@
 ﻿import * as React from "react";
+import { If } from "../If";
 
 export interface ISelectionButtonsProps {
     onClickUpdate(): void;
@@ -9,16 +10,6 @@ export interface ISelectionButtonsProps {
 
 export class SelectionButtons extends React.PureComponent<ISelectionButtonsProps> {
     render() {
-        const loadMoreButton = this.props.showLoadMore ?
-            (
-                <button
-                    className="btn btn--primary"
-                    onClick={() => this.props.onClickLoadMore()}
-                >
-                    Load more
-                    </button>
-            ) : null;
-
         return (
             <div className="selectionBar">
                 <span className="spacer" />
@@ -35,7 +26,14 @@ export class SelectionButtons extends React.PureComponent<ISelectionButtonsProps
                     >
                         Update
                     </button>
-                    {loadMoreButton}
+                    <If shouldRender={this.props.showLoadMore}>
+                        <button
+                            className="btn btn--primary"
+                            onClick={() => this.props.onClickLoadMore()}
+                        >
+                            Load more
+                        </button>
+                    </If>
                 </span>
             </div>
         );
