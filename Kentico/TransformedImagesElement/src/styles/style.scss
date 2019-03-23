@@ -318,6 +318,10 @@ body {
 
                 .btn--primary {
                     background-color: #757575;
+
+                    &:hover {
+                        background-color: #1976d2;
+                    }
                 }
 
                 &.selected {
@@ -440,6 +444,10 @@ body {
 
                                 &[title] {
                                     cursor: pointer;
+
+                                    &:hover {
+                                        color: #2196f3;
+                                    }
                                 }
                             }
                         }

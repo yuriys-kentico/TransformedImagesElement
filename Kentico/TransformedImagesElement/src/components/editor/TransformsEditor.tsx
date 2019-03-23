@@ -9,10 +9,11 @@ import { CropControls } from "./controls/CropControls";
 import { FormatControls } from "./controls/FormatControls";
 import { ResizeControls } from "./controls/ResizeControls";
 import { If } from "../If";
+import { CropType } from "../../types/transformedImage/Transforms";
 
 enum EditorMode {
+    editing,
     preview,
-    hovering,
     noPreview
 }
 
@@ -46,8 +47,8 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
     mouseIsDown: boolean;
 
     get mode(): EditorMode {
-        if (this.state && this.state.mode === EditorMode.hovering) {
-            return EditorMode.hovering;
+        if (this.state && this.state.mode === EditorMode.editing) {
+            return EditorMode.editing;
         }
 
         return this.props.isPreview
@@ -67,58 +68,44 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
         this.setState({ currentEditor: editor });
     }
 
-    isPreviewImageHidden(): boolean {
-        switch (this.mode) {
-            case EditorMode.hovering:
-            case EditorMode.noPreview:
-                return true;
-        }
-        return false;
+    private isEditing(): boolean {
+        return this.mode === EditorMode.editing;
     }
 
-    isEditImageHidden(): boolean {
-        switch (this.mode) {
-            case EditorMode.preview:
-            case EditorMode.noPreview:
-                return true;
-        }
-        return false;
+    private isPreview(): boolean {
+        return this.mode === EditorMode.preview;
     }
 
-    isOriginalImageHidden(): boolean {
-        switch (this.mode) {
-            case EditorMode.preview:
-            case EditorMode.hovering:
-                return true;
-        }
-        return false;
+    private isNoPreview(): boolean {
+        return this.mode === EditorMode.noPreview;
     }
 
-    getHoveringClass(): string {
+    private getHoveringClass(): string {
         switch (this.mode) {
             case EditorMode.preview:
                 return this.props.disabled
                     ? "preview"
                     : "edit preview";
-            case EditorMode.hovering:
+            case EditorMode.editing:
             case EditorMode.noPreview:
                 return "scaleToFit";
         }
     }
 
-    updateMouseAction(event: React.MouseEvent<HTMLDivElement, MouseEvent>, action: MouseAction, currentEditor: BaseControls | null) {
+    private updateMouseAction(event: React.MouseEvent<HTMLDivElement, MouseEvent>, action: MouseAction, currentEditor: BaseControls | null) {
         if (currentEditor) {
             switch (action) {
                 case MouseAction.down:
-                    if (event.button !== 2 && !this.mouseIsDown && currentEditor.onMouseDown(event)) {
+                    if (event.button !== 2 && !this.mouseIsDown && currentEditor.setActionParams(event)) {
                         this.mouseIsDown = true;
                         this.update();
                     }
                     break;
                 case MouseAction.move:
-                    if (this.mouseIsDown && currentEditor.onMouseMove(event)) {
+                    if (this.mouseIsDown && currentEditor.updateActionParams(event)) {
                         this.update();
                     }
+                    this.mode = EditorMode.editing;
                     break;
                 case MouseAction.leave:
                     if (this.mouseIsDown && currentEditor.updateTransform(event)) {
@@ -126,7 +113,7 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                         this.update();
                     }
                     this.props.disabled
-                        ? this.mode = EditorMode.hovering
+                        ? this.mode = EditorMode.editing
                         : this.mode = EditorMode.preview;
                     break;
                 case MouseAction.up:
@@ -140,12 +127,12 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
     }
 
     update = (): void => {
-        this.props.updateUrl(this.props.editedImage.buildEditedUrl().getUrl());
+        this.props.updateUrl(this.props.editedImage.buildPreviewUrl().getUrl());
         this.forceUpdate();
     }
 
     componentDidMount() {
-        this.props.updateUrl(this.props.editedImage.buildEditedUrl().getUrl());
+        this.props.updateUrl(this.props.editedImage.buildPreviewUrl().getUrl());
 
         if (this.firstEditor) {
             this.setState({
@@ -167,33 +154,44 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
             >
                 <div
                     className={`imageEditorPreview ${this.getHoveringClass()}`}
+                    onMouseDown={e => this.updateMouseAction(e, MouseAction.down, currentEditor)}
+                    onMouseMove={e => this.updateMouseAction(e, MouseAction.move, currentEditor)}
+                    onMouseUp={e => this.updateMouseAction(e, MouseAction.up, currentEditor)}
                     onMouseLeave={e => this.updateMouseAction(e, MouseAction.leave, currentEditor)}
-                    onMouseMove={() => this.mode = EditorMode.hovering}
                 >
                     <span className="imageWrapper">
-                        <div
-                            className="imageMask"
-                            onMouseDown={e => this.updateMouseAction(e, MouseAction.down, currentEditor)}
-                            onMouseUp={e => this.updateMouseAction(e, MouseAction.up, currentEditor)}
-                            onMouseMove={e => this.updateMouseAction(e, MouseAction.move, currentEditor)}
-                        >
-                            <If shouldRender={this.mode !== EditorMode.preview}>
+                        <div className="imageMask">
+                            <If shouldRender={this.isEditing()}>
                                 {currentEditor ? currentEditor.getImageOverlay() : null}
                             </If>
+                            <If shouldRender={!(this.state.currentEditor instanceof ResizeControls)}>
+                                <img
+                                    id="a"
+                                    className="imageEditorImage"
+                                    hidden={!this.isEditing()}
+                                    src={this.props.editedImage.buildEditingUrl().getUrl()}
+                                />
+
+                            </If>
+                            <If shouldRender={this.state.currentEditor instanceof ResizeControls}>
+                                <img
+                                    id="b"
+                                    className="imageEditorImage"
+                                    hidden={!this.isEditing()}
+                                    src={this.props.editedImage.buildCropUrl().getUrl()}
+                                />
+                            </If>
                             <img
+                                id="c"
                                 className="imageEditorImage"
-                                hidden={this.isEditImageHidden()}
-                                src={this.props.editedImage.buildHoverUrl().getUrl()}
+                                hidden={!this.isPreview()}
+                                src={this.props.editedImage.buildPreviewUrl().getUrl()}
                             />
                             <img
+                                id="d"
                                 className="imageEditorImage"
-                                hidden={this.isPreviewImageHidden()}
-                                src={this.props.editedImage.buildEditedUrl().getUrl()}
-                            />
-                            <img
-                                className="imageEditorImage"
-                                hidden={this.isOriginalImageHidden()}
-                                src={this.props.editedImage.buildUrl().getUrl()}
+                                hidden={!this.isNoPreview()}
+                                src={this.props.editedImage.buildEditingUrl().getUrl()}
                             />
                         </div>
                     </span>
@@ -213,23 +211,27 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                             setCurrentEditor={this.setCurrentEditor}
                             transform={transforms.crop}
                             setTransform={this.update}
-                            imageWidth={imageWidth ? imageWidth : 0}
-                            imageHeight={imageHeight ? imageHeight : 0}
+                            imageWidth={imageWidth}
+                            imageHeight={imageHeight}
                         />
-                        <ResizeControls
-                            isCurrentEditor={this.editorIsCurrent}
-                            setCurrentEditor={this.setCurrentEditor}
-                            transform={transforms.resize}
-                            setTransform={this.update}
-                            imageWidth={imageWidth ? imageWidth : 0}
-                            imageHeight={imageHeight ? imageHeight : 0}
-                        />
+                        <If shouldRender={transforms.crop.type !== CropType.zoom}>
+                            <ResizeControls
+                                isCurrentEditor={this.editorIsCurrent}
+                                setCurrentEditor={this.setCurrentEditor}
+                                transform={transforms.resize}
+                                setTransform={this.update}
+                                imageWidth={imageWidth}
+                                imageHeight={imageHeight}
+                            />
+                        </If>
                         <If shouldRender={this.props.editedImage.canBeTransparent()}>
                             <BackgroundControls
                                 isCurrentEditor={this.editorIsCurrent}
                                 setCurrentEditor={this.setCurrentEditor}
                                 transform={transforms.background}
                                 setTransform={this.update}
+                                imageWidth={imageWidth}
+                                imageHeight={imageHeight}
                             />
                         </If>
                         <FormatControls
@@ -237,6 +239,8 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                             setCurrentEditor={this.setCurrentEditor}
                             transform={transforms.format}
                             setTransform={this.update}
+                            imageWidth={imageWidth}
+                            imageHeight={imageHeight}
                         />
                     </div>
                 </If>

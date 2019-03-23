@@ -2,53 +2,38 @@ import { WHTransform } from "../../transformedImage/Transforms";
 import { NumberUtils } from "../../NumberUtils";
 import { BaseActions } from "../BaseActions";
 
-import { RectProps, EditAction } from "../../../components/editor/controls/BaseControls";
+import { RectProps, EditAction, ActionParams } from "../../../components/editor/controls/BaseControls";
 
 export class FitActions extends BaseActions<WHTransform> {
-    getTransform(oldFit: WHTransform): WHTransform {
-        let WFloat = 0;
-        let HFloat = 0;
-
-        switch (this.action) {
-            case EditAction.top:
-            case EditAction.bottom:
-                const fitMouseYTranslation = Math.abs(this.endYFloat - .5);
-
-                WFloat = oldFit.wFloat !== 0 ? oldFit.wFloat : 1;
-                HFloat = NumberUtils.toRounded(2 * fitMouseYTranslation, 4);
-                break;
-            case EditAction.left:
-            case EditAction.right:
-                const fitMouseXTranslation = Math.abs(this.endXFloat - .5);
-
-                WFloat = NumberUtils.toRounded(2 * fitMouseXTranslation, 4);
-                HFloat = oldFit.hFloat !== 0 ? oldFit.hFloat : 1;
-                break;
-        }
-
+    getTransform(rectProps: RectProps): WHTransform {
         return {
-            wFloat: WFloat,
-            hFloat: HFloat,
+            wFloat: rectProps.width,
+            hFloat: rectProps.height
         }
     }
 
-    getEditingRect(oldFit: WHTransform): RectProps {
+    getEditingRect(actionParams: ActionParams, oldFit: WHTransform): RectProps {
+        const { action, endXFloat, endYFloat } = actionParams;
+
         let WFloat = 0;
         let HFloat = 0;
 
-        switch (this.action) {
+        const mouseXTranslation = Math.abs(endXFloat - .5);
+        const mouseYTranslation = Math.abs(endYFloat - .5);
+
+        switch (action) {
+            case EditAction.selecting:
+                WFloat = NumberUtils.toRounded(2 * mouseXTranslation, 4);
+                HFloat = NumberUtils.toRounded(2 * mouseYTranslation, 4);
+                break;
             case EditAction.top:
             case EditAction.bottom:
-                const fitMouseYTranslation = Math.abs(this.endYFloat - .5);
-
                 WFloat = oldFit.wFloat !== 0 ? oldFit.wFloat : 1;
-                HFloat = NumberUtils.toRounded(2 * fitMouseYTranslation, 4);
+                HFloat = NumberUtils.toRounded(2 * mouseYTranslation, 4);
                 break;
             case EditAction.left:
             case EditAction.right:
-                const fitMouseXTranslation = Math.abs(this.endXFloat - .5);
-
-                WFloat = NumberUtils.toRounded(2 * fitMouseXTranslation, 4);
+                WFloat = NumberUtils.toRounded(2 * mouseXTranslation, 4);
                 HFloat = oldFit.hFloat !== 0 ? oldFit.hFloat : 1;
                 break;
         }
@@ -57,19 +42,19 @@ export class FitActions extends BaseActions<WHTransform> {
         const YFloat = NumberUtils.toRounded(.5 - HFloat / 2, 4);
 
         return {
-            x: XFloat * 100,
-            y: YFloat * 100,
-            width: WFloat * 100,
-            height: HFloat * 100
+            x: XFloat,
+            y: YFloat,
+            width: WFloat,
+            height: HFloat
         };
     }
 
     getPassiveRect(fit: WHTransform): RectProps {
         return {
-            x: (.5 - fit.wFloat / 2) * 100,
-            y: (.5 - fit.hFloat / 2) * 100,
-            width: fit.wFloat * 100,
-            height: fit.hFloat * 100
+            x: (.5 - fit.wFloat / 2),
+            y: (.5 - fit.hFloat / 2),
+            width: fit.wFloat,
+            height: fit.hFloat
         }
     }
 }

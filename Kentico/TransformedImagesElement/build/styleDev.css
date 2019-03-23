@@ -208,6 +208,8 @@ body {
       color: #757575; }
       .imageEditor .editor .editorControls .control .btn--primary {
         background-color: #757575; }
+        .imageEditor .editor .editorControls .control .btn--primary:hover {
+          background-color: #1976d2; }
       .imageEditor .editor .editorControls .control.selected {
         border-left: #2196f3 solid 0.7em;
         border-radius: 0 0.15em 0.15em 0;
@@ -280,6 +282,8 @@ body {
               margin: 0em; }
               .imageEditor .editor .editorControls .control .fields .input > input + span[title] {
                 cursor: pointer; }
+                .imageEditor .editor .editorControls .control .fields .input > input + span[title]:hover {
+                  color: #2196f3; }
           .imageEditor .editor .editorControls .control .fields .input > .label {
             padding: .375em .25em 0 .25em;
             margin: 0em; }

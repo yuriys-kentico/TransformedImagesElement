@@ -14,6 +14,8 @@ export class TransformedImage extends AssetModels.Asset {
     private baseImageUrl: string;
 
     transforms: ITransforms;
+    imageWidth: number;
+    imageHeight: number;
 
     constructor(
         projectId: string,
@@ -21,6 +23,9 @@ export class TransformedImage extends AssetModels.Asset {
         model: TransformedImageModel | null = null
     ) {
         super(image);
+
+        this.imageWidth = image.imageWidth ? image.imageWidth : 0;
+        this.imageHeight = image.imageHeight ? image.imageHeight : 0;
 
         this.baseImageUrl = `${this.imageEndpoint}/${projectId}/${image.fileReference.id}/${image.fileName}`;
 
@@ -35,15 +40,15 @@ export class TransformedImage extends AssetModels.Asset {
         this.transforms = {
             crop: {
                 type: OPTIONAL_CONFIG.editorDefaultCropType,
-                box: { xFloat: 0, yFloat: 0, wFloat: 0, hFloat: 0 },
-                zoom: { xFloat: 0, yFloat: 0, zFloat: 0 },
-                frame: { wFloat: 0, hFloat: 0 }
+                box: { xFloat: -1, yFloat: -1, wFloat: -1, hFloat: -1 },
+                zoom: { xFloat: -1, yFloat: -1, zFloat: -1 },
+                frame: { wFloat: -1, hFloat: -1 }
             },
             resize: {
                 type: OPTIONAL_CONFIG.editorDefaultResizeType,
-                scale: { wFloat: 0, hFloat: 0 },
-                fit: { wFloat: 0, hFloat: 0 },
-                devicePixelRatio: 0
+                scale: { wFloat: -1, hFloat: -1 },
+                fit: { wFloat: -1, hFloat: -1 },
+                devicePixelRatio: -1
             },
             background: {
                 color: new Color({ r: 0, g: 0, b: 0 })
@@ -95,31 +100,39 @@ export class TransformedImage extends AssetModels.Asset {
         return new ImageUrlBuilder(this.baseImageUrl);
     }
 
-    buildEditedUrl(): ImageUrlBuilder {
+    buildEditingUrl(): ImageUrlBuilder {
         const builder = this.buildUrl();
-        const { crop, resize, background, format } = this.transforms;
+
+        return builder
+            .withWidth(1000)
+            .withHeight(1000);
+    }
+
+    buildCropUrl(): ImageUrlBuilder {
+        const builder = this.buildUrl();
+        const { crop } = this.transforms;
 
         switch (crop.type) {
             case CropType.box:
-                if (crop.box.xFloat > 0
-                    && crop.box.yFloat > 0
-                    && crop.box.wFloat > 0
-                    && crop.box.hFloat > 0) {
+                if (crop.box.xFloat >= 0
+                    && crop.box.yFloat >= 0
+                    && crop.box.wFloat >= 0
+                    && crop.box.hFloat >= 0) {
                     builder
                         .withRectangleCrop(crop.box.xFloat, crop.box.yFloat, crop.box.wFloat, crop.box.hFloat);
                 }
                 break;
             case CropType.zoom:
-                if (crop.zoom.xFloat > 0
-                    && crop.zoom.yFloat > 0
-                    && crop.zoom.zFloat > 0) {
+                if (crop.zoom.xFloat >= 0
+                    && crop.zoom.yFloat >= 0
+                    && crop.zoom.zFloat >= 0) {
                     builder
                         .withFocalPointCrop(crop.zoom.xFloat, crop.zoom.yFloat, crop.zoom.zFloat);
                 }
                 break;
             case CropType.frame:
-                if (crop.frame.wFloat > 0
-                    && crop.frame.hFloat > 0) {
+                if (crop.frame.wFloat >= 0
+                    && crop.frame.hFloat >= 0) {
                     // Fit=crop does not work with floats
                     builder
                         .withRectangleCrop(
@@ -130,10 +143,19 @@ export class TransformedImage extends AssetModels.Asset {
                 break;
         }
 
+        return builder;
+    }
+
+    buildResizeUrl(): ImageUrlBuilder {
+        const builder = this.buildCropUrl();
+        const { crop, resize } = this.transforms;
+
         switch (resize.type) {
             case ResizeType.scale:
-                if (resize.scale.wFloat > 0
-                    && resize.scale.hFloat > 0) {
+                // Scale does not work with zoom
+                if (crop.type !== CropType.zoom
+                    && resize.scale.wFloat >= 0
+                    && resize.scale.hFloat >= 0) {
                     builder
                         .withFitMode(ImageFitModeEnum.Scale)
                         .withWidth(resize.scale.wFloat)
@@ -141,8 +163,8 @@ export class TransformedImage extends AssetModels.Asset {
                 }
                 break;
             case ResizeType.fit:
-                if (resize.fit.wFloat > 0
-                    && resize.fit.hFloat > 0) {
+                if (resize.fit.wFloat >= 0
+                    && resize.fit.hFloat >= 0) {
                     builder
                         .withFitMode(ImageFitModeEnum.Clip)
                         .withWidth(resize.fit.wFloat)
@@ -151,9 +173,23 @@ export class TransformedImage extends AssetModels.Asset {
                 break;
         }
 
+        return builder;
+    }
+
+    buildBackgroundUrl(): ImageUrlBuilder {
+        const builder = this.buildResizeUrl();
+        const { background } = this.transforms;
+
         if (background.color && !background.color.isEmpty()) {
             builder.withCustomParam("bg", background.color.toShortHexString(true));
         }
+
+        return builder;
+    }
+
+    buildFormatUrl(): ImageUrlBuilder {
+        const builder = this.buildBackgroundUrl();
+        const { format } = this.transforms;
 
         if (format.format && format.format !== Format.Original) {
             builder.withCustomParam("fm", format.format.toLowerCase());
@@ -174,12 +210,8 @@ export class TransformedImage extends AssetModels.Asset {
         return builder;
     }
 
-    buildHoverUrl(): ImageUrlBuilder {
-        const builder = this.buildUrl();
-
-        return builder
-            .withWidth(1000)
-            .withHeight(1000);
+    buildPreviewUrl(): ImageUrlBuilder {
+        return this.buildFormatUrl();
     }
 
     getDeliveryModel(): FieldModels.AssetModel {
@@ -188,7 +220,7 @@ export class TransformedImage extends AssetModels.Asset {
             this.type,
             this.size,
             this.descriptions[0].description,
-            this.buildEditedUrl().getUrl(),
+            this.buildPreviewUrl().getUrl(),
             this.id,
             this.transforms
         );

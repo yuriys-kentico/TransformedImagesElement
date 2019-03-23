@@ -16,7 +16,7 @@ export interface IimageListingProps {
 
 export class ImageListingTile extends React.PureComponent<IimageListingProps> {
     getImageUrl(item: TransformedImage): string {
-        return item.buildEditedUrl()
+        return item.buildPreviewUrl()
             .withWidth(400)
             .withHeight(400)
             .getUrl();

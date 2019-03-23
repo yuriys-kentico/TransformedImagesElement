@@ -9,8 +9,6 @@ import { NumberInput } from "../inputs/NumberInput";
 import { If } from "../../If";
 
 export interface IResizeControlsProps extends IBaseControlsProps<IResizeTransform> {
-    imageWidth: number;
-    imageHeight: number;
 }
 
 export interface IResizeControlsState {
@@ -22,19 +20,28 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
 
     updateTransform = () => {
         if (this.actionParams.action !== EditAction.none) {
-            const { type, scale, fit } = this.props.transform;
+            if (!this.mouseHasMoved()) {
+                this.currentRectProps = {
+                    x: -1,
+                    y: -1,
+                    width: -1,
+                    height: -1
+                };
+            }
+
+            const { type } = this.props.transform;
 
             switch (type) {
                 case ResizeType.scale:
-                    this.setTransform({ scale: new ScaleActions(this.actionParams).getTransform(scale) });
+                    this.setTransform({ scale: new ScaleActions().getTransform(this.currentRectProps) });
                     break;
                 case ResizeType.fit:
-                    this.setTransform({ fit: new FitActions(this.actionParams).getTransform(fit) });
+                    this.setTransform({ fit: new FitActions().getTransform(this.currentRectProps) });
                     break;
             }
-        }
 
-        this.actionParams.action = EditAction.none;
+            this.actionParams.action = EditAction.none;
+        }
 
         return true;
     };
@@ -42,57 +49,46 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
     getImageOverlay() {
         const { type, scale, fit } = this.props.transform;
 
-        let rectProps: RectProps = {
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0
-        };
+        let rectProps: RectProps = { ...this.noRectProps };
 
-        if (this.actionParams.action !== EditAction.none && this.hasMovedMouse()) {
+        if (this.actionParams.action !== EditAction.none && this.mouseHasMoved()) {
             switch (type) {
                 case ResizeType.scale:
-                    rectProps = new ScaleActions(this.actionParams).getEditingRect(scale);
+                    rectProps = new ScaleActions().getEditingRect(this.actionParams, scale);
                     break;
                 case ResizeType.fit:
-                    rectProps = new FitActions(this.actionParams).getEditingRect(fit);
+                    rectProps = new FitActions().getEditingRect(this.actionParams, fit);
                     break;
             }
         } else {
             switch (type) {
                 case ResizeType.scale:
                     if (scale.hFloat > 0 && scale.wFloat > 0) {
-                        rectProps = new ScaleActions(this.actionParams).getPassiveRect(scale);
+                        rectProps = new ScaleActions().getPassiveRect(scale);
                     } else {
-                        rectProps = {
-                            x: 0,
-                            y: 0,
-                            width: 100,
-                            height: 100
-                        };
+                        rectProps = this.noRectProps;
                     }
                     break;
                 case ResizeType.fit:
                     if (fit.hFloat > 0 && fit.wFloat > 0) {
-                        rectProps = new FitActions(this.actionParams).getPassiveRect(fit);
+                        rectProps = new FitActions().getPassiveRect(fit);
                     } else {
-                        rectProps = {
-                            x: 0,
-                            y: 0,
-                            width: 100,
-                            height: 100
-                        };
+                        rectProps = this.noRectProps;
                     }
                     break;
             }
         }
 
+        rectProps = this.ensureRectWithinImage(rectProps);
+
         const rectPropsPercent: RectPropsPercent = {
-            x: `${rectProps.x}%`,
-            y: `${rectProps.y}%`,
-            width: `${rectProps.width}%`,
-            height: `${rectProps.height}%`
+            x: `${rectProps.x * 100}%`,
+            y: `${rectProps.y * 100}%`,
+            width: `${rectProps.width * 100}%`,
+            height: `${rectProps.height * 100}%`
         }
+
+        this.currentRectProps = rectProps;
 
         return (
             <svg>
@@ -114,6 +110,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                     className="selectRect"
                 />
                 <rect
+                    id="imageMaskRect"
                     width="100%"
                     height="100%"
                     mask="url(#boxMask)"
@@ -121,7 +118,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                 />
                 <If shouldRender={this.actionParams.action !== EditAction.selecting
                     && rectProps.width > 0 && rectProps.height > 0}>
-                    {this.getGrabCirclesGroup(rectProps, rectPropsPercent)}
+                    {this.getGrabCirclesGroup(rectProps)}
                 </If>
             </svg>
         );
@@ -137,7 +134,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                         <NumberInput
                             type={this.defaultNumberType}
                             allowedTypes={this.allowedNumberTypes}
-                            value={scale.wFloat || null}
+                            value={this.getZeroOrNull(scale.wFloat)}
                             max={this.props.imageWidth}
                             tooltip="Width"
                             setValue={value => {
@@ -149,7 +146,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                         <NumberInput
                             type={this.defaultNumberType}
                             allowedTypes={this.allowedNumberTypes}
-                            value={scale.hFloat || null}
+                            value={this.getZeroOrNull(scale.hFloat)}
                             max={this.props.imageHeight}
                             tooltip="Height"
                             setValue={value => {
@@ -165,7 +162,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                         <NumberInput
                             type={this.defaultNumberType}
                             allowedTypes={this.allowedNumberTypes}
-                            value={fit.wFloat || null}
+                            value={this.getZeroOrNull(fit.wFloat)}
                             max={this.props.imageWidth}
                             tooltip="Width"
                             setValue={value => {
@@ -176,7 +173,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                         <NumberInput
                             type={this.defaultNumberType}
                             allowedTypes={this.allowedNumberTypes}
-                            value={fit.hFloat || null}
+                            value={this.getZeroOrNull(fit.hFloat)}
                             max={this.props.imageHeight}
                             tooltip="Height"
                             setValue={value => {

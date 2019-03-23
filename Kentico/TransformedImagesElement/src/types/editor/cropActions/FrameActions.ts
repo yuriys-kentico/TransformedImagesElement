@@ -2,51 +2,59 @@ import { WHTransform } from "../../transformedImage/Transforms";
 import { NumberUtils } from "../../NumberUtils";
 import { BaseActions } from "../BaseActions";
 
-import { RectProps } from "../../../components/editor/controls/BaseControls";
+import { RectProps, ActionParams, EditAction } from "../../../components/editor/controls/BaseControls";
 
 export class FrameActions extends BaseActions<WHTransform> {
-    getTransform(): WHTransform {
-        const frameMouseXTranslation = Math.abs(this.endXFloat - .5);
-        const frameMouseYTranslation = Math.abs(this.endYFloat - .5);
+    getTransform(rectProps: RectProps): WHTransform {
+        return {
+            wFloat: rectProps.width,
+            hFloat: rectProps.height
+        }
+    }
+
+    getEditingRect(actionParams: ActionParams, oldFrame: WHTransform): RectProps {
+        const { action, endXFloat, endYFloat } = actionParams;
 
         let WFloat = 0;
         let HFloat = 0;
 
-        if (this.endXFloat - this.startXFloat !== 0) {
-            WFloat = NumberUtils.toRounded(2 * frameMouseXTranslation, 4);
-            HFloat = NumberUtils.toRounded(2 * frameMouseYTranslation, 4);
+        const mouseXTranslation = Math.abs(endXFloat - .5);
+        const mouseYTranslation = Math.abs(endYFloat - .5);
+
+        switch (action) {
+            case EditAction.selecting:
+                WFloat = NumberUtils.toRounded(2 * mouseXTranslation, 4);
+                HFloat = NumberUtils.toRounded(2 * mouseYTranslation, 4);
+                break;
+            case EditAction.top:
+            case EditAction.bottom:
+                WFloat = oldFrame.wFloat !== 0 ? oldFrame.wFloat : 1;
+                HFloat = NumberUtils.toRounded(2 * mouseYTranslation, 4);
+                break;
+            case EditAction.left:
+            case EditAction.right:
+                WFloat = NumberUtils.toRounded(2 * mouseXTranslation, 4);
+                HFloat = oldFrame.hFloat !== 0 ? oldFrame.hFloat : 1;
+                break;
         }
-
-        return {
-            wFloat: WFloat,
-            hFloat: HFloat,
-        }
-    }
-
-    getEditingRect(): RectProps {
-        const frameMouseXTranslation = Math.abs(this.endXFloat - .5);
-        const frameMouseYTranslation = Math.abs(this.endYFloat - .5);
-
-        const WFloat = NumberUtils.toRounded(2 * frameMouseXTranslation, 4);
-        const HFloat = NumberUtils.toRounded(2 * frameMouseYTranslation, 4);
 
         const XFloat = NumberUtils.toRounded(.5 - WFloat / 2, 4);
         const YFloat = NumberUtils.toRounded(.5 - HFloat / 2, 4);
 
         return {
-            x: XFloat * 100,
-            y: YFloat * 100,
-            width: WFloat * 100,
-            height: HFloat * 100
+            x: XFloat,
+            y: YFloat,
+            width: WFloat,
+            height: HFloat
         };
     }
 
     getPassiveRect(frame: WHTransform): RectProps {
         return {
-            x: (.5 - frame.wFloat / 2) * 100,
-            y: (.5 - frame.hFloat / 2) * 100,
-            width: frame.wFloat * 100,
-            height: frame.hFloat * 100
+            x: (.5 - frame.wFloat / 2),
+            y: (.5 - frame.hFloat / 2),
+            width: frame.wFloat,
+            height: frame.hFloat
         }
     }
 }

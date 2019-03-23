@@ -181,7 +181,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                         className="imageListing"
                         ref={e => this.listingList = e}
                     >
-                        <If shouldRender={this.state.disabled}>
+                        <If shouldRender={!this.state.disabled}>
                             <ListingButtons
                                 onClickPick={() => {
                                     this.storeCurrentSelectedImages();

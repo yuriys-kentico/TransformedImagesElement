@@ -10,8 +10,6 @@ import { NumberInput, NumberInputType } from "../inputs/NumberInput";
 import { If } from "../../If";
 
 export interface ICropControlsProps extends IBaseControlsProps<ICropTransform> {
-    imageWidth: number;
-    imageHeight: number;
 }
 
 export interface ICropControlsState {
@@ -23,22 +21,31 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
 
     updateTransform = () => {
         if (this.actionParams.action !== EditAction.none) {
+            if (!this.mouseHasMoved()) {
+                this.currentRectProps = {
+                    x: -1,
+                    y: -1,
+                    width: -1,
+                    height: -1
+                };
+            }
+
             const { type } = this.props.transform;
 
             switch (type) {
                 case CropType.frame:
-                    this.setTransform({ frame: new FrameActions(this.actionParams).getTransform() });
+                    this.setTransform({ frame: new FrameActions().getTransform(this.currentRectProps) });
                     break;
                 case CropType.box:
-                    this.setTransform({ box: new BoxActions(this.actionParams).getTransform() });
+                    this.setTransform({ box: new BoxActions().getTransform(this.currentRectProps) });
                     break;
                 case CropType.zoom:
-                    this.setTransform({ zoom: new ZoomActions(this.actionParams).getTransform() });
+                    this.setTransform({ zoom: new ZoomActions().getTransform(this.currentRectProps) });
                     break;
             }
-        }
 
-        this.actionParams.action = EditAction.none;
+            this.actionParams.action = EditAction.none;
+        }
 
         return true;
     };
@@ -46,46 +53,47 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
     getImageOverlay() {
         const { type, frame, box, zoom } = this.props.transform;
 
-        let rectProps: RectProps = {
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0
-        };
+        let rectProps: RectProps = this.noRectProps;
 
-        if (this.actionParams.action !== EditAction.none && this.hasMovedMouse()) {
+        if (this.actionParams.action !== EditAction.none && this.mouseHasMoved()) {
             switch (type) {
                 case CropType.frame:
-                    rectProps = new FrameActions(this.actionParams).getEditingRect();
+                    rectProps = new FrameActions().getEditingRect(this.actionParams, frame);
                     break;
                 case CropType.box:
-                    rectProps = new BoxActions(this.actionParams).getEditingRect();
+                    rectProps = new BoxActions().getEditingRect(this.actionParams);
                     break;
                 case CropType.zoom:
-                    rectProps = new ZoomActions(this.actionParams).getEditingRect();
+                    rectProps = new ZoomActions().getEditingRect(this.actionParams);
             }
         } else {
             switch (type) {
                 case CropType.frame:
-                    rectProps = new FrameActions(this.actionParams).getPassiveRect(frame);
+                    rectProps = new FrameActions().getPassiveRect(frame);
                     break;
                 case CropType.box:
-                    rectProps = new BoxActions(this.actionParams).getPassiveRect(box);
+                    rectProps = new BoxActions().getPassiveRect(box);
                     break;
                 case CropType.zoom:
                     if (zoom.zFloat > 0) {
-                        rectProps = new ZoomActions(this.actionParams).getPassiveRect(zoom);
+                        rectProps = new ZoomActions().getPassiveRect(zoom);
+                    } else {
+                        rectProps = this.noRectProps;
                     }
                     break;
             }
         }
 
+        rectProps = this.ensureRectWithinImage(rectProps);
+
         const rectPropsPercent: RectPropsPercent = {
-            x: `${rectProps.x}%`,
-            y: `${rectProps.y}%`,
-            width: `${rectProps.width}%`,
-            height: `${rectProps.height}%`
+            x: `${rectProps.x * 100}%`,
+            y: `${rectProps.y * 100}%`,
+            width: `${rectProps.width * 100}%`,
+            height: `${rectProps.height * 100}%`
         }
+
+        this.currentRectProps = rectProps;
 
         return (
             <svg>
@@ -106,6 +114,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     className="selectRect"
                 />
                 <rect
+                    id="imageMaskRect"
                     width="100%"
                     height="100%"
                     mask="url(#boxMask)"
@@ -113,7 +122,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                 />
                 <If shouldRender={this.actionParams.action !== EditAction.selecting
                     && rectProps.width > 0 && rectProps.height > 0}>
-                    {this.getGrabCirclesGroup(rectProps, rectPropsPercent)}
+                    {this.getGrabCirclesGroup(rectProps)}
                 </If>
             </svg>
         );
@@ -130,7 +139,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             <NumberInput
                                 type={this.defaultNumberType}
                                 allowedTypes={this.allowedNumberTypes}
-                                value={box.xFloat || null}
+                                value={this.getZeroOrNull(box.xFloat)}
                                 max={this.props.imageWidth}
                                 tooltip="Start X"
                                 setValue={value => {
@@ -141,7 +150,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             <NumberInput
                                 type={this.defaultNumberType}
                                 allowedTypes={this.allowedNumberTypes}
-                                value={box.yFloat || null}
+                                value={this.getZeroOrNull(box.yFloat)}
                                 max={this.props.imageWidth}
                                 tooltip="Start Y"
                                 setValue={value => {
@@ -154,7 +163,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             <NumberInput
                                 type={this.defaultNumberType}
                                 allowedTypes={this.allowedNumberTypes}
-                                value={box.wFloat || null}
+                                value={this.getZeroOrNull(box.wFloat)}
                                 max={this.props.imageWidth}
                                 tooltip="Width"
                                 setValue={value => {
@@ -165,7 +174,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             <NumberInput
                                 type={this.defaultNumberType}
                                 allowedTypes={this.allowedNumberTypes}
-                                value={box.hFloat || null}
+                                value={this.getZeroOrNull(box.hFloat)}
                                 max={this.props.imageWidth}
                                 tooltip="Height"
                                 setValue={value => {
@@ -183,7 +192,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             <NumberInput
                                 type={this.defaultNumberType}
                                 allowedTypes={this.allowedNumberTypes}
-                                value={zoom.xFloat || null}
+                                value={this.getZeroOrNull(zoom.xFloat)}
                                 max={this.props.imageWidth}
                                 tooltip="Center X"
                                 setValue={value => {
@@ -194,7 +203,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             <NumberInput
                                 type={this.defaultNumberType}
                                 allowedTypes={this.allowedNumberTypes}
-                                value={zoom.yFloat || null}
+                                value={this.getZeroOrNull(zoom.yFloat)}
                                 max={this.props.imageWidth}
                                 tooltip="Center Y"
                                 setValue={value => {
@@ -207,7 +216,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                             <NumberInput
                                 type={NumberInputType.float}
                                 allowedTypes={[NumberInputType.float]}
-                                value={zoom.zFloat || null}
+                                value={this.getZeroOrNull(zoom.zFloat)}
                                 max={100}
                                 min={1}
                                 tooltip="Zoom"
@@ -225,7 +234,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                         <NumberInput
                             type={this.defaultNumberType}
                             allowedTypes={this.allowedNumberTypes}
-                            value={frame.wFloat || null}
+                            value={this.getZeroOrNull(frame.wFloat)}
                             max={this.props.imageWidth}
                             tooltip="Width"
                             setValue={value => {
@@ -236,7 +245,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                         <NumberInput
                             type={this.defaultNumberType}
                             allowedTypes={this.allowedNumberTypes}
-                            value={frame.hFloat || null}
+                            value={this.getZeroOrNull(frame.hFloat)}
                             max={this.props.imageHeight}
                             tooltip="Height"
                             setValue={value => {
