@@ -157,8 +157,8 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                     className="imageEditorPreview"
                     ref={e => this.mouseActionZone = e}
                 >
-                    <span className="imageWrapper">
-                        <div className="imageMask">
+                    <div className="imageWrapper">
+                        <span className="imageMask">
                             <If shouldRender={this.isEditing()}>
                                 {currentEditor ? currentEditor.getImageOverlay() : null}
                             </If>
@@ -186,8 +186,8 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                                 hidden={!this.isNoPreview()}
                                 src={this.props.editedImage.buildEditingUrl().getUrl()}
                             />
-                        </div>
-                    </span>
+                        </span>
+                    </div>
                     <If shouldRender={!this.isEditing() && !this.props.isDisabled}>
                         <span className="hoverToEdit">
                             (Hover to edit)
