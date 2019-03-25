@@ -257,7 +257,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                         >
                             <TransformsEditor
                                 editedImage={this.state.editedImage}
-                                disabled={this.state.disabled}
+                                isDisabled={this.state.disabled}
                                 isPreview={this.state.editorUsePreview}
                                 updateUrl={url => this.setState({ editedImageUrl: url })}
                             />

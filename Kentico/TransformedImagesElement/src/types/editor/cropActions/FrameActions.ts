@@ -1,45 +1,48 @@
 import { WHTransform } from "../../transformedImage/Transforms";
-import { NumberUtils } from "../../NumberUtils";
 import { BaseActions } from "../BaseActions";
+import { NumberUtils } from "../../NumberUtils";
 
 import { RectProps, ActionParams, EditAction } from "../../../components/editor/controls/BaseControls";
 
 export class FrameActions extends BaseActions<WHTransform> {
     getTransform(rectProps: RectProps): WHTransform {
         return {
-            wFloat: rectProps.width,
-            hFloat: rectProps.height
+            wFloat: NumberUtils.toRounded(rectProps.width, 4),
+            hFloat: NumberUtils.toRounded(rectProps.height, 4)
         }
     }
 
     getEditingRect(actionParams: ActionParams, oldFrame: WHTransform): RectProps {
         const { action, endXFloat, endYFloat } = actionParams;
 
-        let WFloat = 0;
-        let HFloat = 0;
-
         const mouseXTranslation = Math.abs(endXFloat - .5);
         const mouseYTranslation = Math.abs(endYFloat - .5);
 
+        let WFloat = oldFrame.wFloat !== 0 ? oldFrame.wFloat : 1;
+        let HFloat = oldFrame.hFloat !== 0 ? oldFrame.hFloat : 1;
+
         switch (action) {
             case EditAction.selecting:
-                WFloat = NumberUtils.toRounded(2 * mouseXTranslation, 4);
-                HFloat = NumberUtils.toRounded(2 * mouseYTranslation, 4);
+            case EditAction.dragging:
+            case EditAction.topLeft:
+            case EditAction.bottomRight:
+            case EditAction.topRight:
+            case EditAction.bottomLeft:
+                WFloat = 2 * mouseXTranslation;
+                HFloat = 2 * mouseYTranslation;
                 break;
             case EditAction.top:
             case EditAction.bottom:
-                WFloat = oldFrame.wFloat !== 0 ? oldFrame.wFloat : 1;
-                HFloat = NumberUtils.toRounded(2 * mouseYTranslation, 4);
+                HFloat = 2 * mouseYTranslation;
                 break;
             case EditAction.left:
             case EditAction.right:
-                WFloat = NumberUtils.toRounded(2 * mouseXTranslation, 4);
-                HFloat = oldFrame.hFloat !== 0 ? oldFrame.hFloat : 1;
+                WFloat = 2 * mouseXTranslation;
                 break;
         }
 
-        const XFloat = NumberUtils.toRounded(.5 - WFloat / 2, 4);
-        const YFloat = NumberUtils.toRounded(.5 - HFloat / 2, 4);
+        const XFloat = .5 - WFloat / 2;
+        const YFloat = .5 - HFloat / 2;
 
         return {
             x: XFloat,

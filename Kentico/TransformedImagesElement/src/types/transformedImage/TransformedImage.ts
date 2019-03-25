@@ -74,6 +74,12 @@ export class TransformedImage extends AssetModels.Asset {
             && allowedImageTypes.indexOf(asset.type) > -1;
     }
 
+    static canBeLosslessFormat(format: Format): boolean {
+        return format === Format.Jpg
+            || format === Format.Pjpg
+            || format === Format.Webp;
+    }
+
     canBeTransparent(): boolean {
         if (this.transforms.format) {
             switch (this.transforms.format.format) {
@@ -119,7 +125,12 @@ export class TransformedImage extends AssetModels.Asset {
                     && crop.box.wFloat >= 0
                     && crop.box.hFloat >= 0) {
                     builder
-                        .withRectangleCrop(crop.box.xFloat, crop.box.yFloat, crop.box.wFloat, crop.box.hFloat);
+                        .withRectangleCrop(
+                            NumberUtils.toRounded(crop.box.xFloat * this.imageWidth),
+                            NumberUtils.toRounded(crop.box.yFloat * this.imageHeight),
+                            NumberUtils.toRounded(crop.box.wFloat * this.imageWidth),
+                            NumberUtils.toRounded(crop.box.hFloat * this.imageHeight)
+                        );
                 }
                 break;
             case CropType.zoom:
@@ -138,7 +149,9 @@ export class TransformedImage extends AssetModels.Asset {
                         .withRectangleCrop(
                             NumberUtils.toRounded((1 - crop.frame.wFloat) / 2, 2),
                             NumberUtils.toRounded((1 - crop.frame.hFloat) / 2, 2),
-                            crop.frame.wFloat, crop.frame.hFloat);
+                            crop.frame.wFloat,
+                            crop.frame.hFloat
+                        );
                 }
                 break;
         }
@@ -154,21 +167,44 @@ export class TransformedImage extends AssetModels.Asset {
             case ResizeType.scale:
                 // Scale does not work with zoom
                 if (crop.type !== CropType.zoom
+                    && resize.scale.wFloat !== null
                     && resize.scale.wFloat >= 0
+                    && resize.scale.hFloat !== null
                     && resize.scale.hFloat >= 0) {
                     builder
                         .withFitMode(ImageFitModeEnum.Scale)
                         .withWidth(resize.scale.wFloat)
                         .withHeight(resize.scale.hFloat);
                 }
+                if (crop.type !== CropType.zoom
+                    && resize.devicePixelRatio !== null
+                    && resize.devicePixelRatio >= 0
+                    && (resize.scale.wFloat !== null
+                        && resize.scale.wFloat >= 0
+                        || resize.scale.hFloat !== null
+                        && resize.scale.hFloat >= 0)) {
+                    builder.withDpr(resize.devicePixelRatio);
+                }
                 break;
             case ResizeType.fit:
-                if (resize.fit.wFloat >= 0
+                if (crop.type !== CropType.zoom
+                    && resize.fit.wFloat !== null
+                    && resize.fit.wFloat >= 0
+                    && resize.fit.hFloat !== null
                     && resize.fit.hFloat >= 0) {
                     builder
                         .withFitMode(ImageFitModeEnum.Clip)
                         .withWidth(resize.fit.wFloat)
                         .withHeight(resize.fit.hFloat);
+                }
+                if (crop.type !== CropType.zoom
+                    && resize.devicePixelRatio !== null
+                    && resize.devicePixelRatio >= 0
+                    && (resize.fit.wFloat !== null
+                        && resize.fit.wFloat >= 0
+                        || resize.fit.hFloat !== null
+                        && resize.fit.hFloat >= 0)) {
+                    builder.withDpr(resize.devicePixelRatio);
                 }
                 break;
         }

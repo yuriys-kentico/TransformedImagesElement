@@ -40,7 +40,7 @@ export enum EditAction {
     right = "right",
     bottomRight = "bottomRight",
     bottom = "bottom",
-    bottomLeft = "bottomleft",
+    bottomLeft = "bottomLeft",
     left = "left",
     topLeft = "topLeft"
 }
@@ -50,6 +50,7 @@ export interface IBaseControlsProps<TTransform> {
     setCurrentEditor(editor: BaseControls<this, TTransform>): void;
     transform: TTransform;
     setTransform: (transform: TTransform) => void;
+    isEditable: boolean;
     imageWidth: number;
     imageHeight: number;
 }
@@ -57,6 +58,18 @@ export interface IBaseControlsProps<TTransform> {
 export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform> = IBaseControlsProps<any>, TTransform = {}, IState = {}> extends React.Component<IProps, IState> {
     protected buttonIsSelectedClass(comparison: boolean): string {
         return comparison ? "btn--primary" : "btn--secondary";
+    }
+
+    protected isCurrentEditorClass(): string {
+        return this.props.isCurrentEditor(this)
+            ? "selected"
+            : "";
+    }
+
+    protected isEditableClass(): string {
+        return this.props.isEditable
+            ? "editable"
+            : "";
     }
 
     protected defaultNumberType = OPTIONAL_CONFIG.inputsDefaultToPercent
@@ -167,11 +180,6 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
         return false;
     };
 
-    protected mouseHasMoved(): boolean {
-        return Math.abs(this.actionParams.endXFloat - this.actionParams.startXFloat) > 0
-            || Math.abs(this.actionParams.endYFloat - this.actionParams.startYFloat) > 0
-    }
-
     abstract updateTransform(event: React.MouseEvent<HTMLDivElement, MouseEvent>): boolean;
 
     abstract getImageOverlay(): React.ReactNode;
@@ -195,23 +203,11 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
     protected ensureRectWithinImage(rectProps: RectProps): RectProps {
         const { x, y, width, height } = rectProps;
 
-        const newX = NumberUtils.toBetween(x, 1, 0);
-        const newY = NumberUtils.toBetween(y, 1, 0);
+        let newX = NumberUtils.toBetween(x, 1 - width, 0);
+        let newY = NumberUtils.toBetween(y, 1 - height, 0);
 
-        let newWidth = NumberUtils.toBetween(width, 1 - newX, 0);
-        let newHeight = NumberUtils.toBetween(height, 1 - newY, 0);
-
-        if (x < 0) {
-            newWidth = NumberUtils.toBetween(width + x, 1, 0);
-        }
-
-        if (y < 0) {
-            newHeight = NumberUtils.toBetween(height + y, 1, 0);
-        }
-
-        if (x > 1 || newWidth === 0 || y > 1 || newHeight === 0) {
-            return this.noRectProps;
-        }
+        let newWidth = NumberUtils.toBetween(width, 1, 0);
+        let newHeight = NumberUtils.toBetween(height, 1, 0);
 
         return {
             x: newX,
@@ -258,10 +254,7 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
     render() {
         return (
             <div
-                className={`control ${this.props.isCurrentEditor(this)
-                    ? "selected"
-                    : ""
-                    }`}
+                className={`control ${this.isEditableClass()} ${this.isCurrentEditorClass()}`}
                 onClick={() => this.props.setCurrentEditor(this)}
             >
                 {this.renderControls()}

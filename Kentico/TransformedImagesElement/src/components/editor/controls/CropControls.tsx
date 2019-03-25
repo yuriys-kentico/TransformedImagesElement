@@ -1,7 +1,7 @@
 ﻿import * as React from "react";
 
 import { ICropTransform, CropType } from "../../../types/transformedImage/Transforms";
-import { BoxActions } from "../../../types/editor/cropActions/boxActions";
+import { BoxActions } from "../../../types/editor/cropActions/BoxActions";
 import { ZoomActions } from "../../../types/editor/cropActions/ZoomActions";
 import { FrameActions } from "../../../types/editor/cropActions/FrameActions";
 
@@ -21,15 +21,6 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
 
     updateTransform = () => {
         if (this.actionParams.action !== EditAction.none) {
-            if (!this.mouseHasMoved()) {
-                this.currentRectProps = {
-                    x: -1,
-                    y: -1,
-                    width: -1,
-                    height: -1
-                };
-            }
-
             const { type } = this.props.transform;
 
             switch (type) {
@@ -55,16 +46,17 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
 
         let rectProps: RectProps = this.noRectProps;
 
-        if (this.actionParams.action !== EditAction.none && this.mouseHasMoved()) {
+        if (this.actionParams.action !== EditAction.none) {
             switch (type) {
+                case CropType.box:
+                    rectProps = new BoxActions().getEditingRect(this.actionParams, box);
+                    break;
+                case CropType.zoom:
+                    rectProps = new ZoomActions().getEditingRect(this.actionParams, zoom);
+                    break;
                 case CropType.frame:
                     rectProps = new FrameActions().getEditingRect(this.actionParams, frame);
                     break;
-                case CropType.box:
-                    rectProps = new BoxActions().getEditingRect(this.actionParams);
-                    break;
-                case CropType.zoom:
-                    rectProps = new ZoomActions().getEditingRect(this.actionParams);
             }
         } else {
             switch (type) {
@@ -95,6 +87,8 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
 
         this.currentRectProps = rectProps;
 
+        const canDragCssClass = type !== CropType.frame ? "draggable" : "";
+
         return (
             <svg>
                 <defs>
@@ -110,15 +104,15 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                     </mask>
                 </defs>
                 <rect
-                    {...rectPropsPercent}
-                    className="selectRect"
-                />
-                <rect
                     id="imageMaskRect"
                     width="100%"
                     height="100%"
                     mask="url(#boxMask)"
                     className="outsideRect"
+                />
+                <rect
+                    {...rectPropsPercent}
+                    className={`selectRect ${canDragCssClass}`}
                 />
                 <If shouldRender={this.actionParams.action !== EditAction.selecting
                     && rectProps.width > 0 && rectProps.height > 0}>
@@ -211,8 +205,6 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                                     this.setTransform({ zoom: crop.zoom })
                                 }}
                             />
-                        </div>
-                        <div className="fieldsBlock">
                             <NumberInput
                                 type={NumberInputType.float}
                                 allowedTypes={[NumberInputType.float]}

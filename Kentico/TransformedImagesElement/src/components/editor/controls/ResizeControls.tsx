@@ -5,7 +5,7 @@ import { FitActions } from "../../../types/editor/resizeActions/FitActions";
 import { ScaleActions } from "../../../types/editor/resizeActions/ScaleActions";
 
 import { BaseControls, IBaseControlsProps, EditAction, RectProps, RectPropsPercent } from "./BaseControls";
-import { NumberInput } from "../inputs/NumberInput";
+import { NumberInput, NumberInputType } from "../inputs/NumberInput";
 import { If } from "../../If";
 
 export interface IResizeControlsProps extends IBaseControlsProps<IResizeTransform> {
@@ -20,15 +20,6 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
 
     updateTransform = () => {
         if (this.actionParams.action !== EditAction.none) {
-            if (!this.mouseHasMoved()) {
-                this.currentRectProps = {
-                    x: -1,
-                    y: -1,
-                    width: -1,
-                    height: -1
-                };
-            }
-
             const { type } = this.props.transform;
 
             switch (type) {
@@ -51,7 +42,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
 
         let rectProps: RectProps = { ...this.noRectProps };
 
-        if (this.actionParams.action !== EditAction.none && this.mouseHasMoved()) {
+        if (this.actionParams.action !== EditAction.none) {
             switch (type) {
                 case ResizeType.scale:
                     rectProps = new ScaleActions().getEditingRect(this.actionParams, scale);
@@ -106,15 +97,15 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                     </mask>
                 </defs>
                 <rect
-                    {...rectPropsPercent}
-                    className="selectRect"
-                />
-                <rect
                     id="imageMaskRect"
                     width="100%"
                     height="100%"
                     mask="url(#boxMask)"
                     className="outsideRect"
+                />
+                <rect
+                    {...rectPropsPercent}
+                    className="selectRect"
                 />
                 <If shouldRender={this.actionParams.action !== EditAction.selecting
                     && rectProps.width > 0 && rectProps.height > 0}>
@@ -154,6 +145,18 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                                 this.setTransform({ scale: resize.scale })
                             }}
                         />
+                        <NumberInput
+                            type={NumberInputType.float}
+                            allowedTypes={[NumberInputType.float]}
+                            value={this.getZeroOrNull(resize.devicePixelRatio)}
+                            max={5}
+                            min={0}
+                            tooltip="Device Pixel Ratio"
+                            disabled={resize.scale.hFloat === 0 && resize.scale.wFloat === 0}
+                            setValue={value => {
+                                this.setTransform({ devicePixelRatio: value })
+                            }}
+                        />
                     </div>
                 );
             case ResizeType.fit:
@@ -179,6 +182,18 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                             setValue={value => {
                                 resize.fit.hFloat = value;
                                 this.setTransform({ fit: resize.fit })
+                            }}
+                        />
+                        <NumberInput
+                            type={NumberInputType.float}
+                            allowedTypes={[NumberInputType.float]}
+                            value={this.getZeroOrNull(resize.devicePixelRatio)}
+                            max={5}
+                            min={0}
+                            tooltip="Device Pixel Ratio"
+                            disabled={resize.fit.hFloat === 0 && resize.fit.wFloat === 0}
+                            setValue={value => {
+                                this.setTransform({ devicePixelRatio: value })
                             }}
                         />
                     </div>

@@ -45,7 +45,7 @@ export class ImageListingTile extends React.PureComponent<IimageListingProps> {
                                 data-balloon-pos="down"
                             >
                                 <i aria-hidden="true" className="icon-add-params" />
-                            </div>,
+                            </div>
                             <a
                                 className="imageListingAction imageListingActionDownload"
                                 target="_blank"
@@ -55,7 +55,7 @@ export class ImageListingTile extends React.PureComponent<IimageListingProps> {
                                 data-balloon-pos="down"
                             >
                                 <i aria-hidden="true" className="icon-download" />
-                            </a>,
+                            </a>
                             <div
                                 className="imageListingAction imageListingActionRemove"
                                 onClick={() => this.props.onRemove(this.props.image)}

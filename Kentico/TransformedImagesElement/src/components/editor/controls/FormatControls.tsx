@@ -8,6 +8,7 @@ import { SwitchInput } from "../inputs/SwitchInput";
 import { NumberInput, NumberInputType } from "../inputs/NumberInput";
 import { DropdownInput } from "../inputs/DropdownInput";
 import { If } from "../../If";
+import { TransformedImage } from "../../../types/transformedImage/TransformedImage";
 
 export interface IFormatControlsProps extends IBaseControlsProps<IFormatTransform> {
 }
@@ -72,9 +73,7 @@ export class FormatControls extends BaseControls<IFormatControlsProps, IFormatTr
                         />
                     </div>
                     <div className="fieldsBlock">
-                        <If shouldRender={format.format === Format.Jpg
-                            || format.format === Format.Pjpg
-                            || format.format === Format.Webp}>
+                        <If shouldRender={TransformedImage.canBeLosslessFormat(format.format)}>
                             <NumberInput
                                 type={NumberInputType.int}
                                 allowedTypes={[NumberInputType.int]}

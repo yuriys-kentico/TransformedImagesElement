@@ -136,16 +136,28 @@ body {
     flex: 2;
     overflow: hidden;
     position: relative; }
+    .imageEditor .editor .imageEditorPreview .hoverToEdit {
+      position: absolute;
+      color: #757575;
+      width: 100%;
+      background-color: rgba(245, 245, 245, 0.8);
+      text-align: center;
+      padding: .5em;
+      bottom: 0; }
     .imageEditor .editor .imageEditorPreview .imageWrapper {
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      height: 100%;
+      padding: 1em;
       position: relative;
-      padding: .5em; }
+      max-width: 100%;
+      max-height: 100%;
+      display: flex; }
       .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask {
         position: relative;
-        user-select: none; }
+        max-width: 100%;
+        max-height: 100%;
+        display: flex;
+        user-select: none;
+        -moz-user-select: none;
+        justify-content: center; }
         .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask .notSupported {
           position: absolute;
           left: 50%;
@@ -160,9 +172,13 @@ body {
           height: 100%;
           cursor: crosshair;
           overflow: initial; }
+          .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg mask, .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg rect {
+            position: absolute; }
           .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .selectRect {
             stroke: #2196f3;
-            fill: transparent; }
+            fill: rgba(255, 255, 255, 0.001); }
+            .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .selectRect.draggable {
+              cursor: move; }
           .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle {
             stroke: #2196f3;
             fill: white; }
@@ -170,56 +186,43 @@ body {
               cursor: ns-resize; }
             .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle#left, .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle#right {
               cursor: ew-resize; }
+            .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle#topRight, .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle#bottomLeft {
+              cursor: nesw-resize; }
+            .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle#topLeft, .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle#bottomRight {
+              cursor: nwse-resize; }
           .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .outsideRect {
             fill: rgba(255, 255, 255, 0.667); }
-      .imageEditor .editor .imageEditorPreview .imageWrapper .imageEditorImage {
-        box-shadow: 0 1px 8px 2px rgba(0, 0, 0, 0.2);
-        pointer-events: none;
-        max-width: 100%;
-        height: 100%; }
-    .imageEditor .editor .imageEditorPreview.scaleToFit .imageMask {
-      height: 100%; }
-    .imageEditor .editor .imageEditorPreview.preview .imageWrapper {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%); }
-      .imageEditor .editor .imageEditorPreview.preview .imageWrapper .imageEditorImage {
-        max-width: initial;
-        max-height: initial; }
-    .imageEditor .editor .imageEditorPreview.preview.edit::after {
-      content: "(Hover to edit)";
-      position: absolute;
-      color: #757575;
-      width: 100%;
-      background-color: rgba(245, 245, 245, 0.8);
-      text-align: center;
-      padding: .5em;
-      bottom: 0; }
+        .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask .imageEditorImage {
+          box-shadow: 0 1px 8px 2px rgba(0, 0, 0, 0.2);
+          pointer-events: none;
+          max-width: 100%;
+          max-height: 100%; }
   .imageEditor .editor .editorControls {
     min-height: 100%;
     flex: 1;
     background: #f5f5f5;
     padding: 1em 0.5em 1em 0; }
     .imageEditor .editor .editorControls .control {
-      padding: 0.5em 0.5em 0.5em 1em;
+      padding: 0.5em 0.5em 0.5em 1.2em;
       border: transparent solid 0.1em;
-      border-left: #9e9e9e solid 0.3em;
       color: #757575; }
       .imageEditor .editor .editorControls .control .btn--primary {
         background-color: #757575; }
         .imageEditor .editor .editorControls .control .btn--primary:hover {
           background-color: #1976d2; }
-      .imageEditor .editor .editorControls .control.selected {
-        border-left: #2196f3 solid 0.7em;
-        border-radius: 0 0.15em 0.15em 0;
-        padding-left: 0.6em;
-        color: inherit; }
-        .imageEditor .editor .editorControls .control.selected .btn--primary {
-          background-color: #2196f3;
-          transition: none; }
-        .imageEditor .editor .editorControls .control.selected .fields .input > input + span[title] {
-          color: #2196f3; }
+      .imageEditor .editor .editorControls .control.editable {
+        padding-left: 1em;
+        border-left: #9e9e9e solid 0.3em; }
+        .imageEditor .editor .editorControls .control.editable.selected {
+          border-left: #2196f3 solid 0.7em;
+          border-radius: 0 0.15em 0.15em 0;
+          padding-left: 0.6em;
+          color: inherit; }
+          .imageEditor .editor .editorControls .control.editable.selected .btn--primary {
+            background-color: #2196f3;
+            transition: none; }
+          .imageEditor .editor .editorControls .control.editable.selected .fields .input > input + span[title] {
+            color: #2196f3; }
       .imageEditor .editor .editorControls .control .modes {
         display: flex;
         margin: 0 0 .5em 0;
