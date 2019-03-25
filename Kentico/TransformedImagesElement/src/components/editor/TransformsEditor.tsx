@@ -227,7 +227,7 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                         <If shouldRender={this.props.editedImage.canBeTransparent()}>
                             <BackgroundControls
                                 isCurrentEditor={this.editorIsCurrent}
-                                setCurrentEditor={() => null}
+                                setCurrentEditor={this.setCurrentEditor}
                                 transform={transforms.background}
                                 setTransform={this.update}
                                 isEditable={false}
