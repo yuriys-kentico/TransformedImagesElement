@@ -6,24 +6,24 @@
         canvas.width = squareSize * 2;
         canvas.height = squareSize * 2;
 
-        const ctx = canvas.getContext("2d");
+        const twoDContext = canvas.getContext("2d");
 
         // If no context can be found, return early
-        if (!ctx) {
+        if (!twoDContext) {
             return "";
         }
 
         // Draw white everywhere
-        ctx.fillStyle = whiteColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        twoDContext.fillStyle = whiteColor;
+        twoDContext.fillRect(0, 0, canvas.width, canvas.height);
 
         // Draw grey in top-left
-        ctx.fillStyle = greyColor;
-        ctx.fillRect(0, 0, squareSize, squareSize);
+        twoDContext.fillStyle = greyColor;
+        twoDContext.fillRect(0, 0, squareSize, squareSize);
 
         // Draw grey in bottom right
-        ctx.translate(squareSize, squareSize);
-        ctx.fillRect(0, 0, squareSize, squareSize);
+        twoDContext.translate(squareSize, squareSize);
+        twoDContext.fillRect(0, 0, squareSize, squareSize);
 
         return canvas.toDataURL();
     };

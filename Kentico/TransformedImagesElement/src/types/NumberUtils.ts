@@ -20,5 +20,6 @@ export namespace NumberUtils {
 
     export const toHex = (value: number, size: number = 2) => value.toString(16).padStart(size, "0");
     export const isHexOneChar = (value: number) => (value || 0) % 17 === 0;
-    export const isHexNumbers = (value: string) => /^([0-9a-fA-F][0-9a-fA-F]){3,4}$|^[0-9a-fA-F]{3,4}$|^$/.test(value);
+    export const is4HexNumbers = (value: string) => /^([0-9a-fA-F][0-9a-fA-F]){3,4}$|^[0-9a-fA-F]{3,4}$|^$/.test(value);
+    export const is3HexNumbers = (value: string) => /^([0-9a-fA-F][0-9a-fA-F]){3}$|^[0-9a-fA-F]{3}$|^$/.test(value);
 }

@@ -11,7 +11,11 @@ export enum ColorInputType {
     hex = "HEX"
 }
 
-export class ColorInput extends BaseInput<IInputProps<ColorInputType, Color>, IInputState<ColorInputType>, ColorInputType, Color> {
+export interface IColorInputProps<TType, TValue> extends IInputProps<TType, TValue> {
+    disableAlpha: boolean;
+}
+
+export class ColorInput extends BaseInput<IColorInputProps<ColorInputType, Color>, IInputState<ColorInputType>, ColorInputType, Color> {
     state: IInputState<ColorInputType> = {
         type: null,
         rawValue: "",
@@ -38,13 +42,21 @@ export class ColorInput extends BaseInput<IInputProps<ColorInputType, Color>, II
         return rawInput.pipe(
             filter(v => this.isAllowedCharacters(v, "0-9a-fA-F", 0, 8)),
             map(this.storeValueInState),
-            filter(NumberUtils.isHexNumbers),
+            filter(v => {
+                return this.props.disableAlpha
+                    ? NumberUtils.is3HexNumbers(v)
+                    : NumberUtils.is4HexNumbers(v);
+            }),
             map(Color.fromHex),
         );
     }
 
     getValue(value: Color): string {
-        return value.isEmpty() ? "" : value.toShortHexString();
+        if (this.props.disableAlpha) {
+            value.rgba = { ...value.rgba, a: 0 };
+        }
+
+        return value.toShortHexString();
     }
 
     renderLabel(): React.ReactNode {

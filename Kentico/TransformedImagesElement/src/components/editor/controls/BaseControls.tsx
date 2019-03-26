@@ -46,13 +46,13 @@ export enum EditAction {
 }
 
 export interface IBaseControlsProps<TTransform> {
-    isCurrentEditor(editor: BaseControls<this, TTransform>): boolean;
-    setCurrentEditor(editor: BaseControls<this, TTransform>): void;
+    isCurrentEditor?(editor: BaseControls<this, TTransform>): boolean;
+    setCurrentEditor?(editor: BaseControls<this, TTransform>): void;
     transform: TTransform;
     setTransform: (transform: TTransform) => void;
     isEditable: boolean;
-    imageWidth: number;
-    imageHeight: number;
+    imageWidth?: number;
+    imageHeight?: number;
 }
 
 export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform> = IBaseControlsProps<any>, TTransform = {}, IState = {}> extends React.Component<IProps, IState> {
@@ -60,13 +60,13 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
         return comparison ? "btn--primary" : "btn--secondary";
     }
 
-    protected isCurrentEditorClass(): string {
-        return this.props.isCurrentEditor(this)
+    protected isCurrentEditorCssClass(): string {
+        return this.props.isCurrentEditor && this.props.isCurrentEditor(this)
             ? "selected"
             : "";
     }
 
-    protected isEditableClass(): string {
+    protected isEditableCssClass(): string {
         return this.props.isEditable
             ? "editable"
             : "";
@@ -102,10 +102,7 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
     }
 
     private findImageMaskElement(targetElement: Element): Element | null {
-        if (targetElement.id === "imageMaskRect") {
-            // The mask rect has the same shape as the image mask
-            return targetElement;
-        } else if (targetElement instanceof SVGElement) {
+        if (targetElement instanceof SVGElement) {
             const svgParent = (targetElement as SVGElement).ownerSVGElement;
 
             return svgParent ? svgParent.parentElement : null;
@@ -193,13 +190,6 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
         height: 0
     };
 
-    protected readonly fullRectProps: RectPropsPercent = {
-        x: "0%",
-        y: "0%",
-        width: "100%",
-        height: "100%"
-    };
-
     protected ensureRectWithinImage(rectProps: RectProps): RectProps {
         const { x, y, width, height } = rectProps;
 
@@ -217,45 +207,17 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
         };
     }
 
-    protected getGrabCirclesGroup(rectProps: RectProps): JSX.Element {
-        const rectPropsPercent: RectProps = {
-            x: rectProps.x * 100,
-            y: rectProps.y * 100,
-            width: rectProps.width * 100,
-            height: rectProps.height * 100
-        }
-
-        const { x, y, width, height } = rectPropsPercent;
-
-        const circle = (id: string, radius: number, cx: number, cy: number) => {
-            return <circle
-                cx={`${cx}%`}
-                cy={`${cy}%`}
-                r={radius}
-                id={id}
-                className="grabCircle"
-            />
-        }
-
-        return (<g>
-            {circle(EditAction.top, 10, x + width / 2, y)}
-            {circle(EditAction.topRight, 7, x + width, y)}
-            {circle(EditAction.right, 10, x + width, y + height / 2)}
-            {circle(EditAction.bottomRight, 7, x + width, y + height)}
-            {circle(EditAction.bottom, 10, x + width / 2, y + height)}
-            {circle(EditAction.bottomLeft, 7, x, y + height)}
-            {circle(EditAction.left, 10, x, y + height / 2)}
-            {circle(EditAction.topLeft, 7, x, y)}
-        </g>);
-    }
-
     protected abstract renderControls(): React.ReactNode;
 
     render() {
         return (
             <div
-                className={`control ${this.isEditableClass()} ${this.isCurrentEditorClass()}`}
-                onClick={() => this.props.setCurrentEditor(this)}
+                className={`control ${this.isEditableCssClass()} ${this.isCurrentEditorCssClass()}`}
+                onClick={() => {
+                    if (this.props.setCurrentEditor) {
+                        this.props.setCurrentEditor(this);
+                    }
+                }}
             >
                 {this.renderControls()}
             </div>

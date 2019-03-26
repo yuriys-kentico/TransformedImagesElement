@@ -39,9 +39,10 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
 
     private mouseIsDown: boolean;
 
-    private mouseActionZone: HTMLDivElement | null;
+    private imageEditorPreview: HTMLDivElement | null;
 
     private firstEditor: BaseControls | null;
+    private backgroundEditor: BaseControls | null;
 
     get mode(): EditorMode {
         if (this.state && this.state.mode === EditorMode.editing) {
@@ -85,8 +86,15 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
     componentDidMount() {
         this.props.updateUrl(this.props.editedImage.buildPreviewUrl().getUrl());
 
-        if (this.mouseActionZone) {
-            fromEvent<React.MouseEvent<HTMLDivElement>>(this.mouseActionZone, "mousedown")
+        if (this.imageEditorPreview) {
+            fromEvent<React.MouseEvent<HTMLDivElement>>(this.imageEditorPreview, "mouseenter")
+                .subscribe(() => {
+                    if (!this.props.isDisabled) {
+                        this.mode = EditorMode.editing;
+                    }
+                });
+
+            fromEvent<React.MouseEvent<HTMLDivElement>>(this.imageEditorPreview, "mousedown")
                 .subscribe(event => {
                     if (event.button !== 2
                         && !this.mouseIsDown
@@ -97,7 +105,7 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                     }
                 });
 
-            fromEvent<React.MouseEvent<HTMLDivElement>>(this.mouseActionZone, "mousemove")
+            fromEvent<React.MouseEvent<HTMLDivElement>>(this.imageEditorPreview, "mousemove")
                 .pipe(throttleTime(10))
                 .subscribe(event => {
                     if (this.mouseIsDown
@@ -105,12 +113,9 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                         && this.state.currentEditor.updateActionParams(event)) {
                         this.update();
                     }
-                    if (!this.props.isDisabled) {
-                        this.mode = EditorMode.editing;
-                    }
                 });
 
-            fromEvent<React.MouseEvent<HTMLDivElement>>(this.mouseActionZone, "mouseup")
+            fromEvent<React.MouseEvent<HTMLDivElement>>(this.imageEditorPreview, "mouseup")
                 .subscribe(event => {
                     if (event.button !== 2
                         && this.mouseIsDown
@@ -121,14 +126,14 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                     }
                 });
 
-            fromEvent<React.MouseEvent<HTMLDivElement>>(this.mouseActionZone, "mouseleave")
+            fromEvent<React.MouseEvent<HTMLDivElement>>(this.imageEditorPreview, "mouseleave")
                 .subscribe(event => {
                     if (this.mouseIsDown
                         && this.state.currentEditor
                         && this.state.currentEditor.updateTransform(event)) {
                         this.mouseIsDown = false;
-                        this.update();
                     }
+
                     this.mode = this.props.isPreview
                         ? EditorMode.preview
                         : EditorMode.noPreview;
@@ -155,21 +160,21 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
             >
                 <div
                     className="imageEditorPreview"
-                    ref={e => this.mouseActionZone = e}
+                    ref={e => this.imageEditorPreview = e}
                 >
                     <div className="imageWrapper">
                         <span className="imageMask">
-                            <If shouldRender={this.isEditing()}>
+                            <If shouldRender={!this.isPreview() && !this.props.isDisabled}>
                                 {currentEditor ? currentEditor.getImageOverlay() : null}
                             </If>
-                            <If shouldRender={!(this.state.currentEditor instanceof ResizeControls)}>
+                            <If shouldRender={!(currentEditor instanceof ResizeControls)}>
                                 <img
                                     className="imageEditorImage"
                                     hidden={!this.isEditing()}
                                     src={this.props.editedImage.buildEditingUrl().getUrl()}
                                 />
                             </If>
-                            <If shouldRender={this.state.currentEditor instanceof ResizeControls}>
+                            <If shouldRender={currentEditor instanceof ResizeControls}>
                                 <img
                                     className="imageEditorImage"
                                     hidden={!this.isEditing()}
@@ -198,8 +203,8 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                     <div
                         className="editorControls"
                         onClick={() => {
-                            if (currentEditor) {
-                                currentEditor.onClickSidebar();
+                            if (this.backgroundEditor) {
+                                this.backgroundEditor.onClickSidebar();
                             }
                         }}
                     >
@@ -226,8 +231,7 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                         </If>
                         <If shouldRender={this.props.editedImage.canBeTransparent()}>
                             <BackgroundControls
-                                isCurrentEditor={this.editorIsCurrent}
-                                setCurrentEditor={this.setCurrentEditor}
+                                ref={e => this.backgroundEditor = e}
                                 transform={transforms.background}
                                 setTransform={this.update}
                                 isEditable={false}
@@ -237,8 +241,6 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                             />
                         </If>
                         <FormatControls
-                            isCurrentEditor={this.editorIsCurrent}
-                            setCurrentEditor={() => null}
                             transform={transforms.format}
                             setTransform={this.update}
                             isEditable={false}

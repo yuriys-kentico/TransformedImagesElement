@@ -48,6 +48,7 @@ export class BackgroundControls extends BaseControls<IBackgroundControlsProps, I
                         value={background.color || this.emptyColor}
                         tooltip="Canvas color"
                         isLabelFirst={true}
+                        disableAlpha={this.props.disableAlpha}
                         setValue={value => {
                             this.setTransform({ color: value })
                         }}

@@ -4,9 +4,9 @@ import { ResizeType, IResizeTransform } from "../../../types/transformedImage/Tr
 import { FitActions } from "../../../types/editor/resizeActions/FitActions";
 import { ScaleActions } from "../../../types/editor/resizeActions/ScaleActions";
 
-import { BaseControls, IBaseControlsProps, EditAction, RectProps, RectPropsPercent } from "./BaseControls";
+import { BaseControls, IBaseControlsProps, EditAction, RectProps } from "./BaseControls";
 import { NumberInput, NumberInputType } from "../inputs/NumberInput";
-import { If } from "../../If";
+import { SVGOverlay } from "./SVGOverlay";
 
 export interface IResizeControlsProps extends IBaseControlsProps<IResizeTransform> {
 }
@@ -72,132 +72,106 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
 
         rectProps = this.ensureRectWithinImage(rectProps);
 
-        const rectPropsPercent: RectPropsPercent = {
-            x: `${rectProps.x * 100}%`,
-            y: `${rectProps.y * 100}%`,
-            width: `${rectProps.width * 100}%`,
-            height: `${rectProps.height * 100}%`
+        if (rectProps.height === 0 && rectProps.width === 0) {
+            rectProps = this.noRectProps;
         }
 
         this.currentRectProps = rectProps;
 
         return (
-            <svg>
-                <defs>
-                    <mask id="boxMask">
-                        <rect
-                            key={Math.random()}
-                            {...this.fullRectProps}
-                            fill="white"
-                        />
-                        <rect
-                            key={Math.random()}
-                            {...rectPropsPercent}
-                        />
-                    </mask>
-                </defs>
-                <rect
-                    id="imageMaskRect"
-                    width="100%"
-                    height="100%"
-                    mask="url(#boxMask)"
-                    className="outsideRect"
-                />
-                <rect
-                    {...rectPropsPercent}
-                    className="selectRect"
-                />
-                <If shouldRender={this.actionParams.action !== EditAction.selecting
-                    && rectProps.width > 0 && rectProps.height > 0}>
-                    {this.getGrabCirclesGroup(rectProps)}
-                </If>
-            </svg>
+            <SVGOverlay
+                rectProps={rectProps}
+                canDrag={false}
+                isSelecting={this.actionParams.action === EditAction.selecting}
+            />
         );
     }
 
     renderInputs(resize: IResizeTransform): React.ReactNode {
         const { type, scale, fit } = resize;
 
-        switch (type) {
-            case ResizeType.scale:
-                return (
-                    <div className="fields" key={ResizeType.scale}>
-                        <NumberInput
-                            type={this.defaultNumberType}
-                            allowedTypes={this.allowedNumberTypes}
-                            value={this.getZeroOrNull(scale.wFloat)}
-                            max={this.props.imageWidth}
-                            tooltip="Width"
-                            setValue={value => {
-                                resize.scale.wFloat = value;
-                                this.setTransform({ scale: resize.scale });
-                                this.forceUpdate();
-                            }}
-                        />
-                        <NumberInput
-                            type={this.defaultNumberType}
-                            allowedTypes={this.allowedNumberTypes}
-                            value={this.getZeroOrNull(scale.hFloat)}
-                            max={this.props.imageHeight}
-                            tooltip="Height"
-                            setValue={value => {
-                                resize.scale.hFloat = value;
-                                this.setTransform({ scale: resize.scale })
-                            }}
-                        />
-                        <NumberInput
-                            type={NumberInputType.float}
-                            allowedTypes={[NumberInputType.float]}
-                            value={this.getZeroOrNull(resize.devicePixelRatio)}
-                            max={5}
-                            min={0}
-                            tooltip="Device Pixel Ratio"
-                            disabled={resize.scale.hFloat === 0 && resize.scale.wFloat === 0}
-                            setValue={value => {
-                                this.setTransform({ devicePixelRatio: value })
-                            }}
-                        />
-                    </div>
-                );
-            case ResizeType.fit:
-                return (
-                    <div className="fields" key={ResizeType.fit}>
-                        <NumberInput
-                            type={this.defaultNumberType}
-                            allowedTypes={this.allowedNumberTypes}
-                            value={this.getZeroOrNull(fit.wFloat)}
-                            max={this.props.imageWidth}
-                            tooltip="Width"
-                            setValue={value => {
-                                resize.fit.wFloat = value;
-                                this.setTransform({ fit: resize.fit })
-                            }}
-                        />
-                        <NumberInput
-                            type={this.defaultNumberType}
-                            allowedTypes={this.allowedNumberTypes}
-                            value={this.getZeroOrNull(fit.hFloat)}
-                            max={this.props.imageHeight}
-                            tooltip="Height"
-                            setValue={value => {
-                                resize.fit.hFloat = value;
-                                this.setTransform({ fit: resize.fit })
-                            }}
-                        />
-                        <NumberInput
-                            type={NumberInputType.float}
-                            allowedTypes={[NumberInputType.float]}
-                            value={this.getZeroOrNull(resize.devicePixelRatio)}
-                            max={5}
-                            min={0}
-                            tooltip="Device Pixel Ratio"
-                            disabled={resize.fit.hFloat === 0 && resize.fit.wFloat === 0}
-                            setValue={value => {
-                                this.setTransform({ devicePixelRatio: value })
-                            }}
-                        />
-                    </div>
-                );
+        if (this.props.imageHeight && this.props.imageWidth) {
+            switch (type) {
+                case ResizeType.scale:
+                    return (
+                        <div className="fields" key={ResizeType.scale}>
+                            <NumberInput
+                                type={this.defaultNumberType}
+                                allowedTypes={this.allowedNumberTypes}
+                                value={this.getZeroOrNull(scale.wFloat)}
+                                max={this.props.imageWidth}
+                                tooltip="Width"
+                                setValue={value => {
+                                    resize.scale.wFloat = value;
+                                    this.setTransform({ scale: resize.scale });
+                                    this.forceUpdate();
+                                }}
+                            />
+                            <NumberInput
+                                type={this.defaultNumberType}
+                                allowedTypes={this.allowedNumberTypes}
+                                value={this.getZeroOrNull(scale.hFloat)}
+                                max={this.props.imageHeight}
+                                tooltip="Height"
+                                setValue={value => {
+                                    resize.scale.hFloat = value;
+                                    this.setTransform({ scale: resize.scale })
+                                }}
+                            />
+                            <NumberInput
+                                type={NumberInputType.float}
+                                allowedTypes={[NumberInputType.float]}
+                                value={this.getZeroOrNull(resize.devicePixelRatio)}
+                                max={5}
+                                min={0}
+                                tooltip="Device Pixel Ratio"
+                                disabled={resize.scale.hFloat === 0 && resize.scale.wFloat === 0}
+                                setValue={value => {
+                                    this.setTransform({ devicePixelRatio: value })
+                                }}
+                            />
+                        </div>
+                    );
+                case ResizeType.fit:
+                    return (
+                        <div className="fields" key={ResizeType.fit}>
+                            <NumberInput
+                                type={this.defaultNumberType}
+                                allowedTypes={this.allowedNumberTypes}
+                                value={this.getZeroOrNull(fit.wFloat)}
+                                max={this.props.imageWidth}
+                                tooltip="Width"
+                                setValue={value => {
+                                    resize.fit.wFloat = value;
+                                    this.setTransform({ fit: resize.fit })
+                                }}
+                            />
+                            <NumberInput
+                                type={this.defaultNumberType}
+                                allowedTypes={this.allowedNumberTypes}
+                                value={this.getZeroOrNull(fit.hFloat)}
+                                max={this.props.imageHeight}
+                                tooltip="Height"
+                                setValue={value => {
+                                    resize.fit.hFloat = value;
+                                    this.setTransform({ fit: resize.fit })
+                                }}
+                            />
+                            <NumberInput
+                                type={NumberInputType.float}
+                                allowedTypes={[NumberInputType.float]}
+                                value={this.getZeroOrNull(resize.devicePixelRatio)}
+                                max={5}
+                                min={0}
+                                tooltip="Device Pixel Ratio"
+                                disabled={resize.fit.hFloat === 0 && resize.fit.wFloat === 0}
+                                setValue={value => {
+                                    this.setTransform({ devicePixelRatio: value })
+                                }}
+                            />
+                        </div>
+                    );
+            }
         }
     }
 

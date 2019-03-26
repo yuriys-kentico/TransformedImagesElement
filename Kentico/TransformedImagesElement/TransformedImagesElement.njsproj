@@ -46,6 +46,7 @@
     <Content Include="tsconfig.json" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <TypeScriptCompile Include="src\components\editor\controls\SVGOverlay.tsx" />
     <TypeScriptCompile Include="src\components\editor\controls\ResizeControls.tsx" />
     <TypeScriptCompile Include="src\components\editor\controls\FormatControls.tsx" />
     <TypeScriptCompile Include="src\components\editor\controls\BackgroundControls.tsx" />

@@ -153,7 +153,7 @@ body {
       align-items: center;
       height: 100%;
       width: 100%;
-      justify-items: center; }
+      justify-content: space-around; }
       .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask {
         max-width: 100%;
         max-height: 100%;
@@ -181,7 +181,8 @@ body {
               cursor: move; }
           .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle {
             stroke: #2196f3;
-            fill: white; }
+            fill: white;
+            display: none; }
             .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle#top, .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle#bottom {
               cursor: ns-resize; }
             .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle#left, .imageEditor .editor .imageEditorPreview .imageWrapper .imageMask svg .grabCircle#right {
@@ -197,6 +198,8 @@ body {
           pointer-events: none;
           max-width: 100%;
           max-height: 100%; }
+    .imageEditor .editor .imageEditorPreview:hover .imageWrapper .imageMask svg .grabCircle {
+      display: inline; }
   .imageEditor .editor .editorControls {
     min-height: 100%;
     flex: 1;
