@@ -86,13 +86,13 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                 <defs>
                     <mask id="boxMask">
                         <rect
-                            width="100%"
-                            height="100%"
+                            key={Math.random()}
+                            {...this.fullRectProps}
                             fill="white"
                         />
                         <rect
+                            key={Math.random()}
                             {...rectPropsPercent}
-                            className="maskRect"
                         />
                     </mask>
                 </defs>

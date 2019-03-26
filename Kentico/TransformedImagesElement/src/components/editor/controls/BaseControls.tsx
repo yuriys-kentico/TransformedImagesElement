@@ -193,11 +193,11 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
         height: 0
     };
 
-    protected readonly fullRectProps: RectProps = {
-        x: 0,
-        y: 0,
-        width: 100,
-        height: 100
+    protected readonly fullRectProps: RectPropsPercent = {
+        x: "0%",
+        y: "0%",
+        width: "100%",
+        height: "100%"
     };
 
     protected ensureRectWithinImage(rectProps: RectProps): RectProps {
