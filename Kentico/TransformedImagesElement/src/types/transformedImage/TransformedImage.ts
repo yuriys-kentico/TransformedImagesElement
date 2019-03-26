@@ -80,6 +80,21 @@ export class TransformedImage extends AssetModels.Asset {
             || format === Format.Webp;
     }
 
+    cannotHaveAlpha(): boolean {
+        if (this.transforms.format) {
+            switch (this.transforms.format.format) {
+                case Format.Gif:
+                    return true;
+            }
+        }
+
+        const nonAlphaImageTypes = [
+            "image/gif"
+        ];
+
+        return nonAlphaImageTypes.indexOf(this.type) > -1;
+    }
+
     canBeTransparent(): boolean {
         if (this.transforms.format) {
             switch (this.transforms.format.format) {

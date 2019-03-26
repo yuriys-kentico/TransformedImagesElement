@@ -8,22 +8,23 @@ import ColorPicker from "../inputs/ColorPicker";
 import { ColorInput, ColorInputType } from "../inputs/ColorInput";
 
 export interface IBackgroundControlsProps extends IBaseControlsProps<IBackgroundTransform> {
+    disableAlpha: boolean;
 }
 
 export interface IBackgroundControlsState {
-    pickerOpen: boolean;
+    isPickerOpen: boolean;
 }
 
 export class BackgroundControls extends BaseControls<IBackgroundControlsProps, IBackgroundTransform, IBackgroundControlsState> {
     private emptyColor: Color = new Color({ r: 0, g: 0, b: 0 });
 
     state: IBackgroundControlsState = {
-        pickerOpen: false
+        isPickerOpen: false
     }
 
     onClickSidebar(): void {
-        if (this.state.pickerOpen) {
-            this.setState({ pickerOpen: false });
+        if (this.state.isPickerOpen) {
+            this.setState({ isPickerOpen: false });
         }
     }
 
@@ -52,10 +53,11 @@ export class BackgroundControls extends BaseControls<IBackgroundControlsProps, I
                         }}
                     />
                     <ColorPicker
-                        isPickerOpen={this.state.pickerOpen}
+                        isPickerOpen={this.state.isPickerOpen}
+                        disableAlpha={this.props.disableAlpha}
                         togglePicker={() => this.setState(state => {
                             return {
-                                pickerOpen: !state.pickerOpen
+                                isPickerOpen: !state.isPickerOpen
                             }
                         })}
                         value={background.color || this.emptyColor}

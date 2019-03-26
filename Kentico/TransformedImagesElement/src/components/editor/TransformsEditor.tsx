@@ -231,6 +231,7 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                                 transform={transforms.background}
                                 setTransform={this.update}
                                 isEditable={false}
+                                disableAlpha={this.props.editedImage.cannotHaveAlpha()}
                                 imageWidth={imageWidth}
                                 imageHeight={imageHeight}
                             />

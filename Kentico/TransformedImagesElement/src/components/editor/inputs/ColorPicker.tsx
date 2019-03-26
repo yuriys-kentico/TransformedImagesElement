@@ -14,6 +14,7 @@ export interface IColorInputProps {
 
 export interface IColorPickerProps extends IColorInputProps {
     isPickerOpen: boolean;
+    disableAlpha: boolean;
     togglePicker(): void;
 }
 
@@ -33,6 +34,7 @@ class ColorPicker extends React.Component<IColorPickerProps> {
                                 ? this.props.value.toRgb()
                                 : this.props.value.toPickerFormat()}
                             onChange={this.props.setValue}
+                            disableAlpha={this.props.disableAlpha}
                             presetColors={OPTIONAL_CONFIG.colorPickerDefaultColors}
                         />
                     </div>
