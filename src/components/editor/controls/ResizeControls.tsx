@@ -1,14 +1,16 @@
 ﻿import * as React from "react";
 
-import { ResizeType, IResizeTransform } from "../../../types/transformedImage/Transforms";
+import { ResizeType, IResizeTransform, ICropTransform, CropType } from "../../../types/transformedImage/Transforms";
 import { FitActions } from "../../../types/editor/resizeActions/FitActions";
 import { ScaleActions } from "../../../types/editor/resizeActions/ScaleActions";
 
 import { BaseControls, IBaseControlsProps, EditAction, RectProps } from "./BaseControls";
 import { NumberInput, NumberInputType } from "../inputs/NumberInput";
 import { SVGOverlay } from "./SVGOverlay";
+import { NumberUtils } from "../../../types/NumberUtils";
 
 export interface IResizeControlsProps extends IBaseControlsProps<IResizeTransform> {
+    cropTransform: ICropTransform;
 }
 
 export interface IResizeControlsState {
@@ -87,6 +89,50 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
         );
     }
 
+    getImageHeight(): number {
+        const { imageHeight, cropTransform } = this.props;
+
+        if (imageHeight) {
+            switch (cropTransform.type) {
+                case CropType.box:
+                    return NumberUtils.toRounded(cropTransform.box.hFloat * imageHeight);
+
+                case CropType.zoom:
+                    return NumberUtils.toRounded(cropTransform.zoom.zFloat * imageHeight);
+
+                case CropType.frame:
+                    return NumberUtils.toRounded(cropTransform.frame.hFloat * imageHeight);
+
+                default:
+                    return imageHeight;
+            }
+        }
+
+        return 0;
+    }
+
+    getImageWidth(): number {
+        const { imageWidth, cropTransform } = this.props;
+
+        if (imageWidth) {
+            switch (cropTransform.type) {
+                case CropType.box:
+                    return NumberUtils.toRounded(cropTransform.box.wFloat * imageWidth);
+
+                case CropType.zoom:
+                    return NumberUtils.toRounded(cropTransform.zoom.zFloat * imageWidth);
+
+                case CropType.frame:
+                    return NumberUtils.toRounded(cropTransform.frame.wFloat * imageWidth);
+
+                default:
+                    return imageWidth;
+            }
+        }
+
+        return 0;
+    }
+
     renderInputs(resize: IResizeTransform): React.ReactNode {
         const { type, scale, fit } = resize;
 
@@ -99,7 +145,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                                 type={this.defaultNumberType}
                                 allowedTypes={this.allowedNumberTypes}
                                 value={this.getZeroOrNull(scale.wFloat)}
-                                max={this.props.imageWidth}
+                                max={this.getImageWidth()}
                                 tooltip="Width"
                                 setValue={value => {
                                     resize.scale.wFloat = value;
@@ -111,7 +157,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                                 type={this.defaultNumberType}
                                 allowedTypes={this.allowedNumberTypes}
                                 value={this.getZeroOrNull(scale.hFloat)}
-                                max={this.props.imageHeight}
+                                max={this.getImageHeight()}
                                 tooltip="Height"
                                 setValue={value => {
                                     resize.scale.hFloat = value;
@@ -139,7 +185,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                                 type={this.defaultNumberType}
                                 allowedTypes={this.allowedNumberTypes}
                                 value={this.getZeroOrNull(fit.wFloat)}
-                                max={this.props.imageWidth}
+                                max={this.getImageWidth()}
                                 tooltip="Width"
                                 setValue={value => {
                                     resize.fit.wFloat = value;
@@ -150,7 +196,7 @@ export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTr
                                 type={this.defaultNumberType}
                                 allowedTypes={this.allowedNumberTypes}
                                 value={this.getZeroOrNull(fit.hFloat)}
-                                max={this.props.imageHeight}
+                                max={this.getImageHeight()}
                                 tooltip="Height"
                                 setValue={value => {
                                     resize.fit.hFloat = value;

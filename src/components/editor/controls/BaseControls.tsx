@@ -105,7 +105,7 @@ export abstract class BaseControls<IProps extends IBaseControlsProps<TTransform>
         if (targetElement instanceof SVGElement) {
             const svgParent = (targetElement as SVGElement).ownerSVGElement;
 
-            return svgParent ? svgParent.parentElement : null;
+            return svgParent ? svgParent.parentElement : targetElement.parentElement;
         } else {
             return targetElement.querySelector(".imageMask");
         }

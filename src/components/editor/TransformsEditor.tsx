@@ -225,6 +225,7 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
                                 transform={transforms.resize}
                                 setTransform={this.update}
                                 isEditable={true}
+                                cropTransform={transforms.crop}
                                 imageWidth={imageWidth}
                                 imageHeight={imageHeight}
                             />
