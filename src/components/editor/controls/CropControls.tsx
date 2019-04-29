@@ -16,7 +16,7 @@ export interface ICropControlsState {
 }
 
 export class CropControls extends BaseControls<ICropControlsProps, ICropTransform, ICropControlsState> {
-    onClickSidebar(): void {
+    onClickSidebar() {
     }
 
     updateTransform = () => {

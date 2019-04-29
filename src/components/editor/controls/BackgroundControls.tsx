@@ -22,7 +22,7 @@ export class BackgroundControls extends BaseControls<IBackgroundControlsProps, I
         isPickerOpen: false
     }
 
-    onClickSidebar(): void {
+    onClickSidebar() {
         if (this.state.isPickerOpen) {
             this.setState({ isPickerOpen: false });
         }

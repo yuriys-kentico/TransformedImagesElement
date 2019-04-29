@@ -14,7 +14,7 @@ export interface IFormatControlsProps extends IBaseControlsProps<IFormatTransfor
 }
 
 export class FormatControls extends BaseControls<IFormatControlsProps, IFormatTransform, IFormatTransform> {
-    onClickSidebar(): void {
+    onClickSidebar() {
     }
 
     updateTransform = () => false;

@@ -28,19 +28,16 @@ export class EditorButtons extends React.PureComponent<IEditorButtonsProps> {
                     onClick={() => this.props.onClickPreview()}
                     label="Preview"
                 />
-                {
-                    // Only possible when 'allow-popups' permission is set on sandboxed parent frame.
-                    /* <a
-                        className="btn btn--secondary"
-                        href={this.props.editedImageUrl}
-                        title="Open image in new tab"
-                        target="_blank"
-                        >
-                            Open image in new tab
-                            <i className="icon-arrow-right-top-square btn__endicon" aria-hidden="true" />
-                        </a>*/
-                }
                 <span>
+                    <a
+                    className="btn btn--secondary"
+                    href={this.props.editedImageUrl}
+                    title="Open image in new tab"
+                    target="_blank"
+                    >
+                        Open in new tab
+                        <i className="icon-arrow-right-top-square btn__endicon" aria-hidden="true" />
+                    </a>
                     <button
                         className="btn btn--destructive"
                         onClick={() => this.props.onClickCancel()}

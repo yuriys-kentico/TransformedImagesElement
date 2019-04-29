@@ -26,7 +26,7 @@ export class ImageListingTile extends React.PureComponent<IimageListingProps> {
         return this.props.isSelected;
     }
 
-    onSelect(): void {
+    onSelect() {
         if (this.props.onSelect) {
             return this.props.onSelect(this.props.image);
         }

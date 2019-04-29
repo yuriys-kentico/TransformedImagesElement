@@ -1,5 +1,5 @@
 import { ICustomElement } from "./types/customElement/ICustomElement";
-import { initElementFromDelivery, initInvalidUsage } from "./components/Initialize";
+import { initElement, initInvalidUsage } from "./components/Initialize";
 
 require('./styles/style.scss');
 
@@ -9,5 +9,5 @@ declare const CustomElement: ICustomElement;
 if (window.self === window.top) {
     initInvalidUsage();
 } else {
-    CustomElement.init(initElementFromDelivery);
+    CustomElement.init(initElement);
 }

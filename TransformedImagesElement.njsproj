@@ -26,7 +26,7 @@
     <NodejsPort>1337</NodejsPort>
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
     <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
-    <TypeScriptToolsVersion>3.1</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>3.3.3</TypeScriptToolsVersion>
     <EnableTypeScript>true</EnableTypeScript>
     <StartWebBrowser>true</StartWebBrowser>
   </PropertyGroup>
@@ -37,9 +37,6 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="build\element.html" />
-    <Content Include="build\elementDev.html" />
-    <Content Include="build\style.css" />
     <Content Include="src\styles\style.scss" />
     <Content Include="src\templates\index.html" />
     <Content Include="src\types\editor\cropActions\BoxActions.ts" />
@@ -70,6 +67,7 @@
     <TypeScriptCompile Include="src\types\editor\cropActions\ZoomActions.ts" />
     <TypeScriptCompile Include="src\types\editor\resizeActions\ScaleActions.ts" />
     <TypeScriptCompile Include="src\types\editor\resizeActions\FitActions.ts" />
+    <TypeScriptCompile Include="src\types\IListAssetsService.ts" />
     <TypeScriptCompile Include="src\types\NumberUtils.ts" />
     <TypeScriptCompile Include="src\types\react-html-id.d.ts" />
     <TypeScriptCompile Include="src\types\transformedImage\Color.ts" />
@@ -108,7 +106,6 @@
     <Folder Include="src\types\transformedImage\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="build\element.js" />
     <Compile Include="webpack.config.js" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->

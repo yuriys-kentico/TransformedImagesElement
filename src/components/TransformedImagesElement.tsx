@@ -74,7 +74,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         )
     }
 
-    loadMoreAssets(): void {
+    loadMoreAssets() {
         if (this.state.continuationToken) {
             const projectId = this.props.context.projectId;
 

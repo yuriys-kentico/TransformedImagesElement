@@ -78,7 +78,7 @@ export class TransformsEditor extends React.Component<IImageEditorProps, IImageE
         return this.mode === EditorMode.noPreview;
     }
 
-    update = (): void => {
+    update = () => {
         this.props.updateUrl(this.props.editedImage.buildPreviewUrl().getUrl());
         this.forceUpdate();
     }

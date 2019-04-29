@@ -27,7 +27,7 @@ export class InitializationError extends React.Component<IErrorProps> {
 
     render() {
         const sampleParameters: IRequiredConfig = {
-            contentManagementAPIKey: "<Key value from Project settings > API Keys > Content Management API>",
+            listAssetsEndpoint: "<Endpoint URL providing an asset listing response for the project. See https://developer.kenticocloud.com/docs/sensitive-information-for-custom-elements for more.>",
             [nameof<IElementConfig>(i => i.editorDefaultToPreview)]: "<Optional: 'true' or 'false' (without quotes) to preview transformations in the editor by default>",
             [nameof<IElementConfig>(i => i.editorDefaultCropType)]: "<Optional: One of the following default crop modes: 'box', 'zoom', 'frame'>",
             [nameof<IElementConfig>(i => i.editorDefaultResizeType)]: "<Optional: One of the following default resize modes: 'scale', 'fit'>",

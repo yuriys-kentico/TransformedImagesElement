@@ -17,7 +17,7 @@ export interface IResizeControlsState {
 }
 
 export class ResizeControls extends BaseControls<IResizeControlsProps, IResizeTransform, IResizeControlsState> {
-    onClickSidebar(): void {
+    onClickSidebar() {
     }
 
     updateTransform = () => {

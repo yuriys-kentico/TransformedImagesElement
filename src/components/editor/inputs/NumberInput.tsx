@@ -40,7 +40,7 @@ export class NumberInput extends BaseInput<INumberInputProps<NumberInputType, nu
 
     private typeSubject: Subject<NumberInputType> = new BehaviorSubject(this.type);
 
-    private switchType(type: NumberInputType): void {
+    private switchType(type: NumberInputType) {
         const allowedTypes = this.props.allowedTypes;
         const allowedTypesLength = allowedTypes.length;
         const currentTypeIndex = allowedTypes.indexOf(type);
