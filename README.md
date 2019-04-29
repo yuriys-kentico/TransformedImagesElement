@@ -13,23 +13,24 @@ In action:
 ## How to set it up
 
 1. Use a project on the Enterprise plan.
-2. Create or use an existing content type.
-3. Drag in **Custom element** from the tray on the right.
-4. In the element configuration, provide these values:
+1. Create or use an existing content type.
+1. Drag in **Custom element** from the tray on the right.
+1. In the element configuration, provide these values:
    - **Hosted code URL (HTTPS)**: `https://yuriys-kentico.github.io/Kentico/TransformedImagesElement/element`
    - **Parameters {JSON}**:
      ```
      {
-        "contentManagementAPIKey": <Key value from Project settings > API Keys > Content Management API>,
+        "listAssetsEndpoint": <Endpoint URL providing an asset listing response for the project>,
         "editorDefaultToPreview": <Optional: "true" or "false" (without quotes) to preview transformations in the editor by default>,
         "editorDefaultCropType": <Optional: One of the following default crop modes: "box", "zoom", "frame">,
         "editorDefaultResizeType": <Optional: One of the following default resize modes: "scale", "fit">,
         "colorPickerDefaultColors": <Optional: Array of default colors like ["#RRGGBBAA", "#4caf50", ...]>
      }
      ```
-5. Make sure to have some image assets.
-6. Create a new item using this content type.
-7. Start transforming some images!
+   * To set up `listAssetsEndpoint` above, please follow [Working with sensitive data in custom elements](https://developer.kenticocloud.com/docs/sensitive-information-for-custom-elements).
+1. Make sure to have some image assets.
+1. Create a new item using this content type.
+1. Start transforming some images!
 
 ## Want to see the source?
 Here it is: [TransformedImagesElement](https://github.com/yuriys-kentico/TransformedImagesElement)
