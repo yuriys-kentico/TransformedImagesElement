@@ -12,7 +12,7 @@ In action:
 
 ## How to set it up
 
-1. Use a project on the Enterprise plan.
+1. Use a project on the Professional plan or higher.
 1. Create or use an existing content type.
 1. Drag in **Custom element** from the tray on the right.
 1. In the element configuration, provide these values:
@@ -27,7 +27,11 @@ In action:
         "colorPickerDefaultColors": <Optional: Array of default colors like ["#RRGGBBAA", "#4caf50", ...]>
      }
      ```
-   * To set up `listAssetsEndpoint` above, please follow [Working with sensitive data in custom elements](https://developer.kenticocloud.com/docs/sensitive-information-for-custom-elements).
+   * To set up `listAssetsEndpoint` above, please follow [Working with sensitive data in custom elements](https://docs.kenticocloud.com/tutorials/develop-apps/integrate/working-with-sensitive-data-in-custom-elements).
+     - In **Step 2: Configuring your Lambda function**, use the following keys and values in the **Environment variables** section:
+       - `BEARER_TOKEN`: `<Content Management API key from your project (Project settings > API keys)>`
+       - `HOST`: `manage.kenticocloud.com`
+       - `PATH`: `/v2/projects/<Project ID from your project (Project settings > API keys)>/assets`
 1. Make sure to have some image assets.
 1. Create a new item using this content type.
 1. Start transforming some images!
