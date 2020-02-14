@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const tsNameof = require("ts-nameof");
+const fs = require("fs");
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -13,7 +14,7 @@ const getDevSuffix = isProduction ? "" : "Dev";
 const htmlTemplatePath = "./src/templates/index.html";
 const jsFileName = `element${getDevSuffix}.js`;
 const cssFileName = `style${getDevSuffix}.css`;
-const htmlFileName = `element${getDevSuffix}.html`;
+const htmlFileName = `index.html`;
 
 module.exports = {
     mode: process.env.NODE_ENV,
@@ -26,6 +27,12 @@ module.exports = {
     resolve: {
         extensions: [".ts", ".tsx", ".js", ".json"]
     },
+    devServer: {
+        https: {
+          key: fs.readFileSync("./server.key"),
+          cert: fs.readFileSync("./server.cert")
+        }
+      },
     module: {
         rules: [
             {
