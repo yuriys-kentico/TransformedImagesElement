@@ -6,19 +6,12 @@ const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const tsNameof = require("ts-nameof");
 const fs = require("fs");
 
-const isProduction = process.env.NODE_ENV === "production";
-
-const makeSourceMaps = isProduction ? false : "cheap-module-eval-source-map";
-const getDevSuffix = isProduction ? "" : "Dev";
-
 const htmlTemplatePath = "./src/templates/index.html";
-const jsFileName = `element${getDevSuffix}.js`;
-const cssFileName = `style${getDevSuffix}.css`;
+const jsFileName = `element.js`;
+const cssFileName = `style.css`;
 const htmlFileName = `index.html`;
 
 module.exports = {
-    mode: process.env.NODE_ENV,
-    devtool: makeSourceMaps,
     entry: "./src/index",
     output: {
         path: path.resolve(__dirname, "build"),
@@ -67,7 +60,6 @@ module.exports = {
             inject: "body"
         })
     ],
-    watch: !isProduction,
     watchOptions: {
         ignored: /node_modules/
     }
