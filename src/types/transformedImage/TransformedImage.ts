@@ -1,77 +1,60 @@
-import { AssetModels } from "kentico-cloud-content-management";
 import { ImageUrlBuilder } from "kentico-cloud-delivery/_commonjs/images/image-url-builder";
-import { FieldModels } from "kentico-cloud-delivery/_commonjs/fields/field-models";
+
 import { ImageFitModeEnum, ImageCompressionEnum } from "kentico-cloud-delivery/_commonjs/images/image.models";
 
-import { TransformedImageModel } from "./TransformedImageModel";
-import { ITransforms, CropType, Transforms, Format, ResizeType } from "./Transforms";
+import { ITransforms, CropType, Format, ResizeType, Transforms } from "./Transforms";
 import { NumberUtils } from "../NumberUtils";
 import { OPTIONAL_CONFIG } from "../customElement/IElementConfig";
 import { Color } from "./Color";
+import { IAssetDetails, AssetDescription } from "../customElement/ICustomElement";
 
-export class TransformedImage extends AssetModels.Asset {
-    private imageEndpoint: string = "https://assets-us-01.kc-usercontent.com";
-    private baseImageUrl: string;
-
+export class TransformedImage implements IAssetDetails  {
+    id: string;
+    descriptions: AssetDescription[];
+    fileName: string;
+    name: string;
+    size: number;
+    thumbnailUrl: string;
+    title: string;
+    type: string;
+    url: string;
+    transformedUrl: string;
     transforms: ITransforms;
     imageWidth: number;
     imageHeight: number;
 
-    constructor(
-        projectId: string,
-        image: AssetModels.Asset,
-        model: TransformedImageModel | null = null
-    ) {
-        super(image);
-
-        this.imageWidth = image.imageWidth ? image.imageWidth : 0;
-        this.imageHeight = image.imageHeight ? image.imageHeight : 0;
-
-        this.baseImageUrl = `${this.imageEndpoint}/${projectId}/${image.fileReference.id}/${image.fileName}`;
-
-        if (model && model.transforms) {
-            try {
-                this.transforms = new Transforms(model.transforms);
-                return;
-            } catch (error) {
-                console.log(error);
-            }
+    constructor(assetReferenceDetails: IAssetDetails) {
+        if(assetReferenceDetails) {
+            Object.assign(this,assetReferenceDetails);
         }
-        this.transforms = {
-            crop: {
-                type: OPTIONAL_CONFIG.editorDefaultCropType,
-                box: { xFloat: -1, yFloat: -1, wFloat: -1, hFloat: -1 },
-                zoom: { xFloat: -1, yFloat: -1, zFloat: -1 },
-                frame: { wFloat: -1, hFloat: -1 }
-            },
-            resize: {
-                type: OPTIONAL_CONFIG.editorDefaultResizeType,
-                scale: { wFloat: -1, hFloat: -1 },
-                fit: { wFloat: -1, hFloat: -1 },
-                devicePixelRatio: -1
-            },
-            background: {
-                color: new Color({ r: 0, g: 0, b: 0 })
-            },
-            format: {
-                format: Format.Original,
-                autoWebp: false,
-                lossless: null,
-                quality: 0
-            }
-        };
-    }
 
-    static assetIsImage(asset: AssetModels.Asset): boolean {
-        const allowedImageTypes = [
-            "image/jpeg",
-            "image/png",
-            "image/gif",
-            "image/webp"
-        ];
-
-        return asset.imageWidth !== null
-            && allowedImageTypes.indexOf(asset.type) > -1;
+        if (this.transforms) {
+            this.transforms = new Transforms(this.transforms);
+        } else {
+            this.transforms = new Transforms({
+                crop: {
+                    type: OPTIONAL_CONFIG.editorDefaultCropType,
+                    box: { xFloat: -1, yFloat: -1, wFloat: -1, hFloat: -1 },
+                    zoom: { xFloat: -1, yFloat: -1, zFloat: -1 },
+                    frame: { wFloat: -1, hFloat: -1 }
+                },
+                resize: {
+                    type: OPTIONAL_CONFIG.editorDefaultResizeType,
+                    scale: { wFloat: -1, hFloat: -1 },
+                    fit: { wFloat: -1, hFloat: -1 },
+                    devicePixelRatio: -1
+                },
+                background: {
+                    color: new Color({ r: 0, g: 0, b: 0 })
+                },
+                format: {
+                    format: Format.Original,
+                    autoWebp: false,
+                    lossless: null,
+                    quality: 0
+                }
+            });
+        }
     }
 
     static canBeLosslessFormat(format: Format): boolean {
@@ -118,7 +101,7 @@ export class TransformedImage extends AssetModels.Asset {
     }
 
     buildUrl(): ImageUrlBuilder {
-        return new ImageUrlBuilder(this.baseImageUrl);
+        return new ImageUrlBuilder(this.url);
     }
 
     buildEditingUrl(): ImageUrlBuilder {
@@ -265,15 +248,7 @@ export class TransformedImage extends AssetModels.Asset {
         return this.buildFormatUrl();
     }
 
-    getDeliveryModel(): FieldModels.AssetModel {
-        return new TransformedImageModel(
-            this.fileName,
-            this.type,
-            this.size,
-            this.descriptions[0].description,
-            this.buildPreviewUrl().getUrl(),
-            this.id,
-            this.transforms
-        );
+    getDeliveryModel() {
+        return this;
     }
 };

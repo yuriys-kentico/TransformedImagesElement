@@ -61,9 +61,9 @@ export class AssetDetails extends React.PureComponent<IAssetDetailsProps> {
                     <span className="assetDetailsTechDetail">
                         {this.getAssetFileSize(this.props.image.size)}
                     </span>
-                    <span className="assetDetailsTechDetail">
+                    {/* <span className="assetDetailsTechDetail">
                         {this.getAssetLastModified(this.props.image.lastModified)}
-                    </span>
+                    </span> */}
                 </span>
             </div>
 

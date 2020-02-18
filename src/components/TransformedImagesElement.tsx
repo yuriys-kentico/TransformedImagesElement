@@ -1,16 +1,13 @@
 ﻿import * as React from "react";
-import { AssetResponses } from "kentico-cloud-content-management";
-import { Observable } from "rxjs";
 
 import { IContext } from "../types/customElement/IContext";
-import { ICustomElement } from "../types/customElement/ICustomElement";
+import { ICustomElement, AssetFileTypes } from "../types/customElement/ICustomElement";
 import { OPTIONAL_CONFIG } from "../types/customElement/IElementConfig";
 import { TransformedImage } from "../types/transformedImage/TransformedImage";
 import { Transforms, ITransforms } from "../types/transformedImage/Transforms";
 
 import { ImageListingTile } from "./listing/ImageListingTile";
 import { ListingButtons } from "./listing/ListingButtons";
-import { SelectionButtons } from "./selection/SelectionButtons";
 import { TransformsEditor } from "./editor/TransformsEditor";
 import { EditorButtons } from "./editor/EditorButtons";
 import { If } from "./If";
@@ -21,24 +18,18 @@ declare const CustomElement: ICustomElement;
 export enum TransformedImagesElementMode {
     configuration,
     listing,
-    selection,
     editor
 }
 
 export interface IElementProps {
     context: IContext;
     initialDisabled: boolean;
-    initialRawImages: TransformedImage[];
     initialSelectedImages: TransformedImage[];
     initialMode: TransformedImagesElementMode;
-    continuationToken: string | null;
-    moreAssets: (continuationToken: string) => Observable<AssetResponses.AssetsListResponse>;
 }
 
 export interface IElementState {
     disabled: boolean;
-    rawImages: TransformedImage[];
-    continuationToken: string | null;
     selectedImages: TransformedImage[];
     previousSelectedImages: TransformedImage[];
     editedImage: TransformedImage | null;
@@ -49,14 +40,11 @@ export interface IElementState {
 }
 
 export class TransformedImagesElement extends React.Component<IElementProps, IElementState> {
-    private selectionList: HTMLDivElement | null;
     private listingList: HTMLDivElement | null;
     private editorWrapper: HTMLDivElement | null;
 
     state: IElementState = {
         disabled: this.props.initialDisabled,
-        rawImages: this.props.initialRawImages,
-        continuationToken: this.props.continuationToken,
         selectedImages: this.props.initialSelectedImages,
         previousSelectedImages: [],
         editedImage: null,
@@ -74,25 +62,6 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         )
     }
 
-    loadMoreAssets() {
-        if (this.state.continuationToken) {
-            const projectId = this.props.context.projectId;
-
-            this.props.moreAssets(this.state.continuationToken)
-                .subscribe(response =>
-                    this.setState(state => ({
-                        rawImages: [
-                            ...state.rawImages,
-                            ...response.data.items
-                                .filter(i => TransformedImage.assetIsImage(i))
-                                .map(a => new TransformedImage(projectId, a))
-                        ],
-                        continuationToken: response.data.pagination.continuationToken
-                    }))
-                );
-        }
-    }
-
     storeCurrentSelectedImages() {
         this.setState(state => ({
             previousSelectedImages: [...state.selectedImages]
@@ -105,7 +74,7 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         }))
     }
 
-    storeEditedImage(image: TransformedImage) {
+    selectForEditing(image: TransformedImage) {
         const transformsClone = Transforms.clone(image.transforms);
 
         this.setState({
@@ -120,19 +89,26 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         }
     }
 
-    selectImage(image: TransformedImage): any {
-        // Deselect image
-        if (!!this.state.selectedImages.find(i => i.equals(image))) {
-            this.setState((state) => ({
-                selectedImages: state.selectedImages.filter(i => !i.equals(image))
-            }), this.updateValue)
-        }
-        // Select image
-        else {
-            this.setState((state) => ({
-                selectedImages: [...state.selectedImages, image]
-            }))
-        }
+    selectAssets(assets: TransformedImage[]) {
+        this.setState(state=>({
+            selectedImages: [...state.selectedImages, ...assets]
+        }), this.updateValue)
+    }
+
+    removeAsset(index: number) {
+        this.setState((state=> {
+            let array = [...state.selectedImages];
+            array.splice(index,1);
+
+            return {
+                selectedImages: array,
+            }
+        }), this.updateValue)
+        // if (!!this.state.selectedImages.find(i => i === asset)) {
+        //     this.setState((state) => ({
+        //         selectedImages: state.selectedImages.filter(i => i.id !== asset.id)
+        //     }), this.updateValue)
+        // }
     }
 
     updateValue() {
@@ -150,9 +126,6 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
         switch (this.state.mode) {
             case TransformedImagesElementMode.listing:
                 renderedHeight = this.listingList ? this.listingList.scrollHeight : 0;
-                break;
-            case TransformedImagesElementMode.selection:
-                renderedHeight = this.selectionList ? this.selectionList.scrollHeight : 0;
                 break;
             case TransformedImagesElementMode.editor:
                 renderedHeight = this.editorWrapper ? this.editorWrapper.scrollHeight : 0;
@@ -185,7 +158,12 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                             <ListingButtons
                                 onClickPick={() => {
                                     this.storeCurrentSelectedImages();
-                                    this.setMode(TransformedImagesElementMode.selection)
+
+                                    CustomElement.selectAssets({ allowMultiple: true, fileType: AssetFileTypes.images }).then(assets=>{
+                                        CustomElement.getAssetDetails(assets.map(a=>a.id)).then(assets=>{
+                                            this.selectAssets(assets.map(a=>new TransformedImage(a)));
+                                        });
+                                    })
                                 }}
                             />
                         </If>
@@ -196,54 +174,21 @@ export class TransformedImagesElement extends React.Component<IElementProps, IEl
                                     key={i}
                                     showActions={!this.state.disabled}
                                     isSelected={false}
-                                    onRemove={image => {
-                                        this.selectImage(image);
+                                    onRemove={_image => {
+                                        this.removeAsset(i);
                                     }}
-                                    onSelect={image => {
-                                        this.storeEditedImage(image);
+                                    onSelect={image=>{
+                                        this.selectForEditing(image);
                                         this.setMode(TransformedImagesElementMode.editor);
                                     }}
-                                    onAddParams={image => {
-                                        this.storeEditedImage(image);
+                                    onAddParams={asset=>{
+                                        this.selectForEditing(asset);
                                         this.setMode(TransformedImagesElementMode.editor);
                                     }}
                                 />
                             )
                             )}
                         </div>
-                    </div>
-                );
-
-            case TransformedImagesElementMode.selection:
-                return (
-                    <div
-                        className="imageSelection"
-                        ref={e => this.selectionList = e}
-                    >
-                        <div className="list">
-                            {this.state.rawImages
-                                .map((a, i) => (
-                                    <ImageListingTile
-                                        image={a}
-                                        key={i}
-                                        showActions={false}
-                                        isSelected={!!this.state.selectedImages.find(i => i.equals(a))}
-                                        onSelect={image => this.selectImage(image)}
-                                        onAddParams={() => { }}
-                                        onRemove={() => { }}
-                                    />
-                                )
-                                )}
-                        </div>
-                        <SelectionButtons
-                            onClickCancel={() => {
-                                this.revertSelectedImages();
-                                this.setMode(TransformedImagesElementMode.listing)
-                            }}
-                            onClickUpdate={() => this.setMode(TransformedImagesElementMode.listing)}
-                            onClickLoadMore={() => this.loadMoreAssets()}
-                            showLoadMore={this.props.continuationToken !== null}
-                        />
                     </div>
                 );
 

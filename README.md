@@ -1,40 +1,43 @@
-﻿# Transformed Images Element
+﻿# Image Transformer Custom Element for Kentico Kontent
 
-## What this is
-This custom element functions similarly to the **Asset** element, but allows an editor to apply the Image Transformation API to any selected image.
+This is a custom element similar to the **Asset** element, but it allows you to apply the Image Transformation API to any selected image.
 
-Confused?
-- What is Kentico Cloud: [Get started with Kentico Cloud](https://docs.kenticocloud.com/tutorials/get-started-with-kentico-cloud)
-- What is a custom element: [Integrating your own content editing features](https://developer.kenticocloud.com/docs/integrating-content-editing-features)
-
-In action:
 ![ElementInAction](https://user-images.githubusercontent.com/34716163/55026851-35778180-4fda-11e9-878f-f790ed4bedb3.gif)
 
-## How to set it up
+## Setup
 
-1. Use a project on the Professional plan or higher.
-1. Create or use an existing content type.
-1. Drag in **Custom element** from the tray on the right.
-1. In the element configuration, provide these values:
-   - **Hosted code URL (HTTPS)**: `https://yuriys-kentico.github.io/Kentico/TransformedImagesElement/element`
-   - **Parameters {JSON}**:
-     ```
-     {
-        "listAssetsEndpoint": <Endpoint URL providing an asset listing response for the project>,
-        "editorDefaultToPreview": <Optional: "true" or "false" (without quotes) to preview transformations in the editor by default>,
-        "editorDefaultCropType": <Optional: One of the following default crop modes: "box", "zoom", "frame">,
-        "editorDefaultResizeType": <Optional: One of the following default resize modes: "scale", "fit">,
-        "colorPickerDefaultColors": <Optional: Array of default colors like ["#RRGGBBAA", "#4caf50", ...]>
-     }
-     ```
-   * To set up `listAssetsEndpoint` above, please follow [Working with sensitive data in custom elements](https://docs.kenticocloud.com/tutorials/develop-apps/integrate/working-with-sensitive-data-in-custom-elements).
-     - In **Step 2: Configuring your Lambda function**, use the following keys and values in the **Environment variables** section:
-       - `BEARER_TOKEN`: `<Content Management API key from your project (Project settings > API keys)>`
-       - `HOST`: `manage.kenticocloud.com`
-       - `PATH`: `/v2/projects/<Project ID from your project (Project settings > API keys)>/assets`
-1. Make sure to have some image assets.
-1. Create a new item using this content type.
-1. Start transforming some images!
+1. Deploy the code to a secure public host
+    * See [deploying section](#Deploying) for a really quick option
+1. Follow the instructions in the [Kentico Kontent documentation](https://docs.kontent.ai/tutorials/develop-apps/integrate/integrating-your-own-content-editing-features#a-3--displaying-a-custom-element-in-kentico-kontent) to add the element to a content model.
+    * The `Hosted code URL` is where you deployed to in step 1
+    * Pass the necessary parameters as directing in the [JSON Parameters configuration](#json-parameters) section of this readme.
 
-## Want to see the source?
-Here it is: [TransformedImagesElement](https://github.com/yuriys-kentico/TransformedImagesElement)
+## Deploying
+
+Netlify has made this easy. If you click the deploy button below, it will guide you through the process of deploying it to Netlify and leave you with a copy of the repository in your GitHub account as well.
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/yuriys-kentico/TransformedImagesElement)
+
+## JSON Parameters
+
+The `listAssetsEndpoint` parameter is required. All others are optional.
+
+`listAssetsEndpoint` is a string with the endpoint URL providing an asset listing response for the project.
+
+`editorDefaultToPreview` (Optional) is a boolean that indicates whether to preview transformations in the editor by default.
+
+`editorDefaultCropType` (Optional) is a string defining the default crop mode. It must be one of the  following: "box", "zoom", "frame".
+
+`editorDefaultResizeType` (Optional) is a string defining the default resize mode. It must be one of the following: "scale", "fit".
+
+`colorPickerDefaultColors` (Optional) is an array of strings representing the default colors in hex. E.g. `["#RRGGBBAA", "#4caf50"]`.
+
+```json
+{
+  "listAssetsEndpoint": "<ENDPOINT_URL>",
+  "editorDefaultToPreview": true,
+  "editorDefaultCropType": "box",
+  "editorDefaultResizeType": "scale",
+  "colorPickerDefaultColors": ["#RRGGBBAA", "#4caf50"]
+}
+```
