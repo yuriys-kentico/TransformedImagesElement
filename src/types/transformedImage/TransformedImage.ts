@@ -249,6 +249,7 @@ export class TransformedImage implements IAssetDetails  {
     }
 
     getDeliveryModel() {
+        this.transformedUrl = this.buildPreviewUrl().getUrl();
         return this;
     }
 };

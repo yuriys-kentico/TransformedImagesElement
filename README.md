@@ -34,10 +34,86 @@ The `listAssetsEndpoint` parameter is required. All others are optional.
 
 ```json
 {
-  "listAssetsEndpoint": "<ENDPOINT_URL>",
   "editorDefaultToPreview": true,
   "editorDefaultCropType": "box",
   "editorDefaultResizeType": "scale",
   "colorPickerDefaultColors": ["#RRGGBBAA", "#4caf50"]
 }
+```
+
+## Saved Value
+
+The value is saved as string representation of a serialized JSON object. The value contains an array of the selected image details. You can use the `transformedUrl` value to directly use the image with the transformations applied or you can reconstruct the transformation using the provided transform details. Some values, such as `descriptions` and `title` may be null or not present if the image didn't have those values at the time of selection. Most asset values, such as `imageHeight` and `imageWidth`, are the original asset values, not the the values after transformation.
+
+```json
+[
+  {
+    "fileName":"<asset_filename.ext>",
+    "descriptions":[{
+      "language":{
+        "id": "<language_guid>"
+        "codename": "language_codename"
+      },
+      "description": "<asset_description>"
+    }],
+    "id":"<asset_guid>",
+    "imageHeight":360,
+    "imageWidth":270,
+    "name":"<asset_name>",
+    "size":14485,
+    "thumbnailUrl":"<asset_thumbnail_url>",
+    "title":null,
+    "type":"image/jpeg",
+    "url":"<asset_base_url>",
+    "transforms":{
+      "crop":{
+        "type":"box",
+        "frame":{
+          "wFloat":-1,
+          "hFloat":-1
+        },
+        "box":{
+          "xFloat":-1,
+          "yFloat":-1,
+          "wFloat":-1,
+          "hFloat":-1
+        },
+        "zoom":{
+          "xFloat":-1,
+          "yFloat":-1,
+          "zFloat":-1
+        }
+      },
+      "resize":{
+        "type":"fit",
+        "scale":{
+          "wFloat":-1,
+          "hFloat":-1
+        },
+        "fit":{
+          "wFloat":-1,
+          "hFloat":-1
+        },
+        "devicePixelRatio":-1
+      },
+      "background":{
+        "color":{
+          "internalRgba":{
+            "a":0,
+            "r":0,
+            "g":0,
+            "b":0
+          }
+        }
+      },
+      "format":{
+        "format":"Original",
+        "autoWebp":false,
+        "lossless":null,
+        "quality":0
+      }
+    },
+    "transformedUrl":"<asset_url_with_transformations>",
+  },
+]
 ```
