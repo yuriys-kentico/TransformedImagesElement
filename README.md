@@ -6,11 +6,11 @@ This is a custom element similar to the **Asset** element, but it allows you to 
 
 ## Setup
 
-1. Deploy the code to a secure public host
-    * See [deploying section](#Deploying) for a really quick option
+1. Deploy the code to a secure public host.
+   - See the [Deploying](#Deploying) section for a really quick option.
 1. Follow the instructions in the [Kentico Kontent documentation](https://docs.kontent.ai/tutorials/develop-apps/integrate/integrating-your-own-content-editing-features#a-3--displaying-a-custom-element-in-kentico-kontent) to add the element to a content model.
-    * The `Hosted code URL` is where you deployed to in step 1
-    * Pass the necessary parameters as directing in the [JSON Parameters configuration](#json-parameters) section of this readme.
+   - The `Hosted code URL` is where you deployed to in step 1.
+   - The `Parameters {JSON}` is a JSON object containing optional defaults. See the [JSON parameters](#json-parameters) section for details.
 
 ## Deploying
 
@@ -20,100 +20,99 @@ Netlify has made this easy. If you click the deploy button below, it will guide 
 
 ## JSON Parameters
 
-The `listAssetsEndpoint` parameter is required. All others are optional.
+All parameters are optional.
 
-`listAssetsEndpoint` is a string with the endpoint URL providing an asset listing response for the project.
+`editorDefaultToPreview` is a `boolean` that indicates whether to preview transformations in the editor by default.
 
-`editorDefaultToPreview` (Optional) is a boolean that indicates whether to preview transformations in the editor by default.
+`editorDefaultCropType` is a `string` defining the default crop mode. It must be one of the following: "`box`", "`zoom`", "`frame`".
 
-`editorDefaultCropType` (Optional) is a string defining the default crop mode. It must be one of the  following: "box", "zoom", "frame".
+`editorDefaultResizeType` is a `string` defining the default resize mode. It must be one of the following: "`scale`", "`fit`".
 
-`editorDefaultResizeType` (Optional) is a string defining the default resize mode. It must be one of the following: "scale", "fit".
+`colorPickerDefaultColors` is a `string array` containing the default colors in hexadecimal format, like `["#RRGGBBAA", "#4caf50"]`.
 
-`colorPickerDefaultColors` (Optional) is an array of strings representing the default colors in hex. E.g. `["#RRGGBBAA", "#4caf50"]`.
+Example JSON parameters object:
 
 ```json
 {
   "editorDefaultToPreview": true,
   "editorDefaultCropType": "box",
-  "editorDefaultResizeType": "scale",
-  "colorPickerDefaultColors": ["#RRGGBBAA", "#4caf50"]
+  "colorPickerDefaultColors": ["#34aaffa4", "#4caf50"]
 }
 ```
 
 ## Saved Value
 
-The value is saved as string representation of a serialized JSON object. The value contains an array of the selected image details. You can use the `transformedUrl` value to directly use the image with the transformations applied or you can reconstruct the transformation using the provided transform details. Some values, such as `descriptions` and `title` may be null or not present if the image didn't have those values at the time of selection. Most asset values, such as `imageHeight` and `imageWidth`, are the original asset values, not the the values after transformation.
+The value is a serialized JSON array of objects. Each object has the same shape and contains all of the original asset information as well as information for the transformations.
+
+The `transformedUrl` property contains a URL to the image with the transformations applied. Alternatively, you can construct the transformation using the `transform` property. In that property, check whether any transform value is not `-1`.
+
+Some properties, such as `description` and `title` may be empty or `null` if the image didn't have those values when the item containing the element was saved.
+
+See the [Kentico Kontent documentation](https://docs.kontent.ai/reference/delivery-api#section/Asset-element) for a description of the properties from the original image.
+
+Example deserialized saved value with one image:
 
 ```json
 [
   {
-    "fileName":"<asset_filename.ext>",
-    "descriptions":[{
-      "language":{
-        "id": "<language_guid>"
-        "codename": "language_codename"
-      },
-      "description": "<asset_description>"
-    }],
-    "id":"<asset_guid>",
-    "imageHeight":360,
-    "imageWidth":270,
-    "name":"<asset_name>",
-    "size":14485,
-    "thumbnailUrl":"<asset_thumbnail_url>",
-    "title":null,
-    "type":"image/jpeg",
-    "url":"<asset_base_url>",
-    "transforms":{
-      "crop":{
-        "type":"box",
-        "frame":{
-          "wFloat":-1,
-          "hFloat":-1
+    "id": "<asset_guid>",
+    "description": "<asset_description>",
+    "height": 322,
+    "width": 500,
+    "name": "<asset_name>",
+    "title": null,
+    "size": 44337,
+    "type": "image/jpeg",
+    "url": "<asset_base_url>",
+    "transforms": {
+      "crop": {
+        "type": "box",
+        "frame": {
+          "wFloat": -1,
+          "hFloat": -1
         },
-        "box":{
-          "xFloat":-1,
-          "yFloat":-1,
-          "wFloat":-1,
-          "hFloat":-1
+        "box": {
+          "xFloat": 0.47,
+          "yFloat": 0.4969,
+          "wFloat": 0.132,
+          "hFloat": 0.2329
         },
-        "zoom":{
-          "xFloat":-1,
-          "yFloat":-1,
-          "zFloat":-1
+        "zoom": {
+          "xFloat": -1,
+          "yFloat": -1,
+          "zFloat": -1
         }
       },
-      "resize":{
-        "type":"fit",
-        "scale":{
-          "wFloat":-1,
-          "hFloat":-1
+      "resize": {
+        "type": "fit",
+        "scale": {
+          "wFloat": -1,
+          "hFloat": -1
         },
-        "fit":{
-          "wFloat":-1,
-          "hFloat":-1
+        "fit": {
+          "wFloat": -1,
+          "hFloat": -1
         },
-        "devicePixelRatio":-1
+        "devicePixelRatio": -1
       },
-      "background":{
-        "color":{
-          "internalRgba":{
-            "a":0,
-            "r":0,
-            "g":0,
-            "b":0
+      "background": {
+        "color": {
+          "internalRgba": {
+            "a": 0,
+            "r": 0,
+            "g": 0,
+            "b": 0
           }
         }
       },
-      "format":{
-        "format":"Original",
-        "autoWebp":false,
-        "lossless":null,
-        "quality":0
+      "format": {
+        "format": "JPG",
+        "autoWebp": false,
+        "lossless": null,
+        "quality": 50
       }
     },
-    "transformedUrl":"<asset_url_with_transformations>",
-  },
+    "transformedUrl": "<asset_base_url>?rect=235,160,66,75&fm=jpg&q=50"
+  }
 ]
 ```
