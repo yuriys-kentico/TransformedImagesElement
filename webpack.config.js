@@ -1,75 +1,69 @@
 /// <binding BeforeBuild='Run - Development' AfterBuild='Run - Production' />
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
-const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
-const tsNameof = require("ts-nameof");
-const fs = require("fs");
+const path = require('path');
+const fs = require('fs');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const htmlTemplatePath = "./src/templates/index.html";
-const jsFileName = `element.js`;
-const cssFileName = `style.css`;
-const htmlFileName = `index.html`;
+const htmlTemplatePath = './src/index.html';
+const jsFileName = 'element.js';
+const htmlFileName = 'index.html';
 
 module.exports = {
-    entry: "./src/index",
-    output: {
-        path: path.resolve(__dirname, "build"),
-        filename: jsFileName
+  entry: './src/index',
+  output: {
+    path: path.resolve(__dirname, 'build'),
+    filename: jsFileName
+  },
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js', '.json']
+  },
+  devServer: {
+    https: {
+      key: fs.readFileSync('./server.key'),
+      cert: fs.readFileSync('./server.cert')
     },
-    resolve: {
-        extensions: [".ts", ".tsx", ".js", ".json"]
-    },
-    devServer: {
-        https: {
-          key: fs.readFileSync("./server.key"),
-          cert: fs.readFileSync("./server.cert")
-        }
+    historyApiFallback: true
+  },
+  module: {
+    rules: [
+      {
+        enforce: 'pre',
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        use: ['eslint-loader']
       },
-    module: {
-        rules: [
-            {
-                test: /\.scss$/,
-                loader: 'style-loader!css-loader!sass-loader'
-            },
-            {
-                test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-                use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            name: '[name].[ext]',
-                            outputPath: 'fonts/',
-                            esModule: false,
-                        }
-                    }
-                ]
-            },
-            {
-                test: /\.tsx?$/,
-                use: [
-                    {
-                        loader: "awesome-typescript-loader",
-                        options: {
-                            getCustomTransformers: () => ({ before: [tsNameof] })
-                        }
-                    }
-                ]
+      {
+        test: /\.scss$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
+      },
+      {
+        test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]',
+              outputPath: 'fonts/',
+              esModule: false
             }
+          }
         ]
-    },
-    plugins: [
-        new ExtractTextPlugin(cssFileName),
-        new OptimizeCssAssetsPlugin({
-            assetNameRegExp: /^((?!Dev).)*\.css/
-        }),
-        new HtmlWebpackPlugin({
-            template: htmlTemplatePath,
-            filename: htmlFileName,
-            inject: "body"
-        })
-    ],
-    watchOptions: {
-        ignored: /node_modules/
-    }
+      },
+      {
+        test: /\.tsx?$/,
+        use: ['awesome-typescript-loader']
+      }
+    ]
+  },
+  plugins: [
+    new MiniCssExtractPlugin(),
+    new HtmlWebpackPlugin({
+      template: htmlTemplatePath,
+      filename: htmlFileName,
+      inject: 'body'
+    })
+  ],
+  watchOptions: {
+    ignored: /node_modules/
+  }
 };
