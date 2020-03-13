@@ -104,7 +104,7 @@ body {
             &.imageListingActionRemove {
               i:hover {
                 color: #fff;
-                background-color: #ef5350;
+                background-color: #f02222;
               }
             }
 
@@ -233,16 +233,6 @@ body {
           user-select: none;
           -moz-user-select: none;
           position: relative;
-
-          .notSupported {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            background: rgba(255, 255, 255, 0.667);
-            transform: translate(-50%, -50%);
-            text-align: center;
-            padding: 1em;
-          }
 
           svg {
             position: absolute;
