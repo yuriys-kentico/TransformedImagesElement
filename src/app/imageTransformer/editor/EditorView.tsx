@@ -1,4 +1,13 @@
-﻿import React, { FC, MouseEvent, useCallback, useEffect, useReducer, useRef, useState } from 'react';
+﻿import React, {
+    FC,
+    MouseEvent,
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useReducer,
+    useRef,
+    useState
+} from 'react';
 import { fromEvent } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
 
@@ -19,17 +28,27 @@ interface IImageEditorProps {
   updateUrl: (url: string) => void;
 }
 
+interface IImageWidthHeight {
+  width: number;
+  height: number;
+}
+
 export const EditorView: FC<IImageEditorProps> = ({ editedImage, isDisabled, isPreview, updateUrl }) => {
   const [currentEditor, setCurrentEditor] = useState<BaseControls | null>(null);
   const [mode, setMode] = useState<EditorMode>(isPreview ? 'preview' : 'noPreview');
   const [mouseIsDown, setMouseIsDown] = useState(false);
-  const [editedImageHeight, setEditedImageHeight] = useState(0);
-  const [resizeImageHeight, setResizeImageHeight] = useState(0);
-  const [previewImageHeight, setPreviewImageHeight] = useState(0);
+  const [imageMaskHeight, setImageMaskHeight] = useState<string | undefined>(undefined);
+  const [imageMaskWidth, setImageMaskWidth] = useState<string | undefined>(undefined);
+  const [resizeImageWidthHeight, setResizeImageWidthHeight] = useState<IImageWidthHeight>({ width: 0, height: 0 });
+  const [previewImageWidthHeight, setPreviewImageWidthHeight] = useState<IImageWidthHeight>({ width: 0, height: 0 });
+  const [editingImageWidthHeight, setEditingImageWidthHeight] = useState<IImageWidthHeight>({ width: 0, height: 0 });
 
   const imageEditorPreviewRef = useRef<HTMLDivElement | null>(null);
   const firstControlsRef = useRef<CropControls | null>(null);
   const backgroundControlsRef = useRef<BackgroundControls | null>(null);
+  const resizeImageRef = useRef<HTMLImageElement | null>(null);
+  const previewImageRef = useRef<HTMLImageElement | null>(null);
+  const editingImageRef = useRef<HTMLImageElement | null>(null);
 
   const [, forceUpdate] = useReducer(_ => Object.create(null), null);
 
@@ -46,6 +65,27 @@ export const EditorView: FC<IImageEditorProps> = ({ editedImage, isDisabled, isP
     [mode, isPreview]
   );
 
+  useLayoutEffect(() => {
+    if (modeIs('editing')) {
+      setImageMaskHeight(`${resizeImageWidthHeight.height}px`);
+      setImageMaskWidth(`${resizeImageWidthHeight.width}px`);
+    }
+  }, [resizeImageWidthHeight.height, resizeImageWidthHeight.width, mode, isPreview]);
+
+  useLayoutEffect(() => {
+    if (modeIs('preview')) {
+      setImageMaskHeight(`${previewImageWidthHeight.height}px`);
+      setImageMaskWidth(`${previewImageWidthHeight.width}px`);
+    }
+  }, [previewImageWidthHeight.height, previewImageWidthHeight.width, mode, isPreview]);
+
+  useLayoutEffect(() => {
+    if (modeIs('noPreview')) {
+      setImageMaskHeight(`${editingImageWidthHeight.height}px`);
+      setImageMaskWidth(`${editingImageWidthHeight.width}px`);
+    }
+  }, [editingImageWidthHeight.height, editingImageWidthHeight.width, mode, isPreview]);
+
   const update = useCallback(() => {
     updateUrl(editedImage.buildPreviewUrl().getUrl());
     forceUpdate();
@@ -55,59 +95,83 @@ export const EditorView: FC<IImageEditorProps> = ({ editedImage, isDisabled, isP
     updateUrl(editedImage.buildPreviewUrl().getUrl());
 
     if (imageEditorPreviewRef.current) {
-      fromEvent<MouseEvent<HTMLDivElement>>(imageEditorPreviewRef.current, 'mouseenter').subscribe(() => {
+      const eventSubscription = fromEvent<MouseEvent<HTMLDivElement>>(
+        imageEditorPreviewRef.current,
+        'mouseenter'
+      ).subscribe(() => {
         if (!isDisabled) {
           setMode('editing');
+          update();
         }
       });
+
+      return () => eventSubscription.unsubscribe();
     }
-  }, [updateUrl, editedImage, isDisabled]);
+  }, [updateUrl, editedImage, isDisabled, update]);
 
   useEffect(() => {
     if (imageEditorPreviewRef.current) {
-      fromEvent<MouseEvent<HTMLDivElement>>(imageEditorPreviewRef.current, 'mousedown').subscribe(event => {
+      const eventSubscription = fromEvent<MouseEvent<HTMLDivElement>>(
+        imageEditorPreviewRef.current,
+        'mousedown'
+      ).subscribe(event => {
         if (event.button !== 2 && !mouseIsDown && currentEditor && currentEditor.setActionParams(event)) {
           setMouseIsDown(true);
           update();
         }
       });
+
+      return () => eventSubscription.unsubscribe();
     }
   }, [mouseIsDown, currentEditor, update]);
 
   useEffect(() => {
     if (imageEditorPreviewRef.current) {
-      fromEvent<MouseEvent<HTMLDivElement>>(imageEditorPreviewRef.current, 'mousemove')
+      const eventSubscription = fromEvent<MouseEvent<HTMLDivElement>>(imageEditorPreviewRef.current, 'mousemove')
         .pipe(throttleTime(10))
         .subscribe(event => {
           if (mouseIsDown && currentEditor && currentEditor.updateActionParams(event)) {
             update();
           }
         });
+
+      return () => eventSubscription.unsubscribe();
     }
   }, [mouseIsDown, currentEditor, update]);
 
   useEffect(() => {
     if (imageEditorPreviewRef.current) {
-      fromEvent<MouseEvent<HTMLDivElement>>(imageEditorPreviewRef.current, 'mouseup').subscribe(event => {
+      const eventSubscription = fromEvent<MouseEvent<HTMLDivElement>>(
+        imageEditorPreviewRef.current,
+        'mouseup'
+      ).subscribe(event => {
         if (event.button !== 2 && mouseIsDown && currentEditor && currentEditor.updateTransform(event)) {
           setMouseIsDown(false);
           update();
         }
       });
+
+      return () => eventSubscription.unsubscribe();
     }
   }, [mouseIsDown, currentEditor, update]);
 
   useEffect(() => {
     if (imageEditorPreviewRef.current) {
-      fromEvent<MouseEvent<HTMLDivElement>>(imageEditorPreviewRef.current, 'mouseleave').subscribe(event => {
+      const eventSubscription = fromEvent<MouseEvent<HTMLDivElement>>(
+        imageEditorPreviewRef.current,
+        'mouseleave'
+      ).subscribe(event => {
         if (mouseIsDown && currentEditor && currentEditor.updateTransform(event)) {
           setMouseIsDown(false);
         }
 
         setMode(isPreview ? 'preview' : 'noPreview');
+        update();
       });
+
+      return () => eventSubscription.unsubscribe();
     }
-  }, [mouseIsDown, currentEditor, isPreview]);
+  }, [mouseIsDown, currentEditor, isPreview, update]);
 
   useEffect(() => {
     if (firstControlsRef.current) {
@@ -129,47 +193,50 @@ export const EditorView: FC<IImageEditorProps> = ({ editedImage, isDisabled, isP
           <span
             className='imageMask'
             style={{
-              height:
-                modeIs('editing') && currentEditor instanceof ResizeControls
-                  ? `${resizeImageHeight}px`
-                  : modeIs('preview')
-                  ? `${previewImageHeight}px`
-                  : `${editedImageHeight}px`
+              maxHeight: imageMaskHeight,
+              maxWidth: imageMaskWidth
             }}
           >
             {!modeIs('preview') && !isDisabled && currentEditor && currentEditor.getImageOverlay()}
-            {!(currentEditor instanceof ResizeControls) && (
-              <img
-                className='imageEditorImage'
-                hidden={!modeIs('editing')}
-                src={editedImage.buildEditingUrl().getUrl()}
-                onLoad={event => {
-                  setEditedImageHeight((event.target as HTMLImageElement).naturalHeight);
-                }}
-              />
-            )}
-            {currentEditor instanceof ResizeControls && (
-              <img
-                className='imageEditorImage'
-                hidden={!modeIs('editing')}
-                src={editedImage.buildCropUrl().getUrl()}
-                onLoad={event => {
-                  setResizeImageHeight((event.target as HTMLImageElement).naturalHeight);
-                }}
-              />
-            )}
             <img
+              ref={resizeImageRef}
+              className='imageEditorImage'
+              hidden={!modeIs('editing')}
+              src={
+                currentEditor instanceof ResizeControls
+                  ? editedImage.buildCropUrl().getUrl()
+                  : editedImage.buildEditingUrl().getUrl()
+              }
+              onLoad={event =>
+                setResizeImageWidthHeight({
+                  width: event.currentTarget.naturalWidth,
+                  height: event.currentTarget.naturalHeight
+                })
+              }
+            />
+            <img
+              ref={previewImageRef}
               className='imageEditorImage'
               hidden={!modeIs('preview')}
               src={editedImage.buildPreviewUrl().getUrl()}
-              onLoad={event => {
-                setPreviewImageHeight((event.target as HTMLImageElement).naturalHeight);
-              }}
+              onLoad={event =>
+                setPreviewImageWidthHeight({
+                  width: event.currentTarget.naturalWidth,
+                  height: event.currentTarget.naturalHeight
+                })
+              }
             />
             <img
+              ref={editingImageRef}
               className='imageEditorImage'
               hidden={!modeIs('noPreview')}
               src={editedImage.buildEditingUrl().getUrl()}
+              onLoad={event =>
+                setEditingImageWidthHeight({
+                  width: event.currentTarget.naturalWidth,
+                  height: event.currentTarget.naturalHeight
+                })
+              }
             />
           </span>
         </div>
