@@ -27,10 +27,6 @@ export abstract class BaseControls<
   TTransform = {},
   IState = {}
 > extends Component<IProps, IState> {
-  static contextType = CustomElementContext;
-
-  declare context: React.ContextType<typeof CustomElementContext>;
-
   protected buttonIsSelectedClass(comparison: boolean): string {
     return comparison ? 'btn--primary' : 'btn--secondary';
   }
@@ -186,3 +182,5 @@ export abstract class BaseControls<
     );
   }
 }
+
+BaseControls.contextType = CustomElementContext;
