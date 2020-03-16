@@ -25,6 +25,7 @@ export const ImageTransformer: FC = () => {
   const [available, setAvailable] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [selectedImages, setSelectedImages] = useState<ITransformedImage[]>([]);
+  const [context, setContext] = useState<ICustomElementContext>(defaultCustomElementContext);
 
   const update = useCallback(() => {
     if (available && enabled) {
@@ -32,21 +33,16 @@ export const ImageTransformer: FC = () => {
     }
   }, [available, enabled, selectedImages]);
 
-  const customElementContext: ICustomElementContext = {
-    ...defaultCustomElementContext,
-    enabled,
-    selectedImages,
-    setSelectedImages,
-    update
-  };
-
   useEffect(() => {
-    const initCustomElement = async (element: ICustomElement, context: IContext) => {
+    const initCustomElement = async (element: ICustomElement, itemContext: IContext) => {
       if (element.config !== null) {
-        Object.assign(customElementContext, element.config);
+        setContext(Object.assign(context, element.config));
       }
 
-      customElementContext.itemContext = context;
+      setContext(context => {
+        context.itemContext = itemContext;
+        return context;
+      });
 
       const oldImages = JSON.parse(element.value || JSON.stringify([])) as ITransformedImage[];
 
@@ -62,8 +58,8 @@ export const ImageTransformer: FC = () => {
             selectedImages.push(
               new TransformedImage(
                 newImage,
-                TransformedImage.getDescription(newImage, context),
-                customElementContext,
+                TransformedImage.getDescription(newImage, itemContext),
+                context,
                 oldImage.transforms
               )
             );
@@ -79,11 +75,19 @@ export const ImageTransformer: FC = () => {
     };
 
     loadModule(kenticoKontent.customElementScriptEndpoint, () => CustomElement.init(initCustomElement));
-  }, []);
+  }, [context]);
 
   useEffect(() => {
     update();
   });
+
+  const customElementContext: ICustomElementContext = {
+    ...context,
+    enabled,
+    selectedImages,
+    setSelectedImages,
+    update
+  };
 
   return (
     <Suspense fallback={<Loading />}>
