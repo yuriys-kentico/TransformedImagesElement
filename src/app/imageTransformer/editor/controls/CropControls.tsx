@@ -113,7 +113,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                   type={this.defaultNumberType}
                   allowedTypes={this.allowedNumberTypes}
                   value={this.getZeroOrNull(box.yFloat)}
-                  max={this.props.imageWidth}
+                  max={this.props.imageHeight}
                   tooltip='Start Y'
                   setValue={value => {
                     crop.box.yFloat = value;
@@ -137,7 +137,7 @@ export class CropControls extends BaseControls<ICropControlsProps, ICropTransfor
                   type={this.defaultNumberType}
                   allowedTypes={this.allowedNumberTypes}
                   value={this.getZeroOrNull(box.hFloat)}
-                  max={this.props.imageWidth}
+                  max={this.props.imageHeight}
                   tooltip='Height'
                   setValue={value => {
                     crop.box.hFloat = value;
