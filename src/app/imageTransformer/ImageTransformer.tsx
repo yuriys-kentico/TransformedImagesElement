@@ -93,7 +93,7 @@ export const ImageTransformer: FC = () => {
           {available && (
             <Router>
               <Listing default path='/' />
-              <Editor path=':id' />
+              <Editor path='/:index/:id' />
             </Router>
           )}
         </CustomElementContext.Provider>

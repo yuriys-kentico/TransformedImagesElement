@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { navigate } from '@reach/router';
 
+import { toNumber } from '../../../utilities/numbers';
 import { RoutedFC } from '../../../utilities/routing';
 import { Loading } from '../../Loading';
 import { CustomElementContext } from '../CustomElementContext';
@@ -15,27 +16,30 @@ import { SwitchInput } from './inputs/SwitchInput';
 declare const CustomElement: ICustomElement;
 
 interface IEditorProps {
+  index: string;
   id: string;
 }
 
-export const Editor: RoutedFC<IEditorProps> = ({ id }) => {
+export const Editor: RoutedFC<IEditorProps> = ({ index, id }) => {
   const { enabled, selectedImages, editorDefaultToPreview, update } = useContext(CustomElementContext);
 
   const editorRef = useRef<HTMLDivElement>(null);
 
   const [editedImageUrl, setEditedImageUrl] = useState('');
   const [editorUsePreview, setEditorUsePreview] = useState(editorDefaultToPreview);
-  const [editedImage, setEditedImage] = useState<ITransformedImage | null>(null);
+  const [image, setImage] = useState<ITransformedImage | null>(null);
   const [previousEditedTransforms, setPreviousEditedTransforms] = useState<ITransforms | null>(null);
 
   useEffect(() => {
-    const editedImage = selectedImages.find(image => image.id === id);
+    if (index && id) {
+      const editedImage = selectedImages.find((image, imageIndex) => image.id === id && imageIndex === toNumber(index));
 
-    if (editedImage) {
-      setEditedImage(editedImage);
-      setPreviousEditedTransforms(Transforms.clone(editedImage.transforms));
+      if (editedImage) {
+        setImage(editedImage);
+        setPreviousEditedTransforms(Transforms.clone(editedImage.transforms));
+      }
     }
-  }, [selectedImages, id]);
+  }, [selectedImages, index, id]);
 
   useEffect(() => {
     if (editorRef.current) {
@@ -44,18 +48,18 @@ export const Editor: RoutedFC<IEditorProps> = ({ id }) => {
   });
 
   const revertEditedImage = () => {
-    if (editedImage && previousEditedTransforms) {
-      editedImage.transforms = previousEditedTransforms;
+    if (image && previousEditedTransforms) {
+      image.transforms = previousEditedTransforms;
     }
   };
 
   return (
     <>
-      {!editedImage && <Loading />}
-      {editedImage && (
+      {!image && <Loading />}
+      {image && (
         <div className='imageEditor' ref={editorRef}>
           <EditorView
-            editedImage={editedImage}
+            image={image}
             isDisabled={!enabled}
             isPreview={editorUsePreview}
             updateUrl={url => setEditedImageUrl(url)}

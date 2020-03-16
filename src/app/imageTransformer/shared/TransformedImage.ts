@@ -6,7 +6,6 @@ import {
 
 import { toRounded } from '../../../utilities/numbers';
 import { Color } from './Color';
-import { IAssetDescription } from './IAssetDescription';
 import { IAssetDetails } from './IAssetDetails';
 import { IContext } from './IContext';
 import { ICustomElementConfig } from './ICustomElementConfig';
@@ -30,6 +29,9 @@ export interface ITransformedImage {
   buildCropUrl(): ImageUrlBuilder;
   buildPreviewUrl(): ImageUrlBuilder;
   getDeliveryModel(): ITransformedImage;
+  getEditingWidthHeight(): { width: number; height: number };
+  getCropWidthHeight(): { width: number; height: number };
+  getPreviewWidthHeight(): { width: number; height: number };
 }
 
 export class TransformedImage implements ITransformedImage {
@@ -273,5 +275,73 @@ export class TransformedImage implements ITransformedImage {
   getDeliveryModel() {
     this.transformedUrl = this.buildPreviewUrl().getUrl();
     return this;
+  }
+
+  getEditingWidthHeight() {
+    return { width: toRounded(this.width * 1000), height: toRounded(this.height * 1000) };
+  }
+
+  getCropWidthHeight() {
+    const { crop } = this.transforms;
+    let width = 0;
+    let height = 0;
+
+    switch (crop.type) {
+      case 'box':
+        if (crop.box.wFloat >= 0 && crop.box.hFloat >= 0) {
+          width = toRounded(crop.box.wFloat * this.width);
+          height = toRounded(crop.box.hFloat * this.height);
+        }
+        break;
+      case 'zoom':
+        if (crop.zoom.zFloat >= 0) {
+          width = toRounded(crop.zoom.zFloat * this.width);
+          height = toRounded(crop.zoom.zFloat * this.height);
+        }
+        break;
+      case 'frame':
+        if (crop.frame.wFloat >= 0 && crop.frame.hFloat >= 0) {
+          width = toRounded(crop.frame.wFloat * this.width);
+          height = toRounded(crop.frame.hFloat * this.height);
+        }
+        break;
+    }
+
+    return { width, height };
+  }
+
+  getPreviewWidthHeight() {
+    const { crop, resize } = this.transforms;
+    let { width, height } = this.getCropWidthHeight();
+
+    switch (resize.type) {
+      case 'scale':
+        // Scale does not work with zoom
+        if (
+          crop.type !== 'zoom' &&
+          resize.scale.wFloat !== null &&
+          resize.scale.wFloat >= 0 &&
+          resize.scale.hFloat !== null &&
+          resize.scale.hFloat >= 0
+        ) {
+          width = toRounded(resize.scale.wFloat * width);
+          height = toRounded(resize.scale.hFloat * height);
+        }
+        break;
+      case 'fit':
+        if (
+          crop.type !== 'zoom' &&
+          resize.fit.wFloat !== null &&
+          resize.fit.wFloat >= 0 &&
+          resize.fit.hFloat !== null &&
+          resize.fit.hFloat >= 0
+        ) {
+          width = toRounded(resize.fit.wFloat * width);
+          height = toRounded(resize.fit.hFloat * height);
+        }
+        break;
+    }
+
+    return { width, height };
   }
 }

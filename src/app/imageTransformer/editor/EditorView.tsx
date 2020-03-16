@@ -1,13 +1,4 @@
-﻿import React, {
-    FC,
-    MouseEvent,
-    useCallback,
-    useEffect,
-    useLayoutEffect,
-    useReducer,
-    useRef,
-    useState
-} from 'react';
+﻿import React, { FC, MouseEvent, useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { fromEvent } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
 
@@ -22,33 +13,20 @@ import { ResizeControls } from './controls/ResizeControls';
 type EditorMode = 'editing' | 'preview' | 'noPreview';
 
 interface IImageEditorProps {
-  editedImage: ITransformedImage;
+  image: ITransformedImage;
   isDisabled: boolean;
   isPreview: boolean;
   updateUrl: (url: string) => void;
 }
 
-interface IImageWidthHeight {
-  width: number;
-  height: number;
-}
-
-export const EditorView: FC<IImageEditorProps> = ({ editedImage, isDisabled, isPreview, updateUrl }) => {
+export const EditorView: FC<IImageEditorProps> = ({ image, isDisabled, isPreview, updateUrl }) => {
   const [currentEditor, setCurrentEditor] = useState<BaseControls | null>(null);
   const [mode, setMode] = useState<EditorMode>(isPreview ? 'preview' : 'noPreview');
   const [mouseIsDown, setMouseIsDown] = useState(false);
-  const [imageMaskHeight, setImageMaskHeight] = useState<string | undefined>(undefined);
-  const [imageMaskWidth, setImageMaskWidth] = useState<string | undefined>(undefined);
-  const [resizeImageWidthHeight, setResizeImageWidthHeight] = useState<IImageWidthHeight>({ width: 0, height: 0 });
-  const [previewImageWidthHeight, setPreviewImageWidthHeight] = useState<IImageWidthHeight>({ width: 0, height: 0 });
-  const [editingImageWidthHeight, setEditingImageWidthHeight] = useState<IImageWidthHeight>({ width: 0, height: 0 });
 
   const imageEditorPreviewRef = useRef<HTMLDivElement | null>(null);
   const firstControlsRef = useRef<CropControls | null>(null);
   const backgroundControlsRef = useRef<BackgroundControls | null>(null);
-  const resizeImageRef = useRef<HTMLImageElement | null>(null);
-  const previewImageRef = useRef<HTMLImageElement | null>(null);
-  const editingImageRef = useRef<HTMLImageElement | null>(null);
 
   const [, forceUpdate] = useReducer(_ => Object.create(null), null);
 
@@ -65,34 +43,13 @@ export const EditorView: FC<IImageEditorProps> = ({ editedImage, isDisabled, isP
     [mode, isPreview]
   );
 
-  useLayoutEffect(() => {
-    if (modeIs('editing')) {
-      setImageMaskHeight(`${resizeImageWidthHeight.height}px`);
-      setImageMaskWidth(`${resizeImageWidthHeight.width}px`);
-    }
-  }, [resizeImageWidthHeight.height, resizeImageWidthHeight.width, mode, isPreview]);
-
-  useLayoutEffect(() => {
-    if (modeIs('preview')) {
-      setImageMaskHeight(`${previewImageWidthHeight.height}px`);
-      setImageMaskWidth(`${previewImageWidthHeight.width}px`);
-    }
-  }, [previewImageWidthHeight.height, previewImageWidthHeight.width, mode, isPreview]);
-
-  useLayoutEffect(() => {
-    if (modeIs('noPreview')) {
-      setImageMaskHeight(`${editingImageWidthHeight.height}px`);
-      setImageMaskWidth(`${editingImageWidthHeight.width}px`);
-    }
-  }, [editingImageWidthHeight.height, editingImageWidthHeight.width, mode, isPreview]);
-
   const update = useCallback(() => {
-    updateUrl(editedImage.buildPreviewUrl().getUrl());
+    updateUrl(image.buildPreviewUrl().getUrl());
     forceUpdate();
-  }, [updateUrl, editedImage]);
+  }, [updateUrl, image]);
 
   useEffect(() => {
-    updateUrl(editedImage.buildPreviewUrl().getUrl());
+    updateUrl(image.buildPreviewUrl().getUrl());
 
     if (imageEditorPreviewRef.current) {
       const eventSubscription = fromEvent<MouseEvent<HTMLDivElement>>(
@@ -107,7 +64,7 @@ export const EditorView: FC<IImageEditorProps> = ({ editedImage, isDisabled, isP
 
       return () => eventSubscription.unsubscribe();
     }
-  }, [updateUrl, editedImage, isDisabled, update]);
+  }, [updateUrl, image, isDisabled, update]);
 
   useEffect(() => {
     if (imageEditorPreviewRef.current) {
@@ -179,7 +136,23 @@ export const EditorView: FC<IImageEditorProps> = ({ editedImage, isDisabled, isP
     }
   }, []);
 
-  const { transforms, width, height } = editedImage;
+  const getPreviewMaxWidthHeight = () => {
+    let widthHeight = { width: 0, height: 0 };
+
+    if (modeIs('editing') && currentEditor instanceof ResizeControls) {
+      widthHeight = image.getCropWidthHeight();
+    } else if (modeIs('preview')) {
+      widthHeight = image.getPreviewWidthHeight();
+    } else {
+      widthHeight = image.getEditingWidthHeight();
+    }
+
+    const { width, height } = widthHeight;
+
+    return { maxWidth: width > 0 ? `${width}px` : undefined, maxHeight: height > 0 ? `${height}px` : undefined };
+  };
+
+  const { transforms, width, height } = image;
 
   return (
     <div
@@ -190,53 +163,29 @@ export const EditorView: FC<IImageEditorProps> = ({ editedImage, isDisabled, isP
     >
       <div className='imageEditorPreview' ref={imageEditorPreviewRef}>
         <div className='imageWrapper'>
-          <span
-            className='imageMask'
-            style={{
-              maxHeight: imageMaskHeight,
-              maxWidth: imageMaskWidth
-            }}
-          >
+          <span className='imageMask' style={getPreviewMaxWidthHeight()}>
             {!modeIs('preview') && !isDisabled && currentEditor && currentEditor.getImageOverlay()}
             <img
-              ref={resizeImageRef}
               className='imageEditorImage'
               hidden={!modeIs('editing')}
+              alt={image.title}
               src={
                 currentEditor instanceof ResizeControls
-                  ? editedImage.buildCropUrl().getUrl()
-                  : editedImage.buildEditingUrl().getUrl()
-              }
-              onLoad={event =>
-                setResizeImageWidthHeight({
-                  width: event.currentTarget.naturalWidth,
-                  height: event.currentTarget.naturalHeight
-                })
+                  ? image.buildCropUrl().getUrl()
+                  : image.buildEditingUrl().getUrl()
               }
             />
             <img
-              ref={previewImageRef}
               className='imageEditorImage'
               hidden={!modeIs('preview')}
-              src={editedImage.buildPreviewUrl().getUrl()}
-              onLoad={event =>
-                setPreviewImageWidthHeight({
-                  width: event.currentTarget.naturalWidth,
-                  height: event.currentTarget.naturalHeight
-                })
-              }
+              alt={image.title}
+              src={image.buildPreviewUrl().getUrl()}
             />
             <img
-              ref={editingImageRef}
               className='imageEditorImage'
               hidden={!modeIs('noPreview')}
-              src={editedImage.buildEditingUrl().getUrl()}
-              onLoad={event =>
-                setEditingImageWidthHeight({
-                  width: event.currentTarget.naturalWidth,
-                  height: event.currentTarget.naturalHeight
-                })
-              }
+              alt={image.title}
+              src={image.buildEditingUrl().getUrl()}
             />
           </span>
         </div>
@@ -269,13 +218,13 @@ export const EditorView: FC<IImageEditorProps> = ({ editedImage, isDisabled, isP
               imageHeight={height}
             />
           )}
-          {editedImage.canBeTransparent() && (
+          {image.canBeTransparent() && (
             <BackgroundControls
               ref={backgroundControlsRef}
               transform={transforms.background}
               setTransform={update}
               isEditable={false}
-              disableAlpha={editedImage.cannotHaveAlpha()}
+              disableAlpha={image.cannotHaveAlpha()}
               imageWidth={width}
               imageHeight={height}
             />
