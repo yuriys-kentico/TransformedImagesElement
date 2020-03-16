@@ -1,7 +1,17 @@
-﻿import React, { FC, MouseEvent, useCallback, useEffect, useReducer, useRef, useState } from 'react';
+﻿import React, {
+    FC,
+    MouseEvent,
+    useCallback,
+    useEffect,
+    useMemo,
+    useReducer,
+    useRef,
+    useState
+} from 'react';
 import { fromEvent } from 'rxjs';
 import { throttleTime } from 'rxjs/operators';
 
+import { toNumber } from '../../../utilities/numbers';
 import { ITransformedImage } from '../shared/TransformedImage';
 import { Checkerboard } from './Checkerboard';
 import { BackgroundControls } from './controls/BackgroundControls';
@@ -25,6 +35,7 @@ export const EditorView: FC<IImageEditorProps> = ({ image, isDisabled, isPreview
   const [mouseIsDown, setMouseIsDown] = useState(false);
 
   const imageEditorPreviewRef = useRef<HTMLDivElement | null>(null);
+  const imageWrapperRef = useRef<HTMLDivElement | null>(null);
   const firstControlsRef = useRef<CropControls | null>(null);
   const backgroundControlsRef = useRef<BackgroundControls | null>(null);
 
@@ -136,7 +147,7 @@ export const EditorView: FC<IImageEditorProps> = ({ image, isDisabled, isPreview
     }
   }, []);
 
-  const getPreviewMaxWidthHeight = () => {
+  const getPreviewMaxWidthHeight = useMemo(() => {
     let widthHeight = { width: 0, height: 0 };
 
     if (modeIs('editing') && currentEditor instanceof ResizeControls) {
@@ -147,10 +158,24 @@ export const EditorView: FC<IImageEditorProps> = ({ image, isDisabled, isPreview
       widthHeight = image.getEditingWidthHeight();
     }
 
+    if (imageWrapperRef.current) {
+      const { scrollWidth, scrollHeight } = imageWrapperRef.current;
+      const { paddingTop, paddingRight, paddingBottom, paddingLeft } = getComputedStyle(imageWrapperRef.current);
+      const ratio = widthHeight.width / widthHeight.height;
+
+      if (scrollWidth >= scrollHeight) {
+        widthHeight.width = Math.min(widthHeight.width, scrollWidth - toNumber(paddingLeft) - toNumber(paddingRight));
+        widthHeight.height = Math.min(widthHeight.height, widthHeight.width / ratio);
+      } else {
+        widthHeight.height = Math.min(scrollHeight - toNumber(paddingTop) - toNumber(paddingBottom));
+        widthHeight.width = Math.min(widthHeight.width, widthHeight.height / ratio);
+      }
+    }
+
     const { width, height } = widthHeight;
 
     return { maxWidth: width > 0 ? `${width}px` : undefined, maxHeight: height > 0 ? `${height}px` : undefined };
-  };
+  }, [currentEditor, image, modeIs]);
 
   const { transforms, width, height } = image;
 
@@ -162,8 +187,8 @@ export const EditorView: FC<IImageEditorProps> = ({ image, isDisabled, isPreview
       }}
     >
       <div className='imageEditorPreview' ref={imageEditorPreviewRef}>
-        <div className='imageWrapper'>
-          <span className='imageMask' style={getPreviewMaxWidthHeight()}>
+        <div className='imageWrapper' ref={imageWrapperRef}>
+          <span className='imageMask' style={getPreviewMaxWidthHeight}>
             {!modeIs('preview') && !isDisabled && currentEditor && currentEditor.getImageOverlay()}
             <img
               className='imageEditorImage'
