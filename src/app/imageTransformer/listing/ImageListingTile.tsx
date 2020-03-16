@@ -1,4 +1,4 @@
-﻿import React, { FC } from 'react';
+﻿import React, { FC, useCallback } from 'react';
 
 import { ITransformedImage } from '../shared/TransformedImage';
 import { ImageDetails } from './ImageDetails';
@@ -20,13 +20,7 @@ export const ImageListingTile: FC<IImageListingProps> = ({
   onAddParams,
   onRemove
 }) => {
-  const getImageUrl = (item: ITransformedImage) => {
-    return item
-      .buildPreviewUrl()
-      .withWidth(400)
-      .withHeight(400)
-      .getUrl();
-  };
+  const getImageUrl = useCallback((item: ITransformedImage) => item.buildPreviewUrl().getUrl(), []);
 
   return (
     <div className='imageListingWrapper'>
@@ -64,7 +58,7 @@ export const ImageListingTile: FC<IImageListingProps> = ({
           )}
         </div>
         <div className='imageListingPreview' onClick={() => onSelect(image)}>
-          <img className='imageListingImage' src={getImageUrl(image)} />
+          <img className='imageListingImage' alt={image.title} src={getImageUrl(image)} />
         </div>
         <div className='imageListingBottom'>
           <ImageDetails image={image} />

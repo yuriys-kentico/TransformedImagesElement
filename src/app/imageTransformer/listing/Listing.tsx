@@ -5,7 +5,7 @@ import { navigate } from '@reach/router';
 import { RoutedFC } from '../../../utilities/routing';
 import { CustomElementContext } from '../CustomElementContext';
 import { ICustomElement } from '../shared/ICustomElement';
-import { ITransformedImage, TransformedImage } from '../shared/TransformedImage';
+import { TransformedImage } from '../shared/TransformedImage';
 import { ImageListingTile } from './ImageListingTile';
 
 // Expose access to Kentico custom element API
@@ -23,10 +23,6 @@ export const Listing: RoutedFC = () => {
     }
   });
 
-  const selectImages = (images: ITransformedImage[]) => {
-    setSelectedImages([...selectedImages, ...images]);
-  };
-
   const deselectImage = (index: number) => {
     const newSelectedImages = [...selectedImages];
     newSelectedImages.splice(index, 1);
@@ -34,29 +30,28 @@ export const Listing: RoutedFC = () => {
     setSelectedImages(newSelectedImages);
   };
 
+  const selectImages = async () => {
+    const assets = await CustomElement.selectAssets({ allowMultiple: true, fileType: 'images' });
+    const assetDetails = await CustomElement.getAssetDetails(assets.map(asset => asset.id));
+
+    const newImages = assetDetails.map(
+      assetDetail =>
+        new TransformedImage(
+          assetDetail,
+          TransformedImage.getDescription(assetDetail, itemContext),
+          customElementContext
+        )
+    );
+
+    setSelectedImages([...selectedImages, ...newImages]);
+  };
+
   return (
     <div className='imageListing' ref={listingRef}>
       {enabled && (
         <div className='selectionBar'>
           <span>
-            <button
-              className='btn btn--secondary btn--xs'
-              onClick={async () => {
-                const assets = await CustomElement.selectAssets({ allowMultiple: true, fileType: 'images' });
-                const assetDetails = await CustomElement.getAssetDetails(assets.map(asset => asset.id));
-
-                selectImages(
-                  assetDetails.map(
-                    assetDetail =>
-                      new TransformedImage(
-                        assetDetail,
-                        TransformedImage.getDescription(assetDetail, itemContext),
-                        customElementContext
-                      )
-                  )
-                );
-              }}
-            >
+            <button className='btn btn--secondary btn--xs' onClick={selectImages}>
               Pick from Assets
             </button>
           </span>
@@ -70,8 +65,8 @@ export const Listing: RoutedFC = () => {
             showActions={enabled}
             isSelected={false}
             onRemove={() => deselectImage(index)}
-            onSelect={image => navigate(`/${image.id}`)}
-            onAddParams={image => navigate(`/${image.id}`)}
+            onSelect={image => navigate(`/${index}/${image.id}`)}
+            onAddParams={image => navigate(`/${index}/${image.id}`)}
           />
         ))}
       </div>

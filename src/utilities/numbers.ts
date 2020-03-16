@@ -12,7 +12,7 @@ export const toBetween = (value: number, max: number, min: number) => Math.max(M
 export const ensureBetween = (value: string, max: number, min: number): string => {
   const tempValue = toNumber(value);
 
-  if (tempValue !== NaN && (tempValue > max || tempValue < min)) {
+  if (!isNaN(tempValue) && (tempValue > max || tempValue < min)) {
     return toBetween(tempValue, max, min).toString();
   }
 
