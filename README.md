@@ -2,7 +2,7 @@
 
 This is a custom element similar to the **Asset** element, but it allows you to apply the Image Transformation API to any selected image.
 
-![ElementInAction](https://user-images.githubusercontent.com/34716163/55026851-35778180-4fda-11e9-878f-f790ed4bedb3.gif)
+![ElementInAction](https://user-images.githubusercontent.com/34716163/76859339-7c840580-682f-11ea-87ee-15caa360cf31.gif)
 
 ## Setup
 
